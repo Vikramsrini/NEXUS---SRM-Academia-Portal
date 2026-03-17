@@ -61,7 +61,6 @@
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-secondary);
   box-shadow: var(--shadow-card);
-  flex-wrap: wrap;
 }
 
 .cal-pills-wrap {
@@ -137,6 +136,10 @@
 .cal-today-btn:hover:not(:disabled) {
   background: var(--surface-tertiary);
   border-color: var(--border-primary);
+}
+
+.cal-today-btn:active:not(:disabled) {
+  transform: scale(0.96);
 }
 
 .cal-today-btn:disabled {
@@ -546,12 +549,11 @@
   .cal-pills-wrap {
     flex: 1;
     display: flex;
-    justify-content: space-around;
-    max-width: none;
-    height: 34px;
-    align-items: center;
-    overflow: hidden; /* Fill the bar, no scroll */
-    gap: 2px;
+    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 4px;
   }
 
   .cal-pill {
@@ -577,6 +579,8 @@
     overflow: hidden;
     border-color: var(--border-glass);
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    width: 100%;
+    margin: 0 auto;
   }
 
   .cal-weekday-row,
