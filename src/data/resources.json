@@ -1,0 +1,480 @@
+[
+  {
+    "semester": 1,
+    "subjects": [
+      {
+        "slug": "Calculus%20And%20Linear%20Algebra",
+        "name": "Calculus And Linear Algebra",
+        "url": "https://thehelpers.vercel.app/semesters/1/subjects/Calculus%20And%20Linear%20Algebra",
+        "sections": []
+      },
+      {
+        "slug": "Chemistry",
+        "name": "Chemistry",
+        "url": "https://thehelpers.vercel.app/semesters/1/subjects/Chemistry",
+        "sections": []
+      },
+      {
+        "slug": "Philosophy%20Of%20Engineering",
+        "name": "Philosophy Of Engineering",
+        "url": "https://thehelpers.vercel.app/semesters/1/subjects/Philosophy%20Of%20Engineering",
+        "sections": []
+      },
+      {
+        "slug": "Introduction%20To%20Computational%20Biology",
+        "name": "Introduction To Computational Biology",
+        "url": "https://thehelpers.vercel.app/semesters/1/subjects/Introduction%20To%20Computational%20Biology",
+        "sections": []
+      },
+      {
+        "slug": "Programming%20For%20Problem%20Solving",
+        "name": "Programming For Problem Solving",
+        "url": "https://thehelpers.vercel.app/semesters/1/subjects/Programming%20For%20Problem%20Solving",
+        "sections": []
+      },
+      {
+        "slug": "Fundamental%20Of%20Economics%20(FOE)",
+        "name": "Fundamental Of Economics (FOE)",
+        "url": "https://thehelpers.vercel.app/semesters/1/subjects/Fundamental%20Of%20Economics%20(FOE)",
+        "sections": []
+      },
+      {
+        "slug": "Biomedical%20Sensors",
+        "name": "Biomedical Sensors",
+        "url": "https://thehelpers.vercel.app/semesters/1/subjects/Biomedical%20Sensors",
+        "sections": []
+      },
+      {
+        "slug": "Foreign%20Languages",
+        "name": "Foreign Languages",
+        "url": "https://thehelpers.vercel.app/semesters/1/subjects/Foreign%20Languages",
+        "sections": []
+      },
+      {
+        "slug": "Cell%20Biology",
+        "name": "Cell Biology",
+        "url": "https://thehelpers.vercel.app/semesters/1/subjects/Cell%20Biology",
+        "sections": []
+      },
+      {
+        "slug": "Microbiology",
+        "name": "Microbiology",
+        "url": "https://thehelpers.vercel.app/semesters/1/subjects/Microbiology",
+        "sections": []
+      },
+      {
+        "slug": "Physical%20And%20Analytical%20Chemistry",
+        "name": "Physical And Analytical Chemistry",
+        "url": "https://thehelpers.vercel.app/semesters/1/subjects/Physical%20And%20Analytical%20Chemistry",
+        "sections": []
+      },
+      {
+        "slug": "Biochemistry",
+        "name": "Biochemistry",
+        "url": "https://thehelpers.vercel.app/semesters/1/subjects/Biochemistry",
+        "sections": []
+      },
+      {
+        "slug": "Basic%20Civil%20%26%20Mechanical%20Workshop",
+        "name": "Basic Civil & Mechanical Workshop",
+        "url": "https://thehelpers.vercel.app/semesters/1/subjects/Basic%20Civil%20%26%20Mechanical%20Workshop",
+        "sections": []
+      }
+    ]
+  },
+  {
+    "semester": 2,
+    "subjects": [
+      {
+        "slug": "Advanced%20Calculus%20And%20Complex%20Analysis",
+        "name": "Advanced Calculus And Complex Analysis",
+        "url": "https://thehelpers.vercel.app/semesters/2/subjects/Advanced%20Calculus%20And%20Complex%20Analysis",
+        "sections": []
+      },
+      {
+        "slug": "Electrical%20And%20Electronics%20Engineering",
+        "name": "Electrical And Electronics Engineering",
+        "url": "https://thehelpers.vercel.app/semesters/2/subjects/Electrical%20And%20Electronics%20Engineering",
+        "sections": []
+      },
+      {
+        "slug": "Semiconductor%20Physics%20And%20Computational%20Methods",
+        "name": "Semiconductor Physics And Computational Methods",
+        "url": "https://thehelpers.vercel.app/semesters/2/subjects/Semiconductor%20Physics%20And%20Computational%20Methods",
+        "sections": []
+      },
+      {
+        "slug": "Physics-Mechanics",
+        "name": "Physics-Mechanics",
+        "url": "https://thehelpers.vercel.app/semesters/2/subjects/Physics-Mechanics",
+        "sections": []
+      },
+      {
+        "slug": "Object%20Oriented%20Design%20And%20Programming",
+        "name": "Object Oriented Design And Programming",
+        "url": "https://thehelpers.vercel.app/semesters/2/subjects/Object%20Oriented%20Design%20And%20Programming",
+        "sections": []
+      },
+      {
+        "slug": "Communicative%20English",
+        "name": "Communicative English",
+        "url": "https://thehelpers.vercel.app/semesters/2/subjects/Communicative%20English",
+        "sections": []
+      },
+      {
+        "slug": "Electromagnetic%20Physics",
+        "name": "Electromagnetic Physics",
+        "url": "https://thehelpers.vercel.app/semesters/2/subjects/Electromagnetic%20Physics",
+        "sections": []
+      },
+      {
+        "slug": "Engineering%20Mechanics",
+        "name": "Engineering Mechanics",
+        "url": "https://thehelpers.vercel.app/semesters/2/subjects/Engineering%20Mechanics",
+        "sections": []
+      },
+      {
+        "slug": "Electronic%20System%20And%20PCB%20Design",
+        "name": "Electronic System And PCB Design",
+        "url": "https://thehelpers.vercel.app/semesters/2/subjects/Electronic%20System%20And%20PCB%20Design",
+        "sections": []
+      }
+    ]
+  },
+  {
+    "semester": 3,
+    "subjects": [
+      {
+        "slug": "Data%20Structures%20And%20Algorithm",
+        "name": "Data Structures And Algorithm",
+        "url": "https://thehelpers.vercel.app/semesters/3/subjects/Data%20Structures%20And%20Algorithm",
+        "sections": []
+      },
+      {
+        "slug": "Computer%20Organization%20And%20Architecture",
+        "name": "Computer Organization And Architecture",
+        "url": "https://thehelpers.vercel.app/semesters/3/subjects/Computer%20Organization%20And%20Architecture",
+        "sections": []
+      },
+      {
+        "slug": "Operating%20Systems",
+        "name": "Operating Systems",
+        "url": "https://thehelpers.vercel.app/semesters/3/subjects/Operating%20Systems",
+        "sections": []
+      },
+      {
+        "slug": "Transforms%20And%20Boundary%20Value%20Problems",
+        "name": "Transforms And Boundary Value Problems",
+        "url": "https://thehelpers.vercel.app/semesters/3/subjects/Transforms%20And%20Boundary%20Value%20Problems",
+        "sections": []
+      },
+      {
+        "slug": "Advanced%20Programming%20Practice",
+        "name": "Advanced Programming Practice",
+        "url": "https://thehelpers.vercel.app/semesters/3/subjects/Advanced%20Programming%20Practice",
+        "sections": []
+      },
+      {
+        "slug": "Design%20Thinking%20And%20Methodology",
+        "name": "Design Thinking And Methodology",
+        "url": "https://thehelpers.vercel.app/semesters/3/subjects/Design%20Thinking%20And%20Methodology",
+        "sections": []
+      },
+      {
+        "slug": "Digital%20Logic%20Design",
+        "name": "Digital Logic Design",
+        "url": "https://thehelpers.vercel.app/semesters/3/subjects/Digital%20Logic%20Design",
+        "sections": []
+      },
+      {
+        "slug": "Solid%20State%20Devices",
+        "name": "Solid State Devices",
+        "url": "https://thehelpers.vercel.app/semesters/3/subjects/Solid%20State%20Devices",
+        "sections": []
+      },
+      {
+        "slug": "Biochemistry",
+        "name": "Biochemistry",
+        "url": "https://thehelpers.vercel.app/semesters/3/subjects/Biochemistry",
+        "sections": []
+      },
+      {
+        "slug": "Electromagnetic%20Thoery%20And%20Interference",
+        "name": "Electromagnetic Thoery And Interference",
+        "url": "https://thehelpers.vercel.app/semesters/3/subjects/Electromagnetic%20Thoery%20And%20Interference",
+        "sections": []
+      },
+      {
+        "slug": "Basic%20Chemical%20Engineering",
+        "name": "Basic Chemical Engineering",
+        "url": "https://thehelpers.vercel.app/semesters/3/subjects/Basic%20Chemical%20Engineering",
+        "sections": []
+      },
+      {
+        "slug": "Bioprocess%20Principles",
+        "name": "Bioprocess Principles",
+        "url": "https://thehelpers.vercel.app/semesters/3/subjects/Bioprocess%20Principles",
+        "sections": []
+      },
+      {
+        "slug": "Genetics%20And%20Cytogenetics",
+        "name": "Genetics And Cytogenetics",
+        "url": "https://thehelpers.vercel.app/semesters/3/subjects/Genetics%20And%20Cytogenetics",
+        "sections": []
+      },
+      {
+        "slug": "Microbiology",
+        "name": "Microbiology",
+        "url": "https://thehelpers.vercel.app/semesters/3/subjects/Microbiology",
+        "sections": []
+      },
+      {
+        "slug": "Social%20Engineering",
+        "name": "Social Engineering",
+        "url": "https://thehelpers.vercel.app/semesters/3/subjects/Social%20Engineering",
+        "sections": []
+      },
+      {
+        "slug": "Numerical%20Methods%20%26%20Analysis",
+        "name": "Numerical Methods & Analysis",
+        "url": "https://thehelpers.vercel.app/semesters/3/subjects/Numerical%20Methods%20%26%20Analysis",
+        "sections": []
+      },
+      {
+        "slug": "Foundation%20of%20Data%20Science%20(FDS)",
+        "name": "Foundation of Data Science (FDS)",
+        "url": "https://thehelpers.vercel.app/semesters/3/subjects/Foundation%20of%20Data%20Science%20(FDS)",
+        "sections": []
+      }
+    ]
+  },
+  {
+    "semester": 4,
+    "subjects": [
+      {
+        "slug": "Design%20And%20Analysis%20Of%20Algorithms",
+        "name": "Design And Analysis Of Algorithms",
+        "url": "https://thehelpers.vercel.app/semesters/4/subjects/Design%20And%20Analysis%20Of%20Algorithms",
+        "sections": []
+      },
+      {
+        "slug": "Database%20Management%20Systems",
+        "name": "Database Management Systems",
+        "url": "https://thehelpers.vercel.app/semesters/4/subjects/Database%20Management%20Systems",
+        "sections": []
+      },
+      {
+        "slug": "Artificial%20Intelligence",
+        "name": "Artificial Intelligence",
+        "url": "https://thehelpers.vercel.app/semesters/4/subjects/Artificial%20Intelligence",
+        "sections": []
+      },
+      {
+        "slug": "Probability%20And%20Queueing%20Theory",
+        "name": "Probability And Queueing Theory",
+        "url": "https://thehelpers.vercel.app/semesters/4/subjects/Probability%20And%20Queueing%20Theory",
+        "sections": []
+      },
+      {
+        "slug": "Social%20Engineering",
+        "name": "Social Engineering",
+        "url": "https://thehelpers.vercel.app/semesters/4/subjects/Social%20Engineering",
+        "sections": []
+      },
+      {
+        "slug": "Bioprocess%20Engineering",
+        "name": "Bioprocess Engineering",
+        "url": "https://thehelpers.vercel.app/semesters/4/subjects/Bioprocess%20Engineering",
+        "sections": []
+      },
+      {
+        "slug": "Cell%20Communication%20And%20Signaling",
+        "name": "Cell Communication And Signaling",
+        "url": "https://thehelpers.vercel.app/semesters/4/subjects/Cell%20Communication%20And%20Signaling",
+        "sections": []
+      },
+      {
+        "slug": "Software%20Process",
+        "name": "Software Process",
+        "url": "https://thehelpers.vercel.app/semesters/4/subjects/Software%20Process",
+        "sections": []
+      },
+      {
+        "slug": "Chemical%20Engineering%20Principles",
+        "name": "Chemical Engineering Principles",
+        "url": "https://thehelpers.vercel.app/semesters/4/subjects/Chemical%20Engineering%20Principles",
+        "sections": []
+      },
+      {
+        "slug": "Molecular%20Biology",
+        "name": "Molecular Biology",
+        "url": "https://thehelpers.vercel.app/semesters/4/subjects/Molecular%20Biology",
+        "sections": []
+      },
+      {
+        "slug": "Internet%20Of%20Things%20(IOT)",
+        "name": "Internet Of Things (IOT)",
+        "url": "https://thehelpers.vercel.app/semesters/4/subjects/Internet%20Of%20Things%20(IOT)",
+        "sections": []
+      }
+    ]
+  },
+  {
+    "semester": 5,
+    "subjects": [
+      {
+        "slug": "Discrete%20Mathematics",
+        "name": "Discrete Mathematics",
+        "url": "https://thehelpers.vercel.app/semesters/5/subjects/Discrete%20Mathematics",
+        "sections": []
+      },
+      {
+        "slug": "Full%20Stack%20Web%20Development",
+        "name": "Full Stack Web Development",
+        "url": "https://thehelpers.vercel.app/semesters/5/subjects/Full%20Stack%20Web%20Development",
+        "sections": []
+      },
+      {
+        "slug": "Formal%20Language%20And%20Automata",
+        "name": "Formal Language And Automata",
+        "url": "https://thehelpers.vercel.app/semesters/5/subjects/Formal%20Language%20And%20Automata",
+        "sections": []
+      },
+      {
+        "slug": "Computer%20Networks",
+        "name": "Computer Networks",
+        "url": "https://thehelpers.vercel.app/semesters/5/subjects/Computer%20Networks",
+        "sections": []
+      },
+      {
+        "slug": "Machine%20Learning",
+        "name": "Machine Learning",
+        "url": "https://thehelpers.vercel.app/semesters/5/subjects/Machine%20Learning",
+        "sections": []
+      },
+      {
+        "slug": "Professional%20Elective%202",
+        "name": "Professional Elective 2",
+        "url": "https://thehelpers.vercel.app/semesters/5/subjects/Professional%20Elective%202",
+        "sections": []
+      },
+      {
+        "slug": "Open%20Elective%201",
+        "name": "Open Elective 1",
+        "url": "https://thehelpers.vercel.app/semesters/5/subjects/Open%20Elective%201",
+        "sections": []
+      },
+      {
+        "slug": "Community%20Connect",
+        "name": "Community Connect",
+        "url": "https://thehelpers.vercel.app/semesters/5/subjects/Community%20Connect",
+        "sections": []
+      }
+    ]
+  },
+  {
+    "semester": 6,
+    "subjects": [
+      {
+        "slug": "Data%20Science",
+        "name": "Data Science",
+        "url": "https://thehelpers.vercel.app/semesters/6/subjects/Data%20Science",
+        "sections": []
+      },
+      {
+        "slug": "Software%20Engineering%20And%20Project%20Management",
+        "name": "Software Engineering And Project Management",
+        "url": "https://thehelpers.vercel.app/semesters/6/subjects/Software%20Engineering%20And%20Project%20Management",
+        "sections": []
+      },
+      {
+        "slug": "Compiler%20Design",
+        "name": "Compiler Design",
+        "url": "https://thehelpers.vercel.app/semesters/6/subjects/Compiler%20Design",
+        "sections": []
+      },
+      {
+        "slug": "Professional%20Elective%203",
+        "name": "Professional Elective 3",
+        "url": "https://thehelpers.vercel.app/semesters/6/subjects/Professional%20Elective%203",
+        "sections": []
+      },
+      {
+        "slug": "Professional%20Elective%204",
+        "name": "Professional Elective 4",
+        "url": "https://thehelpers.vercel.app/semesters/6/subjects/Professional%20Elective%204",
+        "sections": []
+      },
+      {
+        "slug": "Open%20Elective%202",
+        "name": "Open Elective 2",
+        "url": "https://thehelpers.vercel.app/semesters/6/subjects/Open%20Elective%202",
+        "sections": []
+      },
+      {
+        "slug": "Project%20%26%20MOOC",
+        "name": "Project & MOOC",
+        "url": "https://thehelpers.vercel.app/semesters/6/subjects/Project%20%26%20MOOC",
+        "sections": []
+      }
+    ]
+  },
+  {
+    "semester": 7,
+    "subjects": [
+      {
+        "slug": "Behavioral%20Psychology",
+        "name": "Behavioral Psychology",
+        "url": "https://thehelpers.vercel.app/semesters/7/subjects/Behavioral%20Psychology",
+        "sections": []
+      },
+      {
+        "slug": "Professional%20Elective%205",
+        "name": "Professional Elective 5",
+        "url": "https://thehelpers.vercel.app/semesters/7/subjects/Professional%20Elective%205",
+        "sections": []
+      },
+      {
+        "slug": "Professional%20Elective%206",
+        "name": "Professional Elective 6",
+        "url": "https://thehelpers.vercel.app/semesters/7/subjects/Professional%20Elective%206",
+        "sections": []
+      },
+      {
+        "slug": "Professional%20Elective%207",
+        "name": "Professional Elective 7",
+        "url": "https://thehelpers.vercel.app/semesters/7/subjects/Professional%20Elective%207",
+        "sections": []
+      },
+      {
+        "slug": "Professional%20Elective%208",
+        "name": "Professional Elective 8",
+        "url": "https://thehelpers.vercel.app/semesters/7/subjects/Professional%20Elective%208",
+        "sections": []
+      },
+      {
+        "slug": "Open%20Elective%203",
+        "name": "Open Elective 3",
+        "url": "https://thehelpers.vercel.app/semesters/7/subjects/Open%20Elective%203",
+        "sections": []
+      }
+    ]
+  },
+  {
+    "semester": 8,
+    "subjects": [
+      {
+        "slug": "Major%20Project",
+        "name": "Major Project",
+        "url": "https://thehelpers.vercel.app/semesters/8/subjects/Major%20Project",
+        "sections": []
+      },
+      {
+        "slug": "Internship",
+        "name": "Internship",
+        "url": "https://thehelpers.vercel.app/semesters/8/subjects/Internship",
+        "sections": []
+      }
+    ]
+  }
+]
