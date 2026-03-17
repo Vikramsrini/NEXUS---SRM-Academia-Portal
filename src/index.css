@@ -205,10 +205,8 @@ body {
 
 @media (max-width: 768px) {
   body {
-    /* Force overflow to enable the immersive scroll hack. 
-       20px ensures most mobile browsers (iOS/Android) recognize 
-       the page as scrollable even on short content. */
-    min-height: calc(100dvh + 20px);
+    /* Force 1px overflow to enable the immersive scroll hack */
+    min-height: calc(100dvh + 1.5px);
   }
 }
 
