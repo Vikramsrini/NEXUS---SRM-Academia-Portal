@@ -1646,6 +1646,12 @@
     isolation: isolate;
   }
 
+  [data-theme="dark"] .mobile-more-sheet {
+    background: linear-gradient(180deg, rgba(16, 18, 24, 0.84) 0%, rgba(11, 13, 18, 0.8) 100%);
+    border-color: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 26px 64px rgba(0, 0, 0, 0.58), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  }
+
   .mobile-more-sheet.show {
     transform: translate3d(-50%, -50%, 0) scale(1);
     opacity: 1;
@@ -1681,6 +1687,12 @@
     width: 36px;
     height: 36px;
     min-width: 36px;
+  }
+
+  [data-theme="dark"] .mobile-sheet-close {
+    background: rgba(28, 31, 39, 0.9);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: #d0d3da;
   }
 
   .mobile-more-grid {
