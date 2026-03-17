@@ -18,8 +18,9 @@ const isSystemNoise = (str, isExam = false) => {
   const s = String(str).toLowerCase().trim();
   
   if (isExam) {
-    // Only filter out very obvious noise like "Faculty" or "FT-"
-    return s.includes('llj') || s.includes('faculty') || s.includes('ft-');
+    // For marks, almost everything with a score is valid. 
+    // We only filter out obvious system placeholders if any.
+    return s.includes('system-noise-placeholder');
   }
 
   return (

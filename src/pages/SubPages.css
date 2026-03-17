@@ -1512,57 +1512,111 @@
 }
 
 @media (max-width: 768px) {
-  .timetable-section .section-header {
-    display: flex;
-    align-items: center;
+  .timetable-apple-stack {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
-    padding: 14px 18px;
+    align-items: start;
+  }
+
+  .timetable-section {
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  .timetable-section .section-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+    padding: 12px 6px;
+    background: var(--surface-secondary);
+    border-bottom: 1px solid var(--border-secondary);
+  }
+
+  .timetable-section .day-pill {
+    width: 100%;
+    padding: 4px 6px;
+    font-size: 10px;
+    justify-content: center;
+    border-radius: 6px;
+    white-space: nowrap;
+    min-height: auto;
+  }
+
+  .timetable-section .section-header .count {
+    margin: 0;
+    font-size: 9px;
+    color: var(--text-tertiary);
   }
 
   .timetable-section .class-item-apple {
-    display: grid;
-    grid-template-columns: 85px 1fr;
-    align-items: flex-start;
-    gap: 16px;
-    padding: 18px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 8px;
+    align-items: center;
+    text-align: center;
+    border-bottom: 1px solid var(--border-secondary);
   }
 
   .timetable-section .time-badge {
-    justify-content: center;
-    padding: 4px 0;
-    font-size: 0.64rem;
-    min-width: 0;
     width: 100%;
-    background: var(--surface-secondary);
-    border: 1px solid var(--border-secondary);
-    color: var(--text-secondary);
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--accent);
+    font-size: 9px;
+    padding: 0;
+    font-weight: 700;
+  }
+
+  .timetable-section .time-badge svg {
+    display: none;
+  }
+
+  .timetable-section .class-main {
+    gap: 2px;
   }
 
   .timetable-section .class-main .top {
-    display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
+    gap: 4px;
   }
 
   .timetable-section .class-main .top h3 {
-    font-size: 0.95rem;
-    line-height: 1.4;
-  }
-
-  .timetable-section .class-main .top .type-tag {
-    order: -1;
-    margin-bottom: 2px;
+    font-size: 0.78rem;
+    line-height: 1.25;
+    line-clamp: 3;
+    -webkit-line-clamp: 3;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   .timetable-section .class-main .bottom {
-    flex-wrap: wrap;
-    gap: 6px 10px;
-    margin-top: 4px;
+    justify-content: center;
+    font-size: 8.5px;
+    gap: 4px;
+    margin-top: 2px;
   }
 
+  .timetable-section .class-main .bottom .code,
   .timetable-section .class-main .bottom .sep {
     display: none;
+  }
+
+  .timetable-section .class-main .bottom .room-info svg {
+    width: 10px;
+    height: 10px;
+  }
+
+  .timetable-section .type-tag {
+    order: -1;
+    font-size: 7.5px;
+    padding: 1px 6px;
+    align-self: center;
+    margin-bottom: 2px;
   }
 }
 
