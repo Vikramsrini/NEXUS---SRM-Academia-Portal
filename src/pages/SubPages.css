@@ -1918,15 +1918,14 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(20px) saturate(150%);
-  -webkit-backdrop-filter: blur(20px) saturate(150%);
-  /* Remove animation from overlay to rule it out */
-  opacity: 1;
+  background: rgba(10, 11, 14, 0.22) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  pointer-events: auto;
 }
 
 [data-theme="dark"] .apple-modal-overlay {
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.4) !important;
 }
 
 .apple-modal-card {
