@@ -231,7 +231,7 @@ router.post('/auth/login', async (req, res) => {
       let captchaImage = null;
       try {
         const captchaData = await srmGetCaptchaImage(userResult.captcha.digest, userResult._session?.cookies);
-        captchaImage = captchaData?.image_bytes || null;
+        captchaImage = (typeof captchaData === 'string') ? captchaData : (captchaData?.image_bytes || captchaData?.captcha || null);
       } catch (e) { console.error('Captcha fetch error (lookup):', e.message); }
 
       return res.status(200).json({
@@ -258,7 +258,7 @@ router.post('/auth/login', async (req, res) => {
         let captchaImage = null;
         try {
           const captchaData = await srmGetCaptchaImage(passResult.captcha.digest, userResult._session?.cookies);
-          captchaImage = captchaData?.image_bytes || null;
+          captchaImage = (typeof captchaData === 'string') ? captchaData : (captchaData?.image_bytes || captchaData?.captcha || null);
         } catch (e) { console.error('Captcha fetch error (password):', e.message); }
 
         return res.status(200).json({
@@ -272,6 +272,7 @@ router.post('/auth/login', async (req, res) => {
           message: passResult.message || 'Captcha required',
         });
       }
+
       throw new Error(passResult.message || 'Login failed. Check your credentials.');
     }
 
