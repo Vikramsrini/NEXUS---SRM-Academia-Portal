@@ -28,6 +28,16 @@ export default function Login() {
   const [showInstallSuggestion, setShowInstallSuggestion] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
 
+  // Captcha State
+  const [requiresCaptcha, setRequiresCaptcha] = useState(false);
+  const [captchaImage, setCaptchaImage] = useState('');
+  const [captchaDigest, setCaptchaDigest] = useState('');
+  const [captchaValue, setCaptchaValue] = useState('');
+  const [digest, setDigest] = useState('');
+  const [identifier, setIdentifier] = useState('');
+  const [sessionCookies, setSessionCookies] = useState('');
+  const [sessionCsrf, setSessionCsrf] = useState('');
+
   useEffect(() => {
     const mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
@@ -65,16 +75,38 @@ export default function Login() {
       return;
     }
 
+    if (requiresCaptcha && !captchaValue.trim()) {
+      setError('Please enter the verification code');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
     const sessionId = Date.now().toString(36) + Math.random().toString(36).slice(2);
 
     try {
-      const res = await fetch(`${API_BASE}/auth/login`, {
+      const endpoint = requiresCaptcha ? `${API_BASE}/login/captcha` : `${API_BASE}/auth/login`;
+      const body = requiresCaptcha ? {
+        username: username.trim(),
+        password,
+        sessionId,
+        captcha: captchaValue.trim(),
+        cdigest: captchaDigest,
+        digest,
+        identifier,
+        sessionCookies,
+        sessionCsrf,
+      } : { 
+        username: username.trim(), 
+        password, 
+        sessionId 
+      };
+
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: username.trim(), password, sessionId }),
+        body: JSON.stringify(body),
       });
 
       const data = await res.json();
@@ -84,10 +116,19 @@ export default function Login() {
       }
 
       if (data.requiresCaptcha) {
-        setError('SRM requested HIP verification (captcha). Try again after opening SRM Academia once in browser, then retry here.');
+        setRequiresCaptcha(true);
+        setCaptchaImage(data.captchaImage);
+        setCaptchaDigest(data.captchaDigest);
+        setDigest(data.digest);
+        setIdentifier(data.identifier);
+        setSessionCookies(data.sessionCookies || '');
+        setSessionCsrf(data.sessionCsrf || '');
+        setCaptchaValue('');
+        setError('Verification required. Please enter the code shown below.');
         setLoading(false);
         return;
       }
+
 
       localStorage.setItem('academia_token', data.token);
       localStorage.setItem('academia_student', JSON.stringify(data.student_data));
@@ -99,13 +140,16 @@ export default function Login() {
     } catch (err) {
       const rawMessage = err.message || 'Login failed. Please check your credentials.';
       if (/hip required|captcha/i.test(rawMessage)) {
-        setError('SRM requested HIP verification (captcha). Open SRM Academia once in browser and complete login there, then retry here.');
+        setError('SRM requested verification. Please try again or refresh the page.');
+        // If we didn't get captcha data in JSON but got this error string, 
+        // it means the unified login failed to catch it early or something else went wrong.
       } else {
         setError(rawMessage);
       }
       setLoading(false);
     }
   };
+
 
   return (
     <div className="login-wrapper">
@@ -180,7 +224,44 @@ export default function Login() {
             />
           </div>
 
+          {requiresCaptcha && (
+            <div className="login-captcha-container animate-fade-in">
+              <div className="captcha-image-wrapper">
+                <img src={`data:image/png;base64,${captchaImage}`} alt="Verification Code" />
+                <button 
+                  type="button" 
+                  className="captcha-refresh-btn"
+                  onClick={() => {
+                    setRequiresCaptcha(false);
+                    setError('');
+                    handleLogin({ preventDefault: () => {} });
+                  }}
+                >
+                  Refresh Image
+                </button>
+              </div>
+              <div className="form-group">
+                <label htmlFor="captcha">Verification Code</label>
+                <input
+                  id="captcha"
+                  className="form-input"
+                  type="text"
+                  placeholder="Enter code"
+                  value={captchaValue}
+                  onChange={(e) => setCaptchaValue(e.target.value)}
+                  disabled={loading}
+                  autoComplete="off"
+                  autoFocus
+                />
+              </div>
+              <p className="captcha-help-text">
+                SRM requires once-in-a-while verification for security.
+              </p>
+            </div>
+          )}
+
           {error && <div className="login-error">{error}</div>}
+
 
           <button type="submit" className="login-btn" disabled={loading}>
             {loading && <span className="spinner" />}

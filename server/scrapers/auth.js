@@ -198,7 +198,7 @@ export async function srmVerifyPassword(digest, identifier, password, session) {
 /**
  * Fetches captcha image for a given digest.
  */
-export async function srmGetCaptchaImage(captchaDigest) {
+export async function srmGetCaptchaImage(captchaDigest, sessionCookies = null) {
   const response = await fetch(
     `https://academia.srmist.edu.in/accounts/p/40-10002227248/webclient/v1/captcha/${captchaDigest}?darkmode=false`,
     {
@@ -208,7 +208,7 @@ export async function srmGetCaptchaImage(captchaDigest) {
         'sec-fetch-dest': 'empty',
         'sec-fetch-mode': 'cors',
         'sec-fetch-site': 'same-origin',
-        'cookie': SRM_SESSION_COOKIES,
+        'cookie': sessionCookies || SRM_SESSION_COOKIES,
       },
     }
   );
@@ -219,7 +219,7 @@ export async function srmGetCaptchaImage(captchaDigest) {
 /**
  * Verifies password with captcha included.
  */
-export async function srmVerifyWithCaptcha(identifier, digest, captcha, cdigest, password) {
+export async function srmVerifyWithCaptcha(identifier, digest, captcha, cdigest, password, sessionCookies = null, csrfToken = null) {
   const url = `https://academia.srmist.edu.in/accounts/p/40-10002227248/signin/v2/primary/${encodeURIComponent(identifier)}/password?digest=${digest}&cli_time=${Date.now()}&servicename=ZohoCreator&service_language=en&serviceurl=https%3A%2F%2Facademia.srmist.edu.in%2Fportal%2Facademia-academic-services%2FredirectFromLogin&captcha=${encodeURIComponent(captcha)}&cdigest=${encodeURIComponent(cdigest)}`;
 
   const response = await fetch(url, {
@@ -227,11 +227,13 @@ export async function srmVerifyWithCaptcha(identifier, digest, captcha, cdigest,
     headers: {
       ...SRM_LOGIN_HEADERS,
       'content-type': 'application/x-www-form-urlencoded;charset=UTF-8',
-      'x-zcsrf-token': SRM_CSRF_TOKEN,
-      'cookie': SRM_SESSION_COOKIES,
+      'x-zcsrf-token': csrfToken || SRM_CSRF_TOKEN,
+      'cookie': sessionCookies || SRM_SESSION_COOKIES,
     },
     body: JSON.stringify({ passwordauth: { password } }),
   });
+
+
 
   const data = await response.json();
 

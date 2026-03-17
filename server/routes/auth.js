@@ -86,23 +86,136 @@ router.post('/login/password', async (req, res) => {
   }
 });
 
+// ── Unified login ─────────────────────────────────────────────────────
+
+/**
+ * Shared logic to sync student data after successful authentication
+ */
+async function syncStudentData(authCookie, sessionId) {
+  let timetable = [];
+  let attendance = [];
+  let marks = [];
+  let calendar = [];
+  let regNumber = '';
+  let batch = '';
+  let studentName = 'SRM Student';
+  let userInfo = {};
+
+  try {
+    sendStatus(sessionId, 'discover', 'Syncing your academic records...');
+
+    try {
+      userInfo = await fetchRealUserInfo(authCookie);
+    } catch (userInfoError) {
+      console.error('User info sync error:', userInfoError.message);
+    }
+
+    const attHtml = await fetchAcademicPage(authCookie,
+      'https://academia.srmist.edu.in/srm_university/academia-academic-services/page/My_Attendance');
+    const attResult = parseAttendance(attHtml);
+    attendance = attResult.attendance;
+    regNumber = attResult.regNumber;
+    marks = parseMarks(attHtml, attendance);
+    sendStatus(sessionId, 'attendance', `Synced ${attendance.length} courses and ${marks.length} marks`);
+
+    const ttHtml = await fetchTimetablePage(authCookie);
+    if (ttHtml) {
+      const ttResult = parseCourses(ttHtml);
+      batch = ttResult.batch;
+      timetable = buildTimetable(ttResult.courses, batch);
+      if (ttResult.studentName && ttResult.studentName.length > 2) studentName = ttResult.studentName;
+
+      userInfo = {
+        ...ttResult,
+        ...userInfo,
+        name: userInfo.name || ttResult.studentName || studentName,
+        program: userInfo.program || ttResult.program || '',
+        department: userInfo.department || ttResult.department || '',
+        section: userInfo.section || ttResult.section || '',
+        semester: userInfo.semester || ttResult.semester || '',
+        branch: userInfo.branch || ttResult.branch || deriveAcademicBranch(userInfo.program || ttResult.program, userInfo.department || ttResult.department),
+      };
+    }
+    sendStatus(sessionId, 'timetable', `Synced timetable with ${timetable.length} classes`);
+
+    // Fetch calendar while session is still fresh
+    try {
+      const calUrls = getCalendarUrls();
+      for (const calUrl of calUrls) {
+        try {
+          const rawCal = await fetchRawAcademicPage(authCookie, calUrl);
+          if (rawCal) {
+            const calParsed = parseSrmCalendar(rawCal);
+            if (calParsed.calendar?.length > 0) {
+              calendar = calParsed.calendar;
+              console.log(`[Calendar] Success during sync from: ${calUrl}`);
+              break;
+            }
+          }
+        } catch (calErr) {
+          console.log(`[Calendar] Failed ${calUrl}: ${calErr.message}`);
+        }
+      }
+    } catch (calError) {
+      console.error('Calendar sync error:', calError.message);
+    }
+  } catch (dataErr) {
+    console.error('Data sync error:', dataErr.message);
+    sendStatus(sessionId, 'error', 'Data sync partially failed, but login succeeded.');
+  }
+
+  const currentDayOrder = await fetchCurrentDayOrder(authCookie);
+  
+  return {
+    name: userInfo.name || studentName,
+    regNumber,
+    batch,
+    branch: userInfo.branch || deriveAcademicBranch(userInfo.program, userInfo.department),
+    program: userInfo.program || '',
+    department: userInfo.department || '',
+    section: userInfo.section || '',
+    semester: userInfo.semester || '',
+    timetable,
+    attendance,
+    marks,
+    calendar,
+    currentDayOrder,
+    data_source: 'live'
+  };
+}
+
 router.post('/login/captcha', async (req, res) => {
-  const { cdigest, password, digest, identifier, captcha } = req.body;
+  const { cdigest, password, digest, identifier, captcha, sessionId, sessionCookies, sessionCsrf } = req.body;
   if (!cdigest || !password || !digest || !identifier || !captcha) {
     return res.status(400).json({ error: 'All captcha fields are required' });
   }
 
   try {
-    const result = await srmVerifyWithCaptcha(identifier, digest, captcha, cdigest, password);
-    if (result.error) return res.status(500).json({ error: result.error });
-    res.json(result);
+    sendStatus(sessionId, 'password', 'Verifying captcha & credentials...');
+    const result = await srmVerifyWithCaptcha(identifier, digest, captcha, cdigest, password, sessionCookies, sessionCsrf);
+    
+    if (!result.isAuthenticated) {
+      return res.status(401).json({ error: result.message || 'Captcha verification failed' });
+    }
+
+    const authCookie = result.cookies;
+    sendStatus(sessionId, 'loggedin', 'Login successful!');
+
+    const studentData = await syncStudentData(authCookie, sessionId);
+    sendStatus(sessionId, 'done', 'All set!');
+
+    res.json({
+      token: authCookie,
+      message: `Welcome ${studentData.name}! Logged in successfully.`,
+      student_data: studentData,
+    });
   } catch (e) {
     console.error('Captcha verification error:', e.message);
+    sendStatus(sessionId, 'error', `Error: ${e.message}`);
     res.status(500).json({ error: 'Failed to verify captcha: ' + e.message });
   }
 });
 
-// ── Unified login ─────────────────────────────────────────────────────
 router.post('/auth/login', async (req, res) => {
   const { username, password, sessionId } = req.body;
   if (!username || !password) {
@@ -121,117 +234,33 @@ router.post('/auth/login', async (req, res) => {
 
     if (!passResult.isAuthenticated) {
       if (passResult.captcha?.required) {
-        const captchaData = await srmGetCaptchaImage(passResult.captcha.digest);
+        const captchaData = await srmGetCaptchaImage(passResult.captcha.digest, userResult._session?.cookies);
         return res.status(200).json({
           requiresCaptcha: true,
           captchaImage: captchaData?.image_bytes || null,
           captchaDigest: passResult.captcha.digest,
           digest: userResult.digest,
           identifier: userResult.identity,
+          sessionCookies: userResult._session?.cookies,
+          sessionCsrf: userResult._session?.csrfToken,
           message: passResult.message || 'Captcha required',
         });
       }
       throw new Error(passResult.message || 'Login failed. Check your credentials.');
     }
 
+
     const authCookie = passResult.cookies;
     sendStatus(sessionId, 'loggedin', 'Login successful!');
 
-    let timetable = [];
-    let attendance = [];
-    let marks = [];
-    let calendar = [];
-    let regNumber = '';
-    let batch = '';
-    let studentName = 'SRM Student';
-    let userInfo = {};
-
-    try {
-      sendStatus(sessionId, 'discover', 'Syncing your academic records...');
-
-      try {
-        userInfo = await fetchRealUserInfo(authCookie);
-      } catch (userInfoError) {
-        console.error('User info sync error during login:', userInfoError.message);
-      }
-
-      const attHtml = await fetchAcademicPage(authCookie,
-        'https://academia.srmist.edu.in/srm_university/academia-academic-services/page/My_Attendance');
-      const attResult = parseAttendance(attHtml);
-      attendance = attResult.attendance;
-      regNumber = attResult.regNumber;
-      marks = parseMarks(attHtml, attendance);
-      sendStatus(sessionId, 'attendance', `Synced ${attendance.length} courses and ${marks.length} marks`);
-
-      const ttHtml = await fetchTimetablePage(authCookie);
-      if (ttHtml) {
-        const ttResult = parseCourses(ttHtml);
-        batch = ttResult.batch;
-        timetable = buildTimetable(ttResult.courses, batch);
-        if (ttResult.studentName && ttResult.studentName.length > 2) studentName = ttResult.studentName;
-
-        userInfo = {
-          ...ttResult,
-          ...userInfo,
-          name: userInfo.name || ttResult.studentName || studentName,
-          program: userInfo.program || ttResult.program || '',
-          department: userInfo.department || ttResult.department || '',
-          section: userInfo.section || ttResult.section || '',
-          semester: userInfo.semester || ttResult.semester || '',
-          branch: userInfo.branch || ttResult.branch || deriveAcademicBranch(userInfo.program || ttResult.program, userInfo.department || ttResult.department),
-        };
-      }
-      sendStatus(sessionId, 'timetable', `Synced timetable with ${timetable.length} classes`);
-
-      // Fetch calendar while session is still fresh
-      try {
-        const calUrls = getCalendarUrls();
-        for (const calUrl of calUrls) {
-          try {
-            const rawCal = await fetchRawAcademicPage(authCookie, calUrl);
-            if (rawCal) {
-              const calParsed = parseSrmCalendar(rawCal);
-              if (calParsed.calendar?.length > 0) {
-                calendar = calParsed.calendar;
-                console.log(`[Calendar] Success during login from: ${calUrl}`);
-                break;
-              }
-            }
-          } catch (calErr) {
-            console.log(`[Calendar] Failed ${calUrl}: ${calErr.message}`);
-          }
-        }
-      } catch (calError) {
-        console.error('Calendar sync error:', calError.message);
-      }
-    } catch (dataErr) {
-      console.error('Data sync error during login:', dataErr.message);
-      sendStatus(sessionId, 'error', 'Data sync partially failed, but login succeeded.');
-    }
-
+    const studentData = await syncStudentData(authCookie, sessionId);
     sendStatus(sessionId, 'done', 'All set!');
-    const currentDayOrder = await fetchCurrentDayOrder(authCookie);
 
     res.json({
       token: authCookie,
-      message: `Welcome ${studentName}! Logged in successfully.`,
+      message: `Welcome ${studentData.name}! Logged in successfully.`,
       data_source: 'live',
-      student_data: {
-        name: userInfo.name || studentName,
-        regNumber,
-        batch,
-        branch: userInfo.branch || deriveAcademicBranch(userInfo.program, userInfo.department),
-        program: userInfo.program || '',
-        department: userInfo.department || '',
-        section: userInfo.section || '',
-        semester: userInfo.semester || '',
-        timetable,
-        attendance,
-        marks,
-        calendar,
-        currentDayOrder,
-        data_source: 'live',
-      },
+      student_data: studentData
     });
   } catch (error) {
     console.error('Login error:', error.message);
@@ -239,6 +268,7 @@ router.post('/auth/login', async (req, res) => {
     res.status(401).json({ detail: `Login failed: ${error.message}` });
   }
 });
+
 
 // ── Sync ──────────────────────────────────────────────────────────────
 router.post('/auth/sync', async (req, res) => {
