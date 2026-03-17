@@ -1216,9 +1216,18 @@
     display: none;
   }
 
+  .dashboard-layout {
+    height: auto;
+    min-height: auto;
+    overflow: visible;
+    display: block;
+  }
+
   .main-content {
     margin-left: 0;
     padding: calc(12px + env(safe-area-inset-top, 0px)) 16px calc(112px + env(safe-area-inset-bottom, 0px)) 16px;
+    height: auto;
+    overflow-y: visible;
   }
 
   .dashboard-layout.sidebar-collapsed .main-content {
