@@ -48,11 +48,15 @@ export default function CoursesPage() {
       const title = (a.courseTitle || '').trim();
       if (!title || title.length <= 2) return false;
       const lower = title.toLowerCase();
-      // Exclude generic types and internal SRM rows like "FT-I", "FT-II" (Faculty Totals)
+      
+      // Strict filtering of internal SRM system rows and noise
       if (lower === 'theory' || lower === 'practical' || lower === 'lab' || lower === 'clinical') return false;
-      if (lower.startsWith('ft-') || lower.includes('total') || lower.includes('faculty')) return false;
-      if (lower.includes('llj-') || lower.startsWith('ct-') || lower.startsWith('cat-')) return false;
-      if (lower.includes('llj') && lower.includes('/')) return false; // Catch LLJ-I/ etc
+      if (lower.includes('llj')) return false; // Exclude all LLJ noise rows
+      if (lower.includes('ft-') || lower.startsWith('ft')) return false; // Exclude Faculty Totals
+      if (lower.includes('total')) return false; // Exclude any total/summary rows
+      if (lower.startsWith('ct-') || lower.startsWith('cat-')) return false; // Exclude internal test labels
+      if (lower.includes('faculty')) return false;
+      
       return true;
     });
   }, [attendance]);
