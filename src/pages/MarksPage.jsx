@@ -15,28 +15,30 @@ function normalizeCourseCode(value) {
 
 const isSystemNoise = (str, isExam = false) => {
   if (!str) return false;
-  const s = String(str).toLowerCase();
+  const s = String(str).toLowerCase().trim();
   
-  // Base noise common to both subjects and exams
-  const baseNoise = (
+  // For EXAMS (marks in chart), we only want to hide obvious summary/total rows
+  if (isExam) {
+    return (
+      s.includes('llj') || 
+      s.includes('ft-') || 
+      s.includes('total') || 
+      s.includes('faculty')
+    );
+  }
+
+  // For COURSE TITLES (cards), we are more aggressive to skip noise rows
+  return (
     s.includes('llj') || 
     s.includes('ft-') || 
     s.startsWith('ft') || 
     s.includes('fj-') || 
     s.includes('total') || 
     s.includes('faculty') ||
+    s.startsWith('ct-') || 
+    s.startsWith('cat-') ||
     s === 'theory' || s === 'practical' || s === 'lab' || s === 'clinical'
   );
-
-  if (baseNoise) return true;
-
-  // CT and CAT are only "noise" when they appear as course titles
-  // They are VALID when they appear as individual exam names
-  if (!isExam) {
-    if (s.startsWith('ct-') || s.startsWith('cat-')) return true;
-  }
-
-  return false;
 };
 
 function looksLikeCourseCode(value) {
