@@ -143,17 +143,20 @@ export default function AttendancePage() {
       const conducted = parseInt(a.hoursConducted);
       if (isNaN(conducted) || conducted <= 0) return false;
       
-      const s = (title + ' ' + code).toLowerCase();
+      const lowerTitle = title.toLowerCase();
+      const lowerCode = code.toLowerCase();
+      const combined = (title + ' ' + code).toLowerCase();
+      
       const isNoise = (
-        s.includes('llj') || 
-        s.includes('ft-') || 
-        s.startsWith('ft') || 
-        s.includes('fj-') || 
-        s.includes('total') || 
-        s.includes('faculty') ||
-        s.startsWith('ct-') || 
-        s.startsWith('cat-') ||
-        s === 'theory' || s === 'practical' || s === 'lab' || s === 'clinical'
+        lowerTitle === 'theory' || lowerTitle === 'practical' || lowerTitle === 'lab' || lowerTitle === 'clinical' ||
+        combined.includes('llj') || 
+        combined.includes('ft-') || 
+        combined.startsWith('ft') || 
+        combined.includes('fj-') || 
+        combined.includes('total') || 
+        combined.includes('faculty') ||
+        combined.startsWith('ct-') || 
+        combined.startsWith('cat-')
       );
       
       return !isNoise;

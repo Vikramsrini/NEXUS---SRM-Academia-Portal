@@ -1743,9 +1743,9 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 10px;
-    min-height: 108px;
-    padding: 14px;
+    gap: 8px;
+    min-height: 96px;
+    padding: 16px;
     border-radius: 22px;
     text-align: left;
     background: var(--surface-primary);
