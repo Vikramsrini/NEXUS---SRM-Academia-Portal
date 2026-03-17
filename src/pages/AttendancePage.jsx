@@ -137,22 +137,26 @@ export default function AttendancePage() {
   const FILTERED_ATTENDANCE = useMemo(() => {
     return attendance.filter(a => {
       const title = (a.courseTitle || '').trim();
-      // Filter out rows that are actually marks (no hoursConducted or conducted=0)
+      const code = (a.courseCode || '').trim();
       if (!title || title.length <= 2) return false;
       
       const conducted = parseInt(a.hoursConducted);
-      const absent = parseInt(a.hoursAbsent);
-      // If conducted is not a number or it's 0 (most marks or inactive courses), filter it out
       if (isNaN(conducted) || conducted <= 0) return false;
       
-      const lower = title.toLowerCase();
-      // Exclude generic types, faculty totals, and common marks headers
-      if (['theory', 'practical', 'lab', 'clinical'].includes(lower)) return false;
-      if (lower.startsWith('ft-') || lower.includes('total') || lower.includes('faculty')) return false;
-      if (lower.includes('llj-') || lower.startsWith('ct-') || lower.startsWith('cat-')) return false;
-      if (lower.includes('llj') && lower.includes('/')) return false;
+      const s = (title + ' ' + code).toLowerCase();
+      const isNoise = (
+        s.includes('llj') || 
+        s.includes('ft-') || 
+        s.startsWith('ft') || 
+        s.includes('fj-') || 
+        s.includes('total') || 
+        s.includes('faculty') ||
+        s.startsWith('ct-') || 
+        s.startsWith('cat-') ||
+        s === 'theory' || s === 'practical' || s === 'lab' || s === 'clinical'
+      );
       
-      return true;
+      return !isNoise;
     });
   }, [attendance]);
 

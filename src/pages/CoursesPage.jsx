@@ -46,16 +46,27 @@ export default function CoursesPage() {
   const FILTERED_ATTENDANCE = useMemo(() => {
     return attendance.filter(a => {
       const title = (a.courseTitle || '').trim();
+      const code = (a.courseCode || '').trim().toLowerCase();
       if (!title || title.length <= 2) return false;
-      const lower = title.toLowerCase();
+      const lowerTheme = title.toLowerCase();
       
       // Strict filtering of internal SRM system rows and noise
-      if (lower === 'theory' || lower === 'practical' || lower === 'lab' || lower === 'clinical') return false;
-      if (lower.includes('llj')) return false; // Exclude all LLJ noise rows
-      if (lower.includes('ft-') || lower.startsWith('ft')) return false; // Exclude Faculty Totals
-      if (lower.includes('total')) return false; // Exclude any total/summary rows
-      if (lower.startsWith('ct-') || lower.startsWith('cat-')) return false; // Exclude internal test labels
-      if (lower.includes('faculty')) return false;
+      const isNoise = (str) => {
+        const s = str.toLowerCase();
+        return (
+          s.includes('llj') || 
+          s.includes('ft-') || 
+          s.startsWith('ft') || 
+          s.includes('fj-') || 
+          s.includes('total') || 
+          s.includes('faculty') ||
+          s.startsWith('ct-') || 
+          s.startsWith('cat-') ||
+          s === 'theory' || s === 'practical' || s === 'lab' || s === 'clinical'
+        );
+      };
+
+      if (isNoise(lowerTheme) || isNoise(code)) return false;
       
       return true;
     });

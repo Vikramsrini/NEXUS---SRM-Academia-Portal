@@ -13,6 +13,22 @@ function normalizeCourseCode(value) {
   return String(value || '').toUpperCase().replace(/\s+/g, '').replace(/^21/, '');
 }
 
+const isSystemNoise = (str) => {
+  if (!str) return false;
+  const s = String(str).toLowerCase();
+  return (
+    s.includes('llj') || 
+    s.includes('ft-') || 
+    s.startsWith('ft') || 
+    s.includes('fj-') || 
+    s.includes('total') || 
+    s.includes('faculty') ||
+    s.startsWith('ct-') || 
+    s.startsWith('cat-') ||
+    s === 'theory' || s === 'practical' || s === 'lab' || s === 'clinical'
+  );
+};
+
 function looksLikeCourseCode(value) {
   const s = String(value || '').trim().toUpperCase();
   return /^[0-9A-Z]{6,}$/.test(s) && /\d/.test(s);
@@ -113,11 +129,10 @@ export default function MarksPage() {
 
   const FILTERED_MARKS = useMemo(() => {
     return marks.filter((m) => {
-      const title = String(m.course || '').trim().toLowerCase();
-      if (!title || title.length <= 2) return false;
-      if (title.includes('llj-') || title.startsWith('ct-') || title.startsWith('cat-')) return false;
-      if (title.includes('llj') && title.includes('/')) return false;
-      if (title.startsWith('ft-') || title.includes('total') || title.includes('faculty')) return false;
+      const title = String(m.course || '').trim();
+      const code = String(m.courseCode || '').trim();
+      if (isSystemNoise(title) || isSystemNoise(code)) return false;
+      if (title.length <= 2) return false;
       return true;
     });
   }, [marks]);
@@ -200,7 +215,8 @@ export default function MarksPage() {
             const displayName = getDisplayCourseName(m, courseNameByCode);
             const pctValue = m.total?.maxMark > 0 ? (m.total.obtained / m.total.maxMark) * 100 : 0;
             const pct = Math.max(0, Math.min(100, pctValue));
-            const trendChart = buildTrendChart(m.marks || []);
+            const individualMarks = (m.marks || []).filter(exam => !isSystemNoise(exam.exam));
+            const trendChart = buildTrendChart(individualMarks);
             return (
               <div key={i} className="marks-card-apple">
                 <div className="card-header">
@@ -276,7 +292,7 @@ export default function MarksPage() {
                 </div>
                 
                 <div className="exams-list">
-                  {m.marks?.map((exam, j) => (
+                  {individualMarks.map((exam, j) => (
                     <div key={j} className="exam-row">
                       <span className="exam-name">{exam.exam}</span>
                       <span className="exam-val">{exam.obtained} / {exam.maxMark}</span>
