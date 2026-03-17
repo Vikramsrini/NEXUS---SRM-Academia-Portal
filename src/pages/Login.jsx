@@ -29,6 +29,11 @@ export default function Login() {
   const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
+    // Check for existing session on mount
+    if (localStorage.getItem('academia_token')) {
+      navigate('/dashboard', { replace: true });
+    }
+
     const mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
     
@@ -46,7 +51,7 @@ export default function Login() {
 
     window.addEventListener('beforeinstallprompt', handler);
     return () => window.removeEventListener('beforeinstallprompt', handler);
-  }, []);
+  }, [navigate]);
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) return;
