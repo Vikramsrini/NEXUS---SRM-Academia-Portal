@@ -179,7 +179,12 @@ export async function srmVerifyPassword(digest, identifier, password, session) {
     return { isAuthenticated: true, cookies: allCookies };
   }
 
-  const captchaRequired = data.localized_message?.toLowerCase()?.includes('captcha') || false;
+  const authMessage = String(data.localized_message || data.message || '').toLowerCase();
+  const captchaRequired =
+    authMessage.includes('captcha') ||
+    authMessage.includes('hip required') ||
+    authMessage.includes('hip') ||
+    Boolean(data.cdigest);
   return {
     isAuthenticated: false,
     statusCode: data.status_code,

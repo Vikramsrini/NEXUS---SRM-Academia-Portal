@@ -1507,6 +1507,58 @@
   border: 1px solid var(--badge-green-border);
 }
 
+@media (max-width: 768px) {
+  .timetable-section .section-header {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+  }
+
+  .timetable-section .section-header .day-name {
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .timetable-section .section-header .count {
+    margin-left: 0;
+    white-space: nowrap;
+  }
+
+  .timetable-section .class-item-apple {
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px 16px;
+  }
+
+  .timetable-section .time-badge {
+    align-self: flex-start;
+  }
+
+  .timetable-section .class-main .top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 8px;
+  }
+
+  .timetable-section .class-main .top h3 {
+    font-size: 0.95rem;
+  }
+
+  .timetable-section .class-main .bottom {
+    flex-wrap: wrap;
+    gap: 6px 8px;
+  }
+
+  .timetable-section .class-main .bottom .sep {
+    display: none;
+  }
+}
+
 
 /* ══════════════════════════════════════════════════════════════════════
    10. COURSES GRID & CARDS

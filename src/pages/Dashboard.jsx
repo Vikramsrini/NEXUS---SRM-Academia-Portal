@@ -55,6 +55,20 @@ function formatDate() {
   return new Date().toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 }
 
+function getShortDisplayName(name, maxLength = 18) {
+  const cleaned = String(name || '').trim().replace(/\s+/g, ' ');
+  if (!cleaned) return 'Student';
+  if (cleaned.length <= maxLength) return cleaned;
+
+  const [first = '', ...rest] = cleaned.split(' ');
+  const last = rest[rest.length - 1] || '';
+  if (first && last && first.length <= maxLength - 4) {
+    return `${first} ${last.charAt(0).toUpperCase()}.`;
+  }
+
+  return `${cleaned.slice(0, Math.max(8, maxLength - 1)).trimEnd()}…`;
+}
+
 function getGreeting() {
   const hour = new Date().getHours();
   if (hour < 12) return 'Good Morning';
@@ -131,6 +145,8 @@ export default function Dashboard({ children }) {
   const [thoughtLoading, setThoughtLoading] = useState(true);
   const student = getStudentData();
   const displayName = student.name || 'Student';
+  const compactDisplayName = getShortDisplayName(displayName, 18);
+  const compactWelcomeName = getShortDisplayName(displayName, 24);
   const activePath = location.pathname === '/dashboard/' ? '/dashboard' : location.pathname;
   const isOverview = activePath === '/dashboard';
   const currentTab = NAV_ITEMS.find(item => item.path === activePath) || { label: 'Dashboard' };
@@ -661,7 +677,7 @@ export default function Dashboard({ children }) {
                   {Icons.mortarboard}
                 </div>
                 <div className="mobile-brand-copy">
-                  <span className="mobile-brand-title">{isOverview ? `Hi, ${displayName}` : 'NEXUS'}</span>
+                  <span className="mobile-brand-title" title={displayName}>{isOverview ? `Hi, ${compactDisplayName}` : 'NEXUS'}</span>
                 </div>
               </div>
               {renderTopBarActions()}
@@ -683,7 +699,7 @@ export default function Dashboard({ children }) {
           {isOverview ? (
             <div className="overview-hero animate-fade-in-up">
               <div className="ov-welcome">
-                <h2>Welcome, {displayName}!</h2>
+                <h2 title={displayName}>Welcome, {compactWelcomeName}!</h2>
                 <p className="ov-welcome-date">{formatDate()}</p>
               </div>
 

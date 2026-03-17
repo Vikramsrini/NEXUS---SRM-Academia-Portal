@@ -84,7 +84,7 @@ export default function Login() {
       }
 
       if (data.requiresCaptcha) {
-        setError('Captcha required. Please try again in a few minutes.');
+        setError('SRM requested HIP verification (captcha). Try again after opening SRM Academia once in browser, then retry here.');
         setLoading(false);
         return;
       }
