@@ -1600,7 +1600,7 @@
     position: fixed;
     inset: 0;
     z-index: 1180;
-    background: rgba(20, 23, 30, 0.34);
+    background: rgba(20, 23, 30, 0.52);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     opacity: 0;
@@ -1609,7 +1609,13 @@
   }
 
   [data-theme="dark"] .mobile-sheet-overlay {
-    background: rgba(7, 9, 12, 0.68);
+    background: rgba(7, 9, 12, 0.78);
+  }
+
+  body.mobile-sheet-open .top-bar-container.mobile-top-bar {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
   }
 
   .mobile-sheet-overlay.show {
