@@ -3,6 +3,7 @@ import './SubPages.css';
 
 const Icons = {
   marks: <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
+  calculator: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><path d="M16 10h.01M12 10h.01M8 10h.01M12 14h.01M8 14h.01M12 18h.01M8 18h.01"/></svg>
 };
 
 function getStudentData() {
@@ -110,7 +111,7 @@ function buildTrendChart(exams) {
 }
 
 const GRADE_POINTS = { 'O': 10, 'A+': 9, 'A': 8, 'B+': 7, 'B': 6, 'C': 5, 'F': 0 };
-const GRADES = ['O', 'A+', 'A', 'B+', 'B', 'C', 'F'];
+const PREDICT_GRADES = ['C', 'B', 'B+', 'A', 'A+', 'O'];
 const GRADE_THRESHOLDS = { 'O': 91, 'A+': 81, 'A': 71, 'B+': 61, 'B': 56, 'C': 50, 'F': 0 };
 
 function SgpaPredictor({ courses, onClose }) {
@@ -164,11 +165,6 @@ function SgpaPredictor({ courses, onClose }) {
     };
   }, [courses, targetGrades, enabledCourses]);
 
-  const resetToO = () => {
-    const fresh = {};
-    courses.forEach(c => fresh[c.courseCode] = 'O');
-    setTargetGrades(fresh);
-  };
 
   const calculateFinalsNeeded = (id, targetGrade) => {
     const current = parseFloat(internalMarks[id]) || 0;
@@ -192,12 +188,24 @@ function SgpaPredictor({ courses, onClose }) {
             <button className="back-btn" onClick={onClose}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
             </button>
-            <h2>SGPA Predictor</h2>
+            <h2>SGPA Calculator</h2>
           </div>
           <p>Adjust your expected marks to simulate your semester results.</p>
         </div>
         <div className="header-actions">
-           <button className="apple-btn-secondary" onClick={resetToO}>Target All O</button>
+           <div className="target-all-dropdown">
+             <span>Target All</span>
+             <select onChange={(e) => {
+               const grade = e.target.value;
+               const fresh = {};
+               courses.forEach(c => fresh[c.courseCode] = grade);
+               setTargetGrades(fresh);
+             }}>
+               {PREDICT_GRADES.slice().reverse().map(g => (
+                 <option key={g} value={g}>{g}</option>
+               ))}
+             </select>
+           </div>
            <div className={`sgpa-summary-badge ${parseFloat(stats.sgpa) >= 9 ? 'excellent' : ''}`}>
              <span className="lbl">Estimated SGPA</span>
              <span className="val">{stats.sgpa}</span>
@@ -272,13 +280,13 @@ function SgpaPredictor({ courses, onClose }) {
                   type="range" 
                   className="apple-range" 
                   min="0" 
-                  max={GRADES.length - 2} 
-                  value={GRADES.indexOf(target)}
-                  onChange={(e) => setTargetGrades(p => ({ ...p, [id]: GRADES[parseInt(e.target.value)] }))}
-                  style={{ direction: 'rtl', backgroundSize: `${(GRADES.indexOf(target) / (GRADES.length - 2)) * 100}% 100%` }}
+                  max={PREDICT_GRADES.length - 1} 
+                  value={PREDICT_GRADES.indexOf(target)}
+                  onChange={(e) => setTargetGrades(p => ({ ...p, [id]: PREDICT_GRADES[parseInt(e.target.value)] }))}
+                  style={{ backgroundSize: `${(PREDICT_GRADES.indexOf(target) / (PREDICT_GRADES.length - 1)) * 100}% 100%` }}
                 />
                 <div className="grade-marks">
-                  {GRADES.slice(0, -1).map(g => (
+                  {PREDICT_GRADES.map(g => (
                     <span key={g} className={target === g ? 'active' : ''}>{g}</span>
                   ))}
                 </div>
@@ -391,8 +399,8 @@ export default function MarksPage() {
           <p className="subpage-desc">Track performance and predict your semester SGPA.</p>
         </div>
         <button className="apple-btn primary" onClick={() => setIsPredictorOpen(true)}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" style={{ marginRight: '8px' }}><path d="M12 2v20M2 12h20"/></svg>
-          Calculate SGPA
+          <span style={{ marginRight: '8px', display: 'flex', alignItems: 'center' }}>{Icons.calculator}</span>
+          SGPA Calculator
         </button>
       </div>
 
@@ -420,9 +428,8 @@ export default function MarksPage() {
           courses={FILTERED_MARKS} 
           onClose={() => setIsPredictorOpen(false)} 
         />
-      ) : (
-        FILTERED_MARKS.length > 0 && (
-          <div className="marks-grid-apple stagger-children">
+      ) : FILTERED_MARKS.length > 0 ? (
+        <div className="marks-grid-apple stagger-children">
           {FILTERED_MARKS.map((m, i) => {
             const displayName = getDisplayCourseName(m, courseNameByCode);
             const pctValue = m.total?.maxMark > 0 ? (m.total.obtained / m.total.maxMark) * 100 : 0;
@@ -516,13 +523,11 @@ export default function MarksPage() {
           })}
         </div>
       ) : (
-        !isPredictorOpen && (
-          <div className="empty-state">
-            <div className="icon">{Icons.marks}</div>
-            <h3>No records found</h3>
-            <p>Login to sync your academic performance.</p>
-          </div>
-        )
+        <div className="empty-state">
+          <div className="icon">{Icons.marks}</div>
+          <h3>No records found</h3>
+          <p>Login to sync your academic performance.</p>
+        </div>
       )}
 
     </div>
