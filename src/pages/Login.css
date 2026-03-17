@@ -266,6 +266,104 @@
   background: var(--badge-green-text);
 }
 
+/* ── Install Suggestion ──────────────────────────────────────────── */
+.login-install-suggestion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 14px 14px 18px;
+  background: var(--surface-primary);
+  border: 1px solid var(--border-glass);
+  border-radius: 20px;
+  box-shadow: var(--shadow-md);
+  margin-bottom: -10px;
+  position: relative;
+  overflow: hidden;
+}
+
+[data-theme="dark"] .login-install-suggestion {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.install-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.install-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--accent-subtle);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.install-text h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 2px 0;
+}
+
+.install-text p {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.ios-install-steps {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 12px;
+  background: var(--surface-secondary);
+  padding: 6px 10px;
+  border-radius: 10px;
+}
+
+.install-action-btn {
+  background: var(--accent);
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.install-hint {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.install-close-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  background: transparent;
+  padding: 0;
+  flex-shrink: 0;
+}
+
 /* ── Footer ──────────────────────────────────────────────────────── */
 .login-footer {
   color: var(--text-tertiary);

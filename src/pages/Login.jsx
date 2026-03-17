@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../ThemeContext';
 import './Login.css';
@@ -11,6 +11,12 @@ const ThemeIcon = ({ theme }) => theme === 'dark' ? (
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
 );
 
+const MobileIcons = {
+  install: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
+  share: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>,
+  plus: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+};
+
 export default function Login() {
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
@@ -18,6 +24,39 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallSuggestion, setShowInstallSuggestion] = useState(false);
+  const [isIOS, setIsIOS] = useState(false);
+
+  useEffect(() => {
+    const mobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    
+    if (mobile && !isStandalone) {
+      setShowInstallSuggestion(true);
+      if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+        setIsIOS(true);
+      }
+    }
+
+    const handler = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      setDeferredPrompt(null);
+      setShowInstallSuggestion(false);
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -71,6 +110,33 @@ export default function Login() {
         <button className="login-theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
           <ThemeIcon theme={theme} />
         </button>
+
+        {showInstallSuggestion && (
+          <div className="login-install-suggestion animate-fade-in-down">
+            <div className="install-content">
+              <div className="install-icon-wrap">
+                {MobileIcons.install}
+              </div>
+              <div className="install-text">
+                <h3>Install NEXUS</h3>
+                <p>{isIOS ? 'Tap Share > Add to Home Screen' : 'Add to home screen for full experience'}</p>
+              </div>
+            </div>
+            {isIOS ? (
+              <div className="ios-install-steps">
+                <span>{MobileIcons.share}</span>
+                <span>+</span>
+              </div>
+            ) : deferredPrompt ? (
+              <button className="install-action-btn" onClick={handleInstallClick}>Install</button>
+            ) : (
+              <div className="install-hint">Use browser menu</div>
+            )}
+            <button className="install-close-btn" onClick={() => setShowInstallSuggestion(false)} aria-label="Close">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+        )}
 
         <div className="login-logo">
           <div className="login-logo-icon">
