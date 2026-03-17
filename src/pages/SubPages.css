@@ -1924,9 +1924,10 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(10, 11, 14, 0.22) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
+  background: rgba(10, 11, 14, 0.2) !important;
+  backdrop-filter: blur(14px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(14px) saturate(180%) !important;
+  transform: translateZ(0);
   pointer-events: auto;
 }
 
@@ -2988,13 +2989,14 @@
 
   .apple-modal-overlay {
     padding: 16px;
-    background: rgba(0, 0, 0, 0.15) !important;
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
+    background: rgba(0, 0, 0, 0.35) !important;
+    backdrop-filter: blur(10px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(10px) saturate(160%) !important;
+    transform: translateZ(0);
   }
 
   [data-theme="dark"] .apple-modal-overlay {
-    background: rgba(0, 0, 0, 0.35) !important;
+    background: rgba(0, 0, 0, 0.55) !important;
   }
 
   .apple-modal-card {
