@@ -220,33 +220,24 @@ export default function Dashboard({ children }) {
   }, [activePath, isMobile]);
 
   useEffect(() => {
+    if (isMobile) {
+      window.scrollTo(0, 1);
+    }
+  }, [isMobile, activePath]);
+
+  useEffect(() => {
     const el = mainContentRef.current;
     if (el) {
       el.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     }
-    
-    if (isMobile) {
-      const performImmersion = () => {
-        if (!profileOpen && !mobileMoreOpen) {
-          window.scrollTo(0, 1);
-        }
-      };
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [activePath]);
 
-      // Path change triggers
-      performImmersion();
-      const timers = [10, 100, 300, 600].map(ms => setTimeout(performImmersion, ms));
-
-      const shouldLockScroll = profileOpen || mobileMoreOpen;
-      document.body.classList.toggle('mobile-sheet-open', shouldLockScroll);
-      
-      return () => {
-        timers.forEach(clearTimeout);
-        document.body.classList.remove('mobile-sheet-open');
-      };
-    } else {
-      window.scrollTo(0, 0);
-    }
-  }, [activePath, isMobile, profileOpen, mobileMoreOpen]);
+  useEffect(() => {
+    const shouldLockScroll = isMobile && (profileOpen || mobileMoreOpen);
+    document.body.classList.toggle('mobile-sheet-open', shouldLockScroll);
+    return () => document.body.classList.remove('mobile-sheet-open');
+  }, [isMobile, profileOpen, mobileMoreOpen]);
 
   const handleLogout = () => {
     localStorage.clear();

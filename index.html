@@ -1,12 +1,5 @@
 <!doctype html>
-<html lang="en">
-<script>
-  try {
-    const theme = localStorage.getItem('academia_theme') || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-    document.documentElement.setAttribute('data-theme', theme);
-    document.documentElement.style.background = theme === 'dark' ? '#000000' : '#F8F8FA';
-  } catch(e) {}
-</script>
+<html lang="en" data-theme="dark" style="background: #000000;">
 
 <head>
   <meta charset="UTF-8" />

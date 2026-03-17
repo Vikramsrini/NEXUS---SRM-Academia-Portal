@@ -148,8 +148,9 @@ export default function AttendancePage() {
       const lower = title.toLowerCase();
       // Exclude generic types, faculty totals, and common marks headers
       if (['theory', 'practical', 'lab', 'clinical'].includes(lower)) return false;
-      if (lower.startsWith('ft-') || lower.includes('total')) return false;
+      if (lower.startsWith('ft-') || lower.includes('total') || lower.includes('faculty')) return false;
       if (lower.includes('llj-') || lower.startsWith('ct-') || lower.startsWith('cat-')) return false;
+      if (lower.includes('llj') && lower.includes('/')) return false;
       
       return true;
     });

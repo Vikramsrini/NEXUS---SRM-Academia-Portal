@@ -203,13 +203,6 @@ body {
   transition: background var(--transition-base), color var(--transition-base);
 }
 
-@media (max-width: 768px) {
-  body {
-    /* Force 1px overflow to enable the immersive scroll hack */
-    min-height: calc(100dvh + 1.5px);
-  }
-}
-
 body.mobile-sheet-open {
   overflow: hidden;
 }

@@ -102,8 +102,19 @@ export default function MarksPage() {
     return map;
   }, [attendance]);
 
+  const FILTERED_MARKS = useMemo(() => {
+    return marks.filter((m) => {
+      const title = String(m.course || '').trim().toLowerCase();
+      if (!title || title.length <= 2) return false;
+      if (title.includes('llj-') || title.startsWith('ct-') || title.startsWith('cat-')) return false;
+      if (title.includes('llj') && title.includes('/')) return false;
+      if (title.startsWith('ft-') || title.includes('total') || title.includes('faculty')) return false;
+      return true;
+    });
+  }, [marks]);
+
   const marksInsights = useMemo(() => {
-    if (!marks.length) return null;
+    if (!FILTERED_MARKS.length) return null;
 
     let totalPct = 0;
     let exams = 0;
@@ -114,7 +125,7 @@ export default function MarksPage() {
     let lowCode = '—';
     let lowPct = 101;
 
-    marks.forEach((m) => {
+    FILTERED_MARKS.forEach((m) => {
       const pct = m.total?.maxMark > 0 ? (m.total.obtained / m.total.maxMark) * 100 : 0;
       totalPct += pct;
       exams += m.marks?.length || 0;
@@ -133,9 +144,9 @@ export default function MarksPage() {
     });
 
     return {
-      average: (totalPct / marks.length).toFixed(1),
+      average: (totalPct / FILTERED_MARKS.length).toFixed(1),
       exams,
-      courses: marks.length,
+      courses: FILTERED_MARKS.length,
       topCourse,
       topCode,
       topPct: topPct.toFixed(0),
@@ -143,7 +154,7 @@ export default function MarksPage() {
       lowCode,
       lowPct: lowPct.toFixed(0),
     };
-  }, [marks, courseNameByCode]);
+  }, [FILTERED_MARKS, courseNameByCode]);
 
   return (
     <div className="apple-page-container">
@@ -174,9 +185,9 @@ export default function MarksPage() {
         </section>
       )}
 
-      {marks.length > 0 ? (
+      {FILTERED_MARKS.length > 0 ? (
         <div className="marks-grid-apple stagger-children">
-          {marks.map((m, i) => {
+          {FILTERED_MARKS.map((m, i) => {
             const displayName = getDisplayCourseName(m, courseNameByCode);
             const pctValue = m.total?.maxMark > 0 ? (m.total.obtained / m.total.maxMark) * 100 : 0;
             const pct = Math.max(0, Math.min(100, pctValue));
