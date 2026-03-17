@@ -3,12 +3,48 @@
 // Handles login, password verification, captcha, session management
 // ═══════════════════════════════════════════════════════════════════════
 
-import axios from 'axios';
-import dotenv from 'dotenv';
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
 dotenv.config();
 
-const SRM_CSRF_TOKEN = process.env.SRM_CSRF_TOKEN || '';
-const SRM_SESSION_COOKIES = process.env.SRM_SESSION_COOKIES || '';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const ENV_PATH = path.resolve(__dirname, '../.env');
+
+/**
+ * Persists updated session details back to the .env file.
+ */
+async function updateEnvFile(cookies, csrfToken) {
+  try {
+    let content = await fs.readFile(ENV_PATH, 'utf8');
+    
+    // Update or add SRM_CSRF_TOKEN
+    if (content.includes('SRM_CSRF_TOKEN=')) {
+      content = content.replace(/^SRM_CSRF_TOKEN=.*$/m, `SRM_CSRF_TOKEN=${csrfToken}`);
+    } else {
+      content += `\nSRM_CSRF_TOKEN=${csrfToken}`;
+    }
+
+    // Update or add SRM_SESSION_COOKIES
+    if (content.includes('SRM_SESSION_COOKIES=')) {
+      content = content.replace(/^SRM_SESSION_COOKIES=.*$/m, `SRM_SESSION_COOKIES=${cookies}`);
+    } else {
+      content += `\nSRM_SESSION_COOKIES=${cookies}`;
+    }
+
+    await fs.writeFile(ENV_PATH, content, 'utf8');
+    
+    // Also update process.env for the current session
+    process.env.SRM_CSRF_TOKEN = csrfToken;
+    process.env.SRM_SESSION_COOKIES = cookies;
+
+    console.log('[SRM] .env file updated with fresh session tokens');
+  } catch (err) {
+    console.error('[SRM] Failed to update .env file:', err.message);
+  }
+}
 
 const SRM_LOGIN_HEADERS = {
   'accept': '*/*',
@@ -42,6 +78,10 @@ export async function getFreshSrmSession() {
   const csrfToken = iamcsrMatch ? `iamcsrcoo=${iamcsrMatch[1]}` : SRM_CSRF_TOKEN;
 
   console.log('[SRM] Fresh session cookies obtained, CSRF:', csrfToken.substring(0, 30) + '...');
+  
+  // Persist to .env automatically
+  await updateEnvFile(cookieStr, csrfToken);
+
   return { cookies: cookieStr, csrfToken };
 }
 
@@ -82,8 +122,8 @@ export async function srmVerifyUser(username) {
 export async function srmVerifyPassword(digest, identifier, password, session) {
   const url = `https://academia.srmist.edu.in/accounts/p/40-10002227248/signin/v2/primary/${encodeURIComponent(identifier)}/password?digest=${digest}&cli_time=${Date.now()}&servicename=ZohoCreator&service_language=en&serviceurl=https%3A%2F%2Facademia.srmist.edu.in%2Fportal%2Facademia-academic-services%2FredirectFromLogin`;
 
-  const loginCookies = session?.cookies || SRM_SESSION_COOKIES;
-  const loginCsrf = session?.csrfToken || SRM_CSRF_TOKEN;
+  const loginCookies = session?.cookies || process.env.SRM_SESSION_COOKIES || '';
+  const loginCsrf = session?.csrfToken || process.env.SRM_CSRF_TOKEN || '';
 
   const response = await fetch(url, {
     method: 'POST',
@@ -208,7 +248,7 @@ export async function srmGetCaptchaImage(captchaDigest) {
         'sec-fetch-dest': 'empty',
         'sec-fetch-mode': 'cors',
         'sec-fetch-site': 'same-origin',
-        'cookie': SRM_SESSION_COOKIES,
+        'cookie': process.env.SRM_SESSION_COOKIES || '',
       },
     }
   );
@@ -227,8 +267,8 @@ export async function srmVerifyWithCaptcha(identifier, digest, captcha, cdigest,
     headers: {
       ...SRM_LOGIN_HEADERS,
       'content-type': 'application/x-www-form-urlencoded;charset=UTF-8',
-      'x-zcsrf-token': SRM_CSRF_TOKEN,
-      'cookie': SRM_SESSION_COOKIES,
+      'x-zcsrf-token': process.env.SRM_CSRF_TOKEN || '',
+      'cookie': process.env.SRM_SESSION_COOKIES || '',
     },
     body: JSON.stringify({ passwordauth: { password } }),
   });
