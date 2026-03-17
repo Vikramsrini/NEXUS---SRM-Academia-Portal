@@ -1311,319 +1311,217 @@
    9. TIMETABLE
    ══════════════════════════════════════════════════════════════════════ */
 
-.timetable-apple-stack {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
+/* ══════════════════════════════════════════════════════════════════════
+   9. TIMETABLE V2 (PORTALX STYLE)
+   ══════════════════════════════════════════════════════════════════════ */
+
+.timetable-v2 {
+  padding-bottom: 40px;
 }
 
-.timetable-section {
-  display: flex;
-  flex-direction: column;
-  border-radius: var(--radius-lg);
-  background: var(--surface-primary);
-  border: 1px solid var(--border-primary);
-  box-shadow: var(--shadow-card);
-  overflow: hidden;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-[data-theme="dark"] .timetable-section {
-  backdrop-filter: var(--blur-md);
-  -webkit-backdrop-filter: var(--blur-md);
-}
-
-.timetable-section:hover {
-  box-shadow: var(--shadow-card-hover);
-}
-
-/* -- Section Header -- */
-.section-header {
+.title-with-icon {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border-secondary);
 }
 
-.day-pill {
-  display: inline-flex;
+.page-icon-small {
+  display: flex;
   align-items: center;
   justify-content: center;
-  padding: 5px 14px;
-  border-radius: var(--radius-full);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+/* -- Day Selector -- */
+.day-selector-scroller {
+  display: flex;
+  gap: 10px;
+  padding: 16px 4px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.day-selector-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+.day-tab {
+  padding: 8px 18px;
+  border-radius: 12px;
+  background: var(--surface-secondary);
+  border: 1px solid var(--border-secondary);
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.day-tab.active {
   background: var(--accent);
+  border-color: var(--accent);
   color: #fff;
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 0.02em;
+  box-shadow: 0 4px 12px var(--accent-glow);
 }
 
-.section-header .day-name {
-  font-size: 0.85rem;
-  font-weight: 600;
+.day-tab:hover:not(.active) {
+  background: var(--surface-tertiary);
+  border-color: var(--border-primary);
+}
+
+/* -- Grouping -- */
+.timetable-day-group {
+  margin-bottom: 32px;
+}
+
+.day-group-title {
+  font-size: 0.95rem;
+  font-weight: 700;
   color: var(--text-primary);
+  margin: 0 0 16px 4px;
 }
 
-.section-header .count {
-  margin-left: auto;
-  font-size: 0.75rem;
+.classes-grid-v2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+@media (min-width: 1024px) {
+  .classes-grid-v2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* -- Class Card -- */
+.class-card-v2 {
+  background: var(--surface-primary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  padding: 18px 20px;
+  transition: all var(--transition-base);
+  box-shadow: var(--shadow-sm);
+}
+
+[data-theme="dark"] .class-card-v2 {
+  background: linear-gradient(135deg, rgba(25, 27, 32, 0.8) 0%, rgba(15, 17, 21, 0.6) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.class-card-v2:hover {
+  transform: translateY(-2px);
+  border-color: var(--border-active);
+  box-shadow: var(--shadow-md);
+}
+
+.card-main-info {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.left-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.course-name {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.course-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 0.72rem;
   font-weight: 600;
   color: var(--text-tertiary);
 }
 
-/* -- Classes List -- */
-.classes-list {
-  display: flex;
-  flex-direction: column;
-}
-
-.class-item-apple {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-  padding: 14px 20px;
-  border-bottom: 1px solid var(--border-secondary);
-  transition: background var(--transition-fast);
-}
-
-.class-item-apple:last-child {
-  border-bottom: none;
-}
-
-.class-item-apple:hover {
-  background: var(--surface-secondary);
-}
-
-/* -- Time Badge -- */
-.time-badge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 12px;
-  border-radius: var(--radius-full);
-  background: var(--accent-subtle);
-  color: var(--accent);
-  font-size: 0.72rem;
-  font-weight: 700;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-/* -- Class Main -- */
-.class-main {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  flex: 1;
-  min-width: 0;
-}
-
-.class-main .top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.class-main .top h3 {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  line-height: 1.3;
-  flex: 1;
-  min-width: 0;
-}
-
-.class-main .bottom {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-}
-
-.class-main .bottom .code {
-  font-weight: 600;
-}
-
-.class-main .bottom .sep {
+.course-meta .dot {
   opacity: 0.4;
 }
 
-.class-main .bottom .room-info {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--text-secondary);
-}
-
-/* -- Type Tag -- */
-.type-tag {
+.room-pill {
   display: inline-flex;
   align-items: center;
-  padding: 3px 10px;
-  border-radius: var(--radius-full);
-  font-size: 0.65rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: var(--surface-secondary);
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  font-weight: 600;
+  align-self: flex-start;
+  margin-top: 2px;
+}
+
+.right-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
   flex-shrink: 0;
 }
 
-.type-tag.theory {
-  background: var(--badge-blue-bg);
-  color: var(--badge-blue-text);
-  border: 1px solid var(--badge-blue-border);
-}
-
-.type-tag.practical,
-.type-tag.lab {
-  background: var(--badge-green-bg);
-  color: var(--badge-green-text);
-  border: 1px solid var(--badge-green-border);
-}
-
-/* -- Type Badge (attendance cards) -- */
-.type-badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 8px;
-  border-radius: var(--radius-full);
-  font-size: 0.65rem;
+.time-range {
+  font-size: 0.75rem;
   font-weight: 700;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.type-tag-v2 {
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 0.65rem;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
 
-.type-badge.theory {
+.type-tag-v2.theory {
   background: var(--badge-blue-bg);
   color: var(--badge-blue-text);
   border: 1px solid var(--badge-blue-border);
 }
 
-.type-badge.practical,
-.type-badge.lab {
+.type-tag-v2.practical,
+.type-tag-v2.lab {
   background: var(--badge-green-bg);
   color: var(--badge-green-text);
   border: 1px solid var(--badge-green-border);
 }
 
 @media (max-width: 768px) {
-  .timetable-apple-stack {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .timetable-section {
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-primary);
-  }
-
-  .timetable-section .section-header {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 14px 16px;
-    background: var(--surface-secondary);
-  }
-
-  .timetable-section .day-pill {
-    width: auto;
-    padding: 4px 12px;
-    font-size: 0.72rem;
-    border-radius: var(--radius-full);
-  }
-
-  .timetable-section .section-header .count {
-    font-size: 0.7rem;
-    font-weight: 600;
-  }
-
-  .timetable-section .class-item-apple {
-    display: grid;
-    grid-template-columns: 75px 1fr;
-    align-items: flex-start;
-    gap: 14px;
-    padding: 14px 16px;
-    border-bottom: 1px solid var(--border-secondary);
-    text-align: left;
-  }
-
-  .timetable-section .time-badge {
-    width: 100%;
-    justify-content: flex-start;
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    font-size: 0.68rem;
-    padding: 0;
-    font-weight: 600;
-    white-space: pre-wrap;
-    line-height: 1.3;
-  }
-
-  .timetable-section .time-badge svg {
-    display: none;
-  }
-
-  .timetable-section .class-main {
-    gap: 6px;
-  }
-
-  .timetable-section .class-main .top {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-    text-align: left;
-  }
-
-  .timetable-section .class-main .top h3 {
-    font-size: 0.88rem;
-    font-weight: 700;
-    line-height: 1.3;
-    line-clamp: 2;
-    -webkit-line-clamp: 2;
-    color: var(--text-primary);
-  }
-
-  .timetable-section .class-main .bottom {
-    justify-content: flex-start;
-    font-size: 0.72rem;
-    gap: 8px;
-    margin-top: 0;
-    color: var(--text-tertiary);
-  }
-
-  .timetable-section .class-main .bottom .code {
-    display: inline-block;
-    font-weight: 600;
+  .class-card-v2 {
+    padding: 16px;
   }
   
-  .timetable-section .class-main .bottom .sep {
-    display: inline-block;
-    opacity: 0.3;
+  .card-main-info {
+    flex-direction: row; 
   }
 
-  .timetable-section .class-main .bottom .room-info {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .timetable-section .type-tag {
-    order: -1;
-    font-size: 0.6rem;
-    padding: 2px 8px;
-    align-self: flex-start;
-    margin-bottom: 0;
+  .course-name {
+    font-size: 0.88rem;
   }
 }
+
 
 
 /* ══════════════════════════════════════════════════════════════════════

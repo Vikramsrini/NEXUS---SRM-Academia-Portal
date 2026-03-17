@@ -1,10 +1,11 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import './SubPages.css';
 
 const Icons = {
   export: <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
   time: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
   room: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+  person: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
 };
 
 function getStudentData() {
@@ -118,6 +119,7 @@ function downloadTimetableImage(timetable, studentName) {
 export default function TimetablePage() {
   const student = getStudentData();
   const timetable = useMemo(() => student.timetable || [], [student.timetable]);
+  const [activeDay, setActiveDay] = useState('all');
 
   const grouped = useMemo(() => {
     const map = {};
@@ -126,31 +128,34 @@ export default function TimetablePage() {
       if (!map[key]) map[key] = { dayOrder: cls.dayOrder, day: cls.day, classes: [] };
       map[key].classes.push(cls);
     });
-    return Object.values(map).sort((a, b) => {
+    const sorted = Object.values(map).sort((a, b) => {
       const an = parseInt(a.dayOrder?.replace('DO', '') || '99');
       const bn = parseInt(b.dayOrder?.replace('DO', '') || '99');
       return an - bn;
     });
+
+    if (activeDay === 'all') return sorted;
+    return sorted.filter(g => {
+      const num = g.dayOrder?.replace('DO', '');
+      return num === activeDay;
+    });
+  }, [timetable, activeDay]);
+
+  const dayTabs = useMemo(() => {
+    const orders = Array.from(new Set(timetable.map(cls => cls.dayOrder?.replace('DO', '')).filter(Boolean)))
+      .sort((a, b) => parseInt(a) - parseInt(b));
+    return ['all', ...orders];
   }, [timetable]);
 
-  const timetableInsights = useMemo(() => {
-    if (!timetable.length) return null;
-
-    const labCount = timetable.filter(cls => normalizeSlot(cls.slotType).label === 'Lab').length;
-
-    return {
-      classes: timetable.length,
-      dayOrders: grouped.length,
-      labCount,
-    };
-  }, [grouped.length, timetable]);
-
   return (
-    <div className="apple-page-container">
+    <div className="apple-page-container timetable-v2">
       <div className="subpage-header">
         <div className="subpage-title-group">
-          <h1 className="subpage-title">Timetable</h1>
-          <p className="subpage-desc">Your weekly class schedule organized by day order.</p>
+          <div className="title-with-icon">
+             <div className="page-icon-small">{Icons.time}</div>
+             <h1 className="subpage-title">Class Schedule</h1>
+          </div>
+          <p className="subpage-desc">Your weekly course routine organized by day order.</p>
         </div>
         {timetable.length > 0 && (
           <button className="apple-btn-secondary" onClick={() => downloadTimetableImage(timetable, student.name)}>
@@ -159,46 +164,60 @@ export default function TimetablePage() {
         )}
       </div>
 
+      <div className="day-selector-scroller">
+        {dayTabs.map(day => (
+          <button 
+            key={day}
+            className={`day-tab ${activeDay === day ? 'active' : ''}`}
+            onClick={() => setActiveDay(day)}
+          >
+            {day === 'all' ? 'All Days' : day}
+          </button>
+        ))}
+      </div>
+
 
       {grouped.length > 0 ? (
         <div className="timetable-apple-stack stagger-children">
           {grouped.map((group, i) => (
-            <section key={i} className="timetable-section">
-              <header className="section-header">
-                 <div className="day-pill">
-                    {group.dayOrder?.startsWith('DO') ? `Day Order ${group.dayOrder.replace('DO', '')}` : group.dayOrder}
-                 </div>
-                 <span className="count">{group.classes.length} classes</span>
-              </header>
-
-              <div className="classes-list">
-                {group.classes.map((cls, j) => {
-                   const norm = normalizeSlot(cls.slotType);
-                   return (
-                     <div key={j} className="class-item-apple">
-                        <div className="time-badge">
-                           {Icons.time}
-                           <span>{cls.time}</span>
-                        </div>
-                        <div className="class-main">
-                           <div className="top">
-                              <h3>{cls.subject}</h3>
-                              <span className={`type-tag ${norm.css}`}>{norm.label}</span>
-                           </div>
-                           <div className="bottom">
-                              <span className="code">{cls.courseCode.startsWith('21') ? cls.courseCode : `21${cls.courseCode}`}</span>
-                              <span className="sep">•</span>
-                              <div className="room-info">
+            <div key={i} className="timetable-day-group">
+               <h2 className="day-group-title">
+                  {group.dayOrder?.replace('DO', 'Day Order ')}
+               </h2>
+               
+               <div className="classes-grid-v2">
+                 {group.classes.map((cls, j) => {
+                    const norm = normalizeSlot(cls.slotType);
+                    return (
+                      <div key={j} className="class-card-v2">
+                        <div className="card-main-info">
+                           <div className="left-content">
+                              <h3 className="course-name">{cls.subject}</h3>
+                              <div className="course-meta">
+                                 <span className="code">{cls.courseCode.startsWith('21') ? cls.courseCode : `21${cls.courseCode}`}</span>
+                                 {cls.faculty && (
+                                   <>
+                                     <span className="dot">•</span>
+                                     <span className="faculty">{cls.faculty}</span>
+                                   </>
+                                 )}
+                              </div>
+                              <div className="room-pill">
                                  {Icons.room}
                                  <span>{cls.room || 'N/A'}</span>
                               </div>
                            </div>
+                           
+                           <div className="right-content">
+                              <div className="time-range">{cls.time}</div>
+                              <span className={`type-tag-v2 ${norm.css}`}>{norm.label}</span>
+                           </div>
                         </div>
-                     </div>
-                   );
-                })}
-              </div>
-            </section>
+                      </div>
+                    );
+                 })}
+               </div>
+            </div>
           ))}
         </div>
       ) : (
@@ -206,8 +225,8 @@ export default function TimetablePage() {
           <div className="icon">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </div>
-          <h3>Schedule not synced</h3>
-          <p>Sign in to view your personalized timetable.</p>
+          <h3>No records found</h3>
+          <p>Sync your data to view your personalized schedule.</p>
         </div>
       )}
     </div>

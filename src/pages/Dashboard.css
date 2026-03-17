@@ -296,7 +296,7 @@
   position: absolute;
   top: 52px;
   right: 0;
-  width: 290px;
+  width: 320px;
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(60px) saturate(210%);
   -webkit-backdrop-filter: blur(60px) saturate(210%);
@@ -343,22 +343,24 @@
 }
 
 .user-avatar-large {
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
   border-radius: var(--radius-full);
   background: var(--accent);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 800;
   color: white;
+  box-shadow: 0 8px 24px var(--accent-glow);
 }
 
 .dropdown-user-info h3 {
-  font-size: 15px;
-  font-weight: 700;
+  font-size: 18px;
+  font-weight: 800;
   color: var(--text-primary);
+  letter-spacing: -0.02em;
 }
 
 .dropdown-user-info p {
@@ -369,13 +371,15 @@
 .dropdown-divider {
   height: 1px;
   background: var(--border-secondary);
-  margin: 16px 0;
+  margin: 20px -24px;
+  opacity: 0.6;
 }
 
 .dropdown-reg {
   font-size: 12px;
-  color: var(--text-secondary);
-  font-weight: 500;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  letter-spacing: 0.02em;
 }
 
 .dropdown-details {
@@ -386,40 +390,51 @@
 
 .dropdown-detail-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: 20px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-secondary);
+}
+
+.dropdown-detail-row:last-child {
+  border-bottom: none;
 }
 
 .dropdown-detail-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-tertiary);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   flex-shrink: 0;
+  margin-top: 3px;
 }
 
 .dropdown-detail-value {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
   text-align: right;
+  line-height: 1.5;
+  word-break: break-word;
+  max-width: 180px;
 }
 
 .logout-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 10px;
   width: 100%;
-  padding: 10px;
-  border-radius: var(--radius-sm);
+  padding: 12px;
+  border-radius: var(--radius-md);
   color: var(--badge-red-text);
   background: var(--badge-red-bg);
-  font-weight: 600;
-  font-size: 13px;
+  font-weight: 700;
+  font-size: 14px;
   transition: all var(--transition-fast);
+  margin-top: 4px;
 }
 
 .logout-button:hover {
@@ -1409,6 +1424,30 @@
   .profile-dropdown-card.show {
     pointer-events: auto;
     transform: translate3d(0, 0, 0);
+  }
+
+  .profile-dropdown-card .dropdown-details {
+    margin-top: 10px;
+    gap: 0;
+  }
+
+  .profile-dropdown-card .dropdown-detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 16px 0;
+  }
+
+  .profile-dropdown-card .dropdown-detail-value {
+    text-align: left;
+    font-size: 14px;
+    max-width: 100%;
+    color: var(--text-primary);
+  }
+
+  .profile-dropdown-card .dropdown-detail-label {
+    margin-top: 0;
+    color: var(--text-tertiary);
   }
 
   .content-viewport {
