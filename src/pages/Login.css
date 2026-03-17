@@ -166,6 +166,43 @@
   cursor: not-allowed;
 }
 
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-input-wrapper .form-input {
+  width: 100%;
+  padding-right: 46px; /* Space for the eye icon */
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 12px;
+  height: 32px;
+  width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  border-radius: 8px;
+  transition: all var(--transition-fast);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.password-toggle-btn:hover {
+  color: var(--text-primary);
+  background: var(--surface-secondary);
+}
+
+.password-toggle-btn:active {
+  transform: scale(0.92);
+}
+
 /* ── Submit Button ────────────────────────────────────────────────── */
 .login-btn {
   display: inline-flex;
