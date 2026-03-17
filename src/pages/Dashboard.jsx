@@ -220,6 +220,12 @@ export default function Dashboard({ children }) {
   }, [activePath, isMobile]);
 
   useEffect(() => {
+    if (isMobile) {
+      window.scrollTo(0, 1);
+    }
+  }, [isMobile, activePath]);
+
+  useEffect(() => {
     const el = mainContentRef.current;
     if (el) {
       el.scrollTo({ top: 0, left: 0, behavior: 'auto' });
