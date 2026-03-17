@@ -380,9 +380,9 @@ export default function AttendancePage() {
             <div className="apple-modal-body">
               <p className="primary-text">This tool allows manual attendance editing and OD/ML predictions for your local tracking.</p>
               <ul className="apple-bullet-list">
-                <li>Manual adjustments <strong>do not sync</strong> back to the portal.</li>
-                <li>OD/ML values are <strong>estimated</strong> based on your timetable.</li>
-                <li>Always cross-check with official university records.</li>
+                <li><span>Manual adjustments <strong>do not sync</strong> back to the portal.</span></li>
+                <li><span>OD/ML values are <strong>estimated</strong> based on your timetable.</span></li>
+                <li><span>Always cross-check with official university records.</span></li>
               </ul>
             </div>
             <footer className="apple-modal-footer">
