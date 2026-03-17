@@ -218,6 +218,16 @@ export default function SkipProPage() {
     });
   }, [attendance]);
 
+  const ATTENDANCE_GROUPS = useMemo(() => {
+    const theory = FILTERED_ATTENDANCE.filter(a => normalizeSlot(resolveType(a)).label === 'Theory');
+    const lab = FILTERED_ATTENDANCE.filter(a => normalizeSlot(resolveType(a)).label === 'Lab');
+    
+    const groups = [];
+    if (theory.length > 0) groups.push({ id: 'theory', label: 'Theory Classes', items: theory });
+    if (lab.length > 0) groups.push({ id: 'lab', label: 'Lab Classes', items: lab });
+    return groups;
+  }, [FILTERED_ATTENDANCE, timetableMapping, resolveType]);
+
   const stats = useMemo(() => {
     let safe = 0, caution = 0, risk = 0;
     FILTERED_ATTENDANCE.forEach(a => {
@@ -308,53 +318,60 @@ export default function SkipProPage() {
         </div>
       </div>
 
-      {FILTERED_ATTENDANCE.length > 0 ? (
-        <div className="skippro-grid-apple stagger-children">
-          {FILTERED_ATTENDANCE.map((a, i) => {
-            const type = resolveType(a);
-            const courseKey = buildCourseTypeKey(a.courseCode, type);
-            const adj = manualAdjs[courseKey] || {}, safeOdAdj = parseInt(adj.odAdj) || 0;
-            const C = parseInt(a.hoursConducted) || 0, originalA = parseInt(a.hoursAbsent) || 0;
-            const odBonus = getOdBonus(a.courseCode, type);
-            let finalAppliedOd = Math.min(Math.max(0, Math.min(odBonus, originalA) + safeOdAdj), originalA);
-            const A = Math.max(0, originalA - finalAppliedOd), P = Math.max(0, C - A);
-            const pct = C === 0 ? 100 : (P / C) * 100;
-            const futureClasses = getFutureClassesCount(a.courseCode, type);
-            const st = getAttendanceStatus(C, A, targetPct, futureClasses);
-            const norm = normalizeSlot(type);
+      {ATTENDANCE_GROUPS.length > 0 ? (
+        <div className="attendance-page-content">
+          {ATTENDANCE_GROUPS.map(group => (
+            <div key={group.id} className="attendance-group-container">
+              <h2 className="attendance-group-title">{group.label}</h2>
+              <div className="skippro-grid-apple stagger-children">
+                {group.items.map((a, i) => {
+                  const type = resolveType(a);
+                  const courseKey = buildCourseTypeKey(a.courseCode, type);
+                  const adj = manualAdjs[courseKey] || {}, safeOdAdj = parseInt(adj.odAdj) || 0;
+                  const C = parseInt(a.hoursConducted) || 0, originalA = parseInt(a.hoursAbsent) || 0;
+                  const odBonus = getOdBonus(a.courseCode, type);
+                  let finalAppliedOd = Math.min(Math.max(0, Math.min(odBonus, originalA) + safeOdAdj), originalA);
+                  const A = Math.max(0, originalA - finalAppliedOd), P = Math.max(0, C - A);
+                  const pct = C === 0 ? 100 : (P / C) * 100;
+                  const futureClasses = getFutureClassesCount(a.courseCode, type);
+                  const st = getAttendanceStatus(C, A, targetPct, futureClasses);
+                  const norm = normalizeSlot(type);
 
-            return (
-              <div key={i} className={`skippro-card-apple ${st.type}`}>
-                <div className="card-top">
-                  <div className="course-info">
-                    <span className="code">{a.courseCode.startsWith('21') ? a.courseCode : `21${a.courseCode}`}</span>
-                    <h3>{a.courseTitle}</h3>
-                    <div className="meta">
-                       {Icons.book} <span>{norm.label}</span>
+                  return (
+                    <div key={i} className={`skippro-card-apple ${st.type}`}>
+                      <div className="card-top">
+                        <div className="course-info">
+                          <span className="code">{a.courseCode.startsWith('21') ? a.courseCode : `21${a.courseCode}`}</span>
+                          <h3>{a.courseTitle}</h3>
+                          <div className="meta">
+                            {Icons.book} <span>{norm.label}</span>
+                          </div>
+                        </div>
+                        <div className={`status-badge ${st.type}`}>
+                          {st.type === 'green' ? 'SAFE TO SKIP' : st.type === 'amber' ? 'RISK' : 'DANGER'}
+                        </div>
+                      </div>
+
+                      <div className="card-main">
+                        <div className="stat-row">
+                          <span className="lbl">Current</span>
+                          <span className="val">{pct.toFixed(1)}%</span>
+                        </div>
+                        <div className="stat-row highlight">
+                          <span className="lbl">{st.text}</span>
+                          <span className="val big">{st.val}</span>
+                        </div>
+                      </div>
+
+                      <div className="card-footer">
+                        <span>{futureClasses} classes predicted left</span>
+                      </div>
                     </div>
-                  </div>
-                  <div className={`status-badge ${st.type}`}>
-                    {st.type === 'green' ? 'SAFE TO SKIP' : st.type === 'amber' ? 'RISK' : 'DANGER'}
-                  </div>
-                </div>
-
-                <div className="card-main">
-                  <div className="stat-row">
-                     <span className="lbl">Current</span>
-                     <span className="val">{pct.toFixed(1)}%</span>
-                  </div>
-                  <div className="stat-row highlight">
-                     <span className="lbl">{st.text}</span>
-                     <span className="val big">{st.val}</span>
-                  </div>
-                </div>
-
-                <div className="card-footer">
-                   <span>{futureClasses} classes predicted left</span>
-                </div>
+                  );
+                })}
               </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       ) : (
         <div className="empty-state">
