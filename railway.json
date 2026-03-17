@@ -4,6 +4,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
+    "rootDirectory": "./server",
     "startCommand": "node index.js",
     "healthcheckPath": "/api/health",
     "restartPolicyType": "ON_FAILURE"
