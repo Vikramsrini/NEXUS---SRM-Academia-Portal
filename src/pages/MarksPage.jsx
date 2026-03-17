@@ -13,20 +13,30 @@ function normalizeCourseCode(value) {
   return String(value || '').toUpperCase().replace(/\s+/g, '').replace(/^21/, '');
 }
 
-const isSystemNoise = (str) => {
+const isSystemNoise = (str, isExam = false) => {
   if (!str) return false;
   const s = String(str).toLowerCase();
-  return (
+  
+  // Base noise common to both subjects and exams
+  const baseNoise = (
     s.includes('llj') || 
     s.includes('ft-') || 
     s.startsWith('ft') || 
     s.includes('fj-') || 
     s.includes('total') || 
     s.includes('faculty') ||
-    s.startsWith('ct-') || 
-    s.startsWith('cat-') ||
     s === 'theory' || s === 'practical' || s === 'lab' || s === 'clinical'
   );
+
+  if (baseNoise) return true;
+
+  // CT and CAT are only "noise" when they appear as course titles
+  // They are VALID when they appear as individual exam names
+  if (!isExam) {
+    if (s.startsWith('ct-') || s.startsWith('cat-')) return true;
+  }
+
+  return false;
 };
 
 function looksLikeCourseCode(value) {
@@ -215,7 +225,7 @@ export default function MarksPage() {
             const displayName = getDisplayCourseName(m, courseNameByCode);
             const pctValue = m.total?.maxMark > 0 ? (m.total.obtained / m.total.maxMark) * 100 : 0;
             const pct = Math.max(0, Math.min(100, pctValue));
-            const individualMarks = (m.marks || []).filter(exam => !isSystemNoise(exam.exam));
+            const individualMarks = (m.marks || []).filter(exam => !isSystemNoise(exam.exam, true));
             const trendChart = buildTrendChart(individualMarks);
             return (
               <div key={i} className="marks-card-apple">
