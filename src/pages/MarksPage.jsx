@@ -59,10 +59,13 @@ function buildTrendChart(exams) {
     return { x, y, v, label: labels[idx] };
   });
 
-  const toPath = (pts) => pts.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+  const toPath = (pts) => {
+    if (pts.length === 0) return '';
+    return pts.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
+  };
 
   const getSmoothPath = (pts) => {
-    if (pts.length < 2) return '';
+    if (pts.length < 2) return pts.length === 1 ? `M ${pts[0].x} ${pts[0].y}` : '';
     let d = `M ${pts[0].x} ${pts[0].y}`;
     for (let i = 0; i < pts.length - 1; i++) {
         const curr = pts[i];
@@ -73,12 +76,18 @@ function buildTrendChart(exams) {
     return d;
   };
 
-  const dashedPath = points.length >= 2 ? `M ${points[0].x} ${points[0].y} L ${points[1].x} ${points[1].y}` : '';
-  const mainPath = points.length > 2 ? getSmoothPath(points.slice(1)) : (points.length === 2 ? `M ${points[1].x} ${points[1].y} L ${points[1].x} ${points[1].y}` : '');
+  const dataPoints = points.slice(1); // Exclude the "Start" dummy point for the main line
+  const mainPath = getSmoothPath(dataPoints);
 
-  const fillPath = points.length > 1 
-    ? `${getSmoothPath(points.slice(1))} L ${points[points.length - 1].x} ${bottom} L ${points[1].x} ${bottom} Z`
-    : '';
+  let fillPath = '';
+  if (dataPoints.length >= 2) {
+    fillPath = `${mainPath} L ${dataPoints[dataPoints.length - 1].x} ${bottom} L ${dataPoints[0].x} ${bottom} Z`;
+  } else if (dataPoints.length === 1) {
+    // For single point, we don't really have a "trend" line or fill, just the point
+  }
+
+  // Dashed connector from "Start" to first real point
+  const dashedPath = `M ${points[0].x} ${points[0].y} L ${points[1].x} ${points[1].y}`;
 
   return { points, labels, dashedPath, mainPath, fillPath, bottom };
 }
@@ -214,29 +223,43 @@ export default function MarksPage() {
                       <svg className="marks-trend-svg" viewBox="0 0 100 56" preserveAspectRatio="none">
                         <defs>
                           <linearGradient id={`gradient-${i}`} x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.25" />
+                            <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.18" />
                             <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
                           </linearGradient>
+                          <filter id={`glow-${i}`}>
+                            <feGaussianBlur stdDeviation="0.4" result="blur" />
+                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                          </filter>
                         </defs>
+                        
+                        {/* Shorter Grid lines */}
                         {[0, 25, 50, 75, 100].map((v) => {
                           const y = 50 - (v / 100) * 40;
                           return (
                             <g key={`h-${v}`}>
-                              <line className="marks-grid-line" x1="0" y1={y} x2="100" y2={y} />
-                              <text className="marks-axis-label" x="1.2" y={y - 1.2}>{v}%</text>
+                              <line className="marks-grid-line" x1="0" y1={y} x2="100" y2={y} strokeDasharray="2,2" />
+                              <text className="marks-axis-label" x="0.5" y={y - 1.2}>{v}%</text>
                             </g>
                           );
                         })}
+
                         {trendChart.fillPath && (
                           <path className="marks-trend-fill" d={trendChart.fillPath} fill={`url(#gradient-${i})`} />
                         )}
+
                         {trendChart.dashedPath && <path className="marks-trend-line-dashed" d={trendChart.dashedPath} />}
-                        {trendChart.mainPath && <path className="marks-trend-line" d={trendChart.mainPath} />}
+                        {trendChart.mainPath && (
+                          <path 
+                            className="marks-trend-line" 
+                            d={trendChart.mainPath} 
+                            filter={`url(#glow-${i})`}
+                          />
+                        )}
+
                         {trendChart.points.map((p, idx) => (
                           idx > 0 && (
                             <g key={`pt-${idx}`}>
-                              <circle className="marks-trend-point-glow" cx={p.x} cy={p.y} r="2.5" fill="var(--accent)" opacity="0.2" />
-                              <circle className="marks-trend-point" cx={p.x} cy={p.y} r="1.6" />
+                              <circle className="marks-trend-point" cx={p.x} cy={p.y} r="1.2" fill="var(--accent)" />
                             </g>
                           )
                         ))}

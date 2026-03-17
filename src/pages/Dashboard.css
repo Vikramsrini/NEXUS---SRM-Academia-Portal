@@ -16,8 +16,8 @@
 .sidebar {
   width: var(--sidebar-width);
   background: var(--bg-sidebar);
-  backdrop-filter: blur(40px) saturate(210%);
-  -webkit-backdrop-filter: blur(40px) saturate(210%);
+  backdrop-filter: blur(32px) saturate(210%);
+  -webkit-backdrop-filter: blur(32px) saturate(210%);
   display: flex;
   flex-direction: column;
   position: fixed;
@@ -28,9 +28,10 @@
   z-index: 1100;
   transition: all var(--transition-base);
   border-radius: var(--radius-xl);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.4);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.06), inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+  border: 1px solid rgba(0, 0, 0, 0.04);
   overflow: hidden;
+  transform: translateZ(0); 
 }
 
 .dashboard-layout.sidebar-collapsed .sidebar {
@@ -1642,11 +1643,11 @@
     z-index: 2000;
     padding: 24px;
     border-radius: 32px;
-    background: rgba(255, 255, 255, 0.84);
-    backdrop-filter: blur(42px) saturate(220%);
-    -webkit-backdrop-filter: blur(42px) saturate(220%);
-    border: 1px solid rgba(221, 225, 232, 0.84);
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(40px) saturate(210%);
+    -webkit-backdrop-filter: blur(40px) saturate(210%);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
     transform: translate3d(-50%, -45%, 0) scale(0.92);
     opacity: 0;
     pointer-events: none;
