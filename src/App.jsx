@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
+import { Analytics } from '@vercel/analytics/react';
 import Dashboard from './pages/Dashboard';
 import AttendancePage from './pages/AttendancePage';
 import MarksPage from './pages/MarksPage';
@@ -21,6 +22,7 @@ function ProtectedRoute({ children }) {
 export default function App() {
   return (
     <BrowserRouter>
+      <Analytics />
       <Routes>
         {/* Login */}
         <Route path="/" element={<Login />} />
