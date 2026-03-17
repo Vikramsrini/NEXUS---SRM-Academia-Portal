@@ -66,11 +66,22 @@ export async function srmVerifyUser(username) {
     }
   );
   const data = response.data;
+
+  const authMessage = String(data.localized_message || data.message || '').toLowerCase();
+  const captchaRequired =
+    authMessage.includes('captcha') ||
+    authMessage.includes('hip required') ||
+    authMessage.includes('hip') ||
+    Boolean(data.cdigest);
+
   return {
     identity: data.lookup?.identifier,
     statusCode: data.status_code,
-    message: data.message,
+    message: data.localized_message || data.message,
     digest: data.lookup?.digest,
+    captcha: captchaRequired
+      ? { required: true, digest: data.cdigest }
+      : { required: false, digest: null },
     _session: session,
   };
 }
@@ -184,7 +195,9 @@ export async function srmVerifyPassword(digest, identifier, password, session) {
     authMessage.includes('captcha') ||
     authMessage.includes('hip required') ||
     authMessage.includes('hip') ||
-    Boolean(data.cdigest);
+    Boolean(data.cdigest) ||
+    (data.status_code === 401 && (authMessage.includes('verification') || authMessage.includes('security')));
+  
   return {
     isAuthenticated: false,
     statusCode: data.status_code,

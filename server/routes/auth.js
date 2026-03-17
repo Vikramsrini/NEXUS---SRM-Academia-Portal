@@ -225,7 +225,28 @@ router.post('/auth/login', async (req, res) => {
   try {
     sendStatus(sessionId, 'email', 'Verifying username...');
     const userResult = await srmVerifyUser(username);
-    if (!userResult.identity || !userResult.digest) {
+    
+    // Check if captcha is required during username check
+    if (!userResult.identity && userResult.captcha?.required) {
+      let captchaImage = null;
+      try {
+        const captchaData = await srmGetCaptchaImage(userResult.captcha.digest, userResult._session?.cookies);
+        captchaImage = captchaData?.image_bytes || null;
+      } catch (e) { console.error('Captcha fetch error (lookup):', e.message); }
+
+      return res.status(200).json({
+        requiresCaptcha: true,
+        captchaImage,
+        captchaDigest: userResult.captcha.digest,
+        digest: userResult.digest || '',
+        identifier: username,
+        sessionCookies: userResult._session?.cookies,
+        sessionCsrf: userResult._session?.csrfToken,
+        message: userResult.message || 'Security verification required',
+      });
+    }
+
+    if (!userResult.identity || (!userResult.digest && !userResult.captcha?.required)) {
       throw new Error(userResult.message || 'Username verification failed. Check your NetID.');
     }
 
@@ -234,10 +255,15 @@ router.post('/auth/login', async (req, res) => {
 
     if (!passResult.isAuthenticated) {
       if (passResult.captcha?.required) {
-        const captchaData = await srmGetCaptchaImage(passResult.captcha.digest, userResult._session?.cookies);
+        let captchaImage = null;
+        try {
+          const captchaData = await srmGetCaptchaImage(passResult.captcha.digest, userResult._session?.cookies);
+          captchaImage = captchaData?.image_bytes || null;
+        } catch (e) { console.error('Captcha fetch error (password):', e.message); }
+
         return res.status(200).json({
           requiresCaptcha: true,
-          captchaImage: captchaData?.image_bytes || null,
+          captchaImage,
           captchaDigest: passResult.captcha.digest,
           digest: userResult.digest,
           identifier: userResult.identity,
@@ -248,6 +274,7 @@ router.post('/auth/login', async (req, res) => {
       }
       throw new Error(passResult.message || 'Login failed. Check your credentials.');
     }
+
 
 
     const authCookie = passResult.cookies;
