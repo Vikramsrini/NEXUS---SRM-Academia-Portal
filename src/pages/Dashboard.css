@@ -1367,37 +1367,48 @@
 
   .profile-dropdown-card {
     position: fixed;
-    top: 50%;
-    left: 50%;
-    bottom: auto;
-    right: auto;
-    width: min(calc(100% - 40px), 400px);
-    max-height: 80vh;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: auto;
+    width: 100%;
+    max-width: none;
+    max-height: 85vh;
     overflow-y: auto;
-    border-radius: 32px;
-    padding: 24px;
+    border-radius: 36px 36px 0 0;
+    padding: 32px 24px calc(24px + env(safe-area-inset-bottom, 0px));
     z-index: 2000;
-    opacity: 0;
+    opacity: 1;
     pointer-events: none;
-    transform: translate3d(-50%, -45%, 0) scale(0.92);
-    transition: transform 400ms cubic-bezier(0.25, 1, 0.5, 1), opacity 300ms ease;
-    background: rgba(255, 255, 255, 0.96);
-    backdrop-filter: blur(40px) saturate(200%);
-    -webkit-backdrop-filter: blur(40px) saturate(200%);
-    border: 1px solid rgba(215, 219, 227, 0.92);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    transform: translate3d(0, 100%, 0);
+    transition: transform 550ms cubic-bezier(0.16, 1, 0.3, 1), opacity 300ms ease;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(45px) saturate(210%);
+    -webkit-backdrop-filter: blur(45px) saturate(210%);
+    border-top: 1px solid rgba(255, 255, 255, 0.45);
+    box-shadow: 0 -10px 45px rgba(0, 0, 0, 0.14);
     isolation: isolate;
   }
 
-  [data-theme="dark"] .profile-dropdown-card {
-    background: linear-gradient(180deg, rgba(8, 8, 11, 0.98) 0%, rgba(12, 12, 16, 0.95) 100%);
-    border-color: rgba(255, 255, 255, 0.1);
+  .profile-dropdown-card::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 5px;
+    border-radius: 99px;
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  [data-theme="dark"] .profile-dropdown-card::before {
+    background: rgba(255, 255, 255, 0.15);
   }
 
   .profile-dropdown-card.show {
-    opacity: 1;
     pointer-events: auto;
-    transform: translate3d(-50%, -50%, 0) scale(1);
+    transform: translate3d(0, 0, 0);
   }
 
   .content-viewport {
@@ -1635,35 +1646,53 @@
   .mobile-more-sheet {
     display: block;
     position: fixed;
-    top: 50%;
-    left: 50%;
-    bottom: auto;
-    right: auto;
-    width: min(calc(100% - 40px), 420px);
-    z-index: 2000;
-    padding: 24px;
-    border-radius: 32px;
-    background: rgba(255, 255, 255, 0.65);
-    backdrop-filter: blur(40px) saturate(210%);
-    -webkit-backdrop-filter: blur(40px) saturate(210%);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
-    transform: translate3d(-50%, -45%, 0) scale(0.92);
-    opacity: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: auto;
+    width: 100%;
+    max-width: none;
+    max-height: 85vh;
+    overflow-y: auto;
+    z-index: 2100;
+    padding: 32px 24px calc(32px + env(safe-area-inset-bottom, 0px));
+    border-radius: 40px 40px 0 0;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(45px) saturate(210%);
+    -webkit-backdrop-filter: blur(45px) saturate(210%);
+    border-top: 1px solid rgba(255, 255, 255, 0.45);
+    box-shadow: 0 -10px 45px rgba(0, 0, 0, 0.14);
+    transform: translate3d(0, 100%, 0);
+    opacity: 1;
     pointer-events: none;
-    transition: transform 400ms cubic-bezier(0.25, 1, 0.5, 1), opacity 300ms ease;
+    transition: transform 550ms cubic-bezier(0.16, 1, 0.3, 1);
     isolation: isolate;
   }
 
+  .mobile-more-sheet::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 42px;
+    height: 5px;
+    border-radius: 99px;
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  [data-theme="dark"] .mobile-more-sheet::before {
+    background: rgba(255, 255, 255, 0.15);
+  }
+
   [data-theme="dark"] .mobile-more-sheet {
-    background: linear-gradient(180deg, rgba(16, 18, 24, 0.84) 0%, rgba(11, 13, 18, 0.8) 100%);
+    background: rgba(16, 18, 24, 0.76);
     border-color: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 26px 64px rgba(0, 0, 0, 0.58), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    box-shadow: 0 -10px 45px rgba(0, 0, 0, 0.5);
   }
 
   .mobile-more-sheet.show {
-    transform: translate3d(-50%, -50%, 0) scale(1);
-    opacity: 1;
+    transform: translate3d(0, 0, 0);
     pointer-events: auto;
   }
 
