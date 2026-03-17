@@ -1513,62 +1513,59 @@
 
 @media (max-width: 768px) {
   .timetable-apple-stack {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
-    align-items: start;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
   }
 
   .timetable-section {
-    border-radius: var(--radius-md);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-primary);
   }
 
   .timetable-section .section-header {
-    flex-direction: column;
+    display: flex;
+    flex-direction: row;
     align-items: center;
-    text-align: center;
-    gap: 6px;
-    padding: 12px 6px;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
     background: var(--surface-secondary);
-    border-bottom: 1px solid var(--border-secondary);
   }
 
   .timetable-section .day-pill {
-    width: 100%;
-    padding: 4px 6px;
-    font-size: 10px;
-    justify-content: center;
-    border-radius: 6px;
-    white-space: nowrap;
-    min-height: auto;
+    width: auto;
+    padding: 4px 12px;
+    font-size: 0.72rem;
+    border-radius: var(--radius-full);
   }
 
   .timetable-section .section-header .count {
-    margin: 0;
-    font-size: 9px;
-    color: var(--text-tertiary);
+    font-size: 0.7rem;
+    font-weight: 600;
   }
 
   .timetable-section .class-item-apple {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    padding: 10px 8px;
-    align-items: center;
-    text-align: center;
+    display: grid;
+    grid-template-columns: 75px 1fr;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 16px;
     border-bottom: 1px solid var(--border-secondary);
+    text-align: left;
   }
 
   .timetable-section .time-badge {
     width: 100%;
-    justify-content: center;
+    justify-content: flex-start;
     background: transparent;
     border: none;
-    color: var(--accent);
-    font-size: 9px;
+    color: var(--text-secondary);
+    font-size: 0.68rem;
     padding: 0;
-    font-weight: 700;
+    font-weight: 600;
+    white-space: pre-wrap;
+    line-height: 1.3;
   }
 
   .timetable-section .time-badge svg {
@@ -1576,47 +1573,55 @@
   }
 
   .timetable-section .class-main {
-    gap: 2px;
+    gap: 6px;
   }
 
   .timetable-section .class-main .top {
     flex-direction: column;
+    align-items: flex-start;
     gap: 4px;
+    text-align: left;
   }
 
   .timetable-section .class-main .top h3 {
-    font-size: 0.78rem;
-    line-height: 1.25;
-    line-clamp: 3;
-    -webkit-line-clamp: 3;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    font-size: 0.88rem;
+    font-weight: 700;
+    line-height: 1.3;
+    line-clamp: 2;
+    -webkit-line-clamp: 2;
+    color: var(--text-primary);
   }
 
   .timetable-section .class-main .bottom {
-    justify-content: center;
-    font-size: 8.5px;
-    gap: 4px;
-    margin-top: 2px;
+    justify-content: flex-start;
+    font-size: 0.72rem;
+    gap: 8px;
+    margin-top: 0;
+    color: var(--text-tertiary);
   }
 
-  .timetable-section .class-main .bottom .code,
+  .timetable-section .class-main .bottom .code {
+    display: inline-block;
+    font-weight: 600;
+  }
+  
   .timetable-section .class-main .bottom .sep {
-    display: none;
+    display: inline-block;
+    opacity: 0.3;
   }
 
-  .timetable-section .class-main .bottom .room-info svg {
-    width: 10px;
-    height: 10px;
+  .timetable-section .class-main .bottom .room-info {
+    display: flex;
+    align-items: center;
+    gap: 4px;
   }
 
   .timetable-section .type-tag {
     order: -1;
-    font-size: 7.5px;
-    padding: 1px 6px;
-    align-self: center;
-    margin-bottom: 2px;
+    font-size: 0.6rem;
+    padding: 2px 8px;
+    align-self: flex-start;
+    margin-bottom: 0;
   }
 }
 
