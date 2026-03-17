@@ -220,22 +220,29 @@ export default function Dashboard({ children }) {
   }, [activePath, isMobile]);
 
   useEffect(() => {
-    if (isMobile) {
-      window.scrollTo(0, 1);
-    }
-  }, [isMobile, activePath]);
-
-  useEffect(() => {
     const el = mainContentRef.current;
     if (el) {
       el.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     }
-    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-  }, [activePath]);
+    
+    //Consolidated scroll hack for mobile immersion
+    if (isMobile) {
+      // Small delay to ensure the DOM is ready for the scroll flip
+      setTimeout(() => window.scrollTo(0, 1), 10);
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [activePath, isMobile]);
 
   useEffect(() => {
     const shouldLockScroll = isMobile && (profileOpen || mobileMoreOpen);
     document.body.classList.toggle('mobile-sheet-open', shouldLockScroll);
+    
+    // When closing panels, we need to re-trigger the immersive scroll hack
+    if (isMobile && !shouldLockScroll) {
+      setTimeout(() => window.scrollTo(0, 1), 50);
+    }
+    
     return () => document.body.classList.remove('mobile-sheet-open');
   }, [isMobile, profileOpen, mobileMoreOpen]);
 
