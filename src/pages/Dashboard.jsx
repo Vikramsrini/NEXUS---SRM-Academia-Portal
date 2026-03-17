@@ -225,26 +225,28 @@ export default function Dashboard({ children }) {
       el.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     }
     
-    //Consolidated scroll hack for mobile immersion
     if (isMobile) {
-      // Small delay to ensure the DOM is ready for the scroll flip
-      setTimeout(() => window.scrollTo(0, 1), 10);
+      const performImmersion = () => {
+        if (!profileOpen && !mobileMoreOpen) {
+          window.scrollTo(0, 1);
+        }
+      };
+
+      // Path change triggers
+      performImmersion();
+      const timers = [10, 100, 300, 600].map(ms => setTimeout(performImmersion, ms));
+
+      const shouldLockScroll = profileOpen || mobileMoreOpen;
+      document.body.classList.toggle('mobile-sheet-open', shouldLockScroll);
+      
+      return () => {
+        timers.forEach(clearTimeout);
+        document.body.classList.remove('mobile-sheet-open');
+      };
     } else {
       window.scrollTo(0, 0);
     }
-  }, [activePath, isMobile]);
-
-  useEffect(() => {
-    const shouldLockScroll = isMobile && (profileOpen || mobileMoreOpen);
-    document.body.classList.toggle('mobile-sheet-open', shouldLockScroll);
-    
-    // When closing panels, we need to re-trigger the immersive scroll hack
-    if (isMobile && !shouldLockScroll) {
-      setTimeout(() => window.scrollTo(0, 1), 50);
-    }
-    
-    return () => document.body.classList.remove('mobile-sheet-open');
-  }, [isMobile, profileOpen, mobileMoreOpen]);
+  }, [activePath, isMobile, profileOpen, mobileMoreOpen]);
 
   const handleLogout = () => {
     localStorage.clear();
