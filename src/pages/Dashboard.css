@@ -1383,31 +1383,32 @@
   .profile-dropdown-card {
     position: fixed;
     bottom: 0;
-    left: 8px;
-    right: 8px;
+    left: 4px;
+    right: 4px;
     top: auto;
     width: auto;
     max-width: none;
-    max-height: 80vh;
+    max-height: 85vh;
     overflow-y: auto;
-    border-radius: 28px 28px 0 0;
-    padding: 24px 20px calc(16px + env(safe-area-inset-bottom, 0px));
+    border-radius: 32px 32px 0 0;
+    padding: 28px 20px calc(24px + env(safe-area-inset-bottom, 0px));
     z-index: 2000;
     opacity: 1;
     pointer-events: none;
     transform: translate3d(0, 100%, 0);
     transition: transform 550ms cubic-bezier(0.16, 1, 0.3, 1), opacity 300ms ease;
-    background: rgba(255, 255, 255, 0.65);
+    background: rgba(255, 255, 255, 0.94);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-primary);
+    border-bottom: none;
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.12);
     isolation: isolate;
   }
 
   [data-theme="dark"] .profile-dropdown-card {
-    background: rgba(28, 28, 30, 0.7);
-    border-color: rgba(255, 255, 255, 0.08);
+    background: rgba(28, 28, 30, 0.92);
+    border-color: rgba(255, 255, 255, 0.1);
   }
 
   .profile-dropdown-card::before {
@@ -1707,21 +1708,22 @@
     display: block;
     position: fixed;
     bottom: 0;
-    left: 8px;
-    right: 8px;
+    left: 4px;
+    right: 4px;
     top: auto;
     width: auto;
     max-width: none;
-    max-height: 80vh;
+    max-height: 85vh;
     overflow-y: auto;
     z-index: 2100;
-    padding: 24px 20px calc(24px + env(safe-area-inset-bottom, 0px));
-    border-radius: 28px 28px 0 0;
-    background: rgba(255, 255, 255, 0.65);
+    padding: 28px 20px calc(32px + env(safe-area-inset-bottom, 0px));
+    border-radius: 32px 32px 0 0;
+    background: rgba(255, 255, 255, 0.94);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.4);
-    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--border-primary);
+    border-bottom: none;
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.12);
     transform: translate3d(0, 100%, 0);
     opacity: 1;
     pointer-events: none;
@@ -1746,8 +1748,8 @@
   }
 
   [data-theme="dark"] .mobile-more-sheet {
-    background: rgba(28, 28, 30, 0.7);
-    border-color: rgba(255, 255, 255, 0.08);
+    background: rgba(28, 28, 30, 0.92);
+    border-color: rgba(255, 255, 255, 0.1);
   }
 
   .mobile-more-sheet.show {
