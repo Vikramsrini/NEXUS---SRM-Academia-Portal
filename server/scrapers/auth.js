@@ -3,40 +3,12 @@
 // Handles login, password verification, captcha, session management
 // ═══════════════════════════════════════════════════════════════════════
 
-
 import axios from 'axios';
 import dotenv from 'dotenv';
-import { updateEnvVars } from '../utils/env.js';
 dotenv.config();
 
-let SRM_CSRF_TOKEN = process.env.SRM_CSRF_TOKEN || '';
-let SRM_SESSION_COOKIES = process.env.SRM_SESSION_COOKIES || '';
-
-// Helper to refresh CSRF/session if expired and update .env
-export async function ensureFreshSrmSession() {
-  // Try a lightweight request to check if token is valid (customize as needed)
-  try {
-    const testResp = await axios.get('https://academia.srmist.edu.in/portal/academia-academic-services/', {
-      headers: {
-        ...SRM_LOGIN_HEADERS,
-        'x-zcsrf-token': SRM_CSRF_TOKEN,
-        'cookie': SRM_SESSION_COOKIES,
-      },
-      validateStatus: () => true,
-    });
-    if (testResp.status !== 200 && testResp.status !== 302) {
-      throw new Error('CSRF/session expired');
-    }
-    return { csrfToken: SRM_CSRF_TOKEN, cookies: SRM_SESSION_COOKIES };
-  } catch (e) {
-    // Fetch new session and update .env
-    const { cookies, csrfToken } = await getFreshSrmSession();
-    updateEnvVars({ SRM_CSRF_TOKEN: csrfToken, SRM_SESSION_COOKIES: cookies });
-    SRM_CSRF_TOKEN = csrfToken;
-    SRM_SESSION_COOKIES = cookies;
-    return { csrfToken, cookies };
-  }
-}
+const SRM_CSRF_TOKEN = process.env.SRM_CSRF_TOKEN || '';
+const SRM_SESSION_COOKIES = process.env.SRM_SESSION_COOKIES || '';
 
 const SRM_LOGIN_HEADERS = {
   'accept': '*/*',
