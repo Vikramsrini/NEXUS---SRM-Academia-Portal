@@ -185,6 +185,8 @@ html {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   -webkit-tap-highlight-color: transparent;
+  height: 100%;
+  background: #000000; /* Fixed: Solid black matches dark theme & translucent status bar */
 }
 
 body {
