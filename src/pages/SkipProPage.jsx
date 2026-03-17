@@ -253,28 +253,28 @@ export default function SkipProPage() {
         <div className="apple-modal-overlay">
           <div className="apple-modal-card skippro-disclaimer-modal">
             <div className="apple-modal-header">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <span style={{ color: 'var(--accent-red)' }}>{Icons.warning}</span>
+              <div className="modal-title-row">
+                <span className="warning-icon">{Icons.warning}</span>
                 <h2>Predictive Guide</h2>
               </div>
             </div>
             <div className="apple-modal-body">
-              <p style={{ color: 'var(--text-secondary)', fontSize: '15px', lineHeight: '1.5', marginBottom: '20px' }}>
+              <p className="disclaimer-intro">
                 Skip Now projections are strict approximations based on your current timetable and the academic calendar.
               </p>
-              <ul style={{ display: 'grid', gap: '12px', padding: 0, listStyle: 'none', fontSize: '14px' }}>
-                <li style={{ display: 'flex', gap: '10px' }}>
-                  <span style={{ color: 'var(--accent-blue)', fontWeight: 'bold' }}>•</span>
+              <ul className="disclaimer-list">
+                <li>
+                  <span className="dot">•</span>
                   <span>Sudden holidays or faculty leaves are not predicted.</span>
                 </li>
-                <li style={{ display: 'flex', gap: '10px' }}>
-                  <span style={{ color: 'var(--accent-blue)', fontWeight: 'bold' }}>•</span>
+                <li>
+                  <span className="dot">•</span>
                   <span>Mandatory compensatory classes are not included.</span>
                 </li>
               </ul>
-              <div style={{ marginTop: '24px', padding: '16px', background: 'rgba(255, 69, 58, 0.05)', borderRadius: '12px', border: '1px solid rgba(255, 69, 58, 0.1)' }}>
-                <p style={{ color: 'var(--accent-red)', fontSize: '13px', fontWeight: '600', margin: 0 }}>
-                  Disclaimer: NEXUS is not liable for attendance shortages or academic penalties result in from these estimates.
+              <div className="disclaimer-danger-box">
+                <p>
+                  Disclaimer: NEXUS is not liable for attendance shortages or academic penalties resulting from these estimates.
                 </p>
               </div>
             </div>

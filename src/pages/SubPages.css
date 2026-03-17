@@ -2181,6 +2181,66 @@
   overflow: hidden;
 }
 
+.skippro-disclaimer-modal .modal-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.skippro-disclaimer-modal .warning-icon {
+  color: var(--badge-red-text);
+  display: flex;
+  align-items: center;
+}
+
+.skippro-disclaimer-modal .disclaimer-intro {
+  color: var(--text-secondary);
+  font-size: 14.5px;
+  line-height: 1.55;
+  margin-bottom: 20px;
+}
+
+.skippro-disclaimer-modal .disclaimer-list {
+  display: grid;
+  gap: 14px;
+  padding: 0;
+  list-style: none;
+  margin-bottom: 24px;
+}
+
+.skippro-disclaimer-modal .disclaimer-list li {
+  display: flex;
+  gap: 12px;
+  font-size: 13.5px;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  align-items: flex-start;
+}
+
+.skippro-disclaimer-modal .disclaimer-list .dot {
+  color: var(--apple-blue);
+  font-weight: 900;
+  font-size: 18px;
+  line-height: 1;
+  margin-top: -1px;
+}
+
+.skippro-disclaimer-modal .disclaimer-danger-box {
+  padding: 16px;
+  background: var(--badge-red-bg);
+  border: 1px solid var(--badge-red-border);
+  border-radius: 12px;
+}
+
+.skippro-disclaimer-modal .disclaimer-danger-box p {
+  color: var(--badge-red-text);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+  margin: 0;
+  text-align: center;
+}
+
 /* -- Target Dropdown Pill -- */
 .skippro-target-wrap {
   display: inline-flex;
