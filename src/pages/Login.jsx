@@ -97,7 +97,12 @@ export default function Login() {
         navigate('/dashboard');
       }, 800);
     } catch (err) {
-      setError(err.message || 'Login failed. Please check your credentials.');
+      const rawMessage = err.message || 'Login failed. Please check your credentials.';
+      if (/hip required|captcha/i.test(rawMessage)) {
+        setError('SRM requested HIP verification (captcha). Open SRM Academia once in browser and complete login there, then retry here.');
+      } else {
+        setError(rawMessage);
+      }
       setLoading(false);
     }
   };
