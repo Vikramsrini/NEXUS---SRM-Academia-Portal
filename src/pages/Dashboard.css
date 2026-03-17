@@ -1384,29 +1384,46 @@
 
   .ov-welcome {
     text-align: center;
+    margin-bottom: 2px;
   }
 
   .ov-welcome h2 {
-    font-size: clamp(22px, 6vw, 28px);
+    font-size: clamp(22px, 5.5vw, 24px);
     line-height: 1.2;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    padding: 0 4px;
+    letter-spacing: -0.02em;
   }
 
   .ov-welcome p {
-    max-width: 34ch;
-    margin: 4px auto 0;
+    font-size: 13px;
+    margin-top: 4px;
   }
 
   .ov-welcome-date {
     display: block;
-    margin-top: 6px;
     font-size: 12px;
     font-weight: 600;
     color: var(--text-secondary);
-    letter-spacing: 0.02em;
+    margin-top: 2px;
+  }
+
+  .overview-hero {
+    gap: 16px;
+    padding-bottom: 100px;
+  }
+
+  .tod-section {
+    padding: 16px;
+    margin-bottom: 0;
+  }
+
+  .tod-header-row h3 {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+  }
+
+  .tod-quote {
+    font-size: 14px;
+    margin-top: 8px;
   }
 
   .ov-stats-row {
@@ -1429,19 +1446,55 @@
     scroll-snap-align: start;
   }
 
-  .today-schedule-section {
-    margin-top: 0;
-    padding: 18px;
-    border-radius: 26px;
-    background: var(--bg-glass);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
-    border: 1px solid var(--border-glass);
-    box-shadow: 0 14px 38px rgba(0, 0, 0, 0.08);
+  .home-alerts-row {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    margin-top: 4px;
   }
 
-  .home-alerts-row {
-    flex-direction: column;
+  .home-alert-pill {
+    flex: 1;
+    min-width: 0;
+    padding: 12px;
+    border-radius: 20px;
+    gap: 10px;
+  }
+
+  .alert-pill-icon {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+  }
+
+  .alert-pill-label {
+    font-size: 10px;
+  }
+
+  .alert-pill-value {
+    font-size: 13px;
+  }
+
+  .today-schedule-section {
+    margin-top: 4px;
+    padding: 20px;
+    border-radius: 28px;
+  }
+
+  .today-schedule-section .section-header {
+    margin-bottom: 20px;
+  }
+
+  .day-order-badge {
+    display: none; /* Redundant in mobile section header */
+  }
+
+  .mobile-top-shell {
+    background: var(--bg-glass);
+    border: 1px solid var(--border-glass);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+    padding: 6px 6px 6px 14px;
+    border-radius: 22px;
   }
 
   .tod-section {
