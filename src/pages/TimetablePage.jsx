@@ -165,8 +165,9 @@ export default function TimetablePage() {
           {grouped.map((group, i) => (
             <section key={i} className="timetable-section">
               <header className="section-header">
-                 <div className="day-pill">{group.dayOrder}</div>
-                 <span className="day-name">{group.day || 'Academic Day'}</span>
+                 <div className="day-pill">
+                    {group.dayOrder?.startsWith('DO') ? `Day Order ${group.dayOrder.replace('DO', '')}` : group.dayOrder}
+                 </div>
                  <span className="count">{group.classes.length} classes</span>
               </header>
 

@@ -17,17 +17,11 @@ const isSystemNoise = (str, isExam = false) => {
   if (!str) return false;
   const s = String(str).toLowerCase().trim();
   
-  // For EXAMS (marks in chart), we only want to hide obvious summary/total rows
   if (isExam) {
-    return (
-      s.includes('llj') || 
-      s.includes('ft-') || 
-      s.includes('total') || 
-      s.includes('faculty')
-    );
+    // Only filter out very obvious noise like "Faculty" or "FT-"
+    return s.includes('llj') || s.includes('faculty') || s.includes('ft-');
   }
 
-  // For COURSE TITLES (cards), we are more aggressive to skip noise rows
   return (
     s.includes('llj') || 
     s.includes('ft-') || 
@@ -57,23 +51,25 @@ function getDisplayCourseName(markRow, nameByCode) {
 }
 
 function buildTrendChart(exams) {
-  const rows = (Array.isArray(exams) ? exams : [])
+  const validExams = (Array.isArray(exams) ? exams : [])
     .map((exam) => {
       const name = String(exam?.exam || '').trim();
       const obtained = parseFloat(exam?.obtained);
       const max = parseFloat(exam?.maxMark);
       const pct = max > 0 && Number.isFinite(obtained) ? (obtained / max) * 100 : 0;
       return {
-        label: name || `C${Math.random().toString(36).slice(2, 4).toUpperCase()}`,
+        label: name || 'Test',
         pct: Math.max(0, Math.min(100, pct)),
       };
     })
     .filter((r) => r.label);
 
-  if (!rows.length) return null;
+  if (!validExams.length) return null;
 
-  const labels = ['Start', ...rows.map((r) => r.label)];
-  const values = [0, ...rows.map((r) => r.pct)];
+  // If there's only one test, we shouldn't show a "trend", but we should show the point
+  // To handle the chart logic, we use a 'Start' point at 0%
+  const labels = ['Start', ...validExams.map((r) => r.label)];
+  const values = [0, ...validExams.map((r) => r.pct)];
 
   const width = 100;
   const top = 10;
@@ -87,11 +83,6 @@ function buildTrendChart(exams) {
     return { x, y, v, label: labels[idx] };
   });
 
-  const toPath = (pts) => {
-    if (pts.length === 0) return '';
-    return pts.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ');
-  };
-
   const getSmoothPath = (pts) => {
     if (pts.length < 2) return pts.length === 1 ? `M ${pts[0].x} ${pts[0].y}` : '';
     let d = `M ${pts[0].x} ${pts[0].y}`;
@@ -104,21 +95,20 @@ function buildTrendChart(exams) {
     return d;
   };
 
-  const dataPoints = points.slice(1); // Exclude the "Start" dummy point for the main line
+  const dataPoints = points.slice(1); 
   const mainPath = getSmoothPath(dataPoints);
 
   let fillPath = '';
   if (dataPoints.length >= 2) {
     fillPath = `${mainPath} L ${dataPoints[dataPoints.length - 1].x} ${bottom} L ${dataPoints[0].x} ${bottom} Z`;
-  } else if (dataPoints.length === 1) {
-    // For single point, we don't really have a "trend" line or fill, just the point
   }
 
-  // Dashed connector from "Start" to first real point
-  const dashedPath = `M ${points[0].x} ${points[0].y} L ${points[1].x} ${points[1].y}`;
+  const dashedPath = dataPoints.length > 0 ? `M ${points[0].x} ${points[0].y} L ${dataPoints[0].x} ${dataPoints[0].y}` : '';
 
   return { points, labels, dashedPath, mainPath, fillPath, bottom };
 }
+
+
 
 export default function MarksPage() {
   const student = getStudentData();
