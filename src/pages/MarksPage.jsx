@@ -115,24 +115,30 @@ const GRADE_THRESHOLDS = { 'O': 91, 'A+': 81, 'A': 71, 'B+': 61, 'B': 56, 'C': 5
 
 function SgpaPredictor({ courses, onClose }) {
   const [internalMarks, setInternalMarks] = useState({});
+  const [expectedRemaining, setExpectedRemaining] = useState({});
   const [targetGrades, setTargetGrades] = useState({});
   const [enabledCourses, setEnabledCourses] = useState({});
 
   useEffect(() => {
     const initialInternals = {};
+    const initialRemaining = {};
     const initialTargets = {};
     const initialEnabled = {};
     
     courses.forEach(c => {
       const id = c.courseCode;
-      // Extract internals if they exist in the marks data
-      // For Predictor, let's prefill obtained total if it's < 60
-      initialInternals[id] = internalMarks[id] || Math.min(60, c.total?.obtained || 0);
+      const currentMax = c.total?.maxMark || 0;
+      const currentObtained = c.total?.obtained || 0;
+      const remaining = Math.max(0, 60 - currentMax);
+      
+      initialInternals[id] = internalMarks[id] || currentObtained;
+      initialRemaining[id] = expectedRemaining[id] || remaining;
       initialTargets[id] = targetGrades[id] || 'O';
       initialEnabled[id] = enabledCourses[id] ?? true;
     });
     
     setInternalMarks(prev => ({ ...initialInternals, ...prev }));
+    setExpectedRemaining(prev => ({ ...initialRemaining, ...prev }));
     setTargetGrades(prev => ({ ...initialTargets, ...prev }));
     setEnabledCourses(prev => ({ ...initialEnabled, ...prev }));
   }, [courses]);
@@ -165,120 +171,138 @@ function SgpaPredictor({ courses, onClose }) {
   };
 
   const calculateFinalsNeeded = (id, targetGrade) => {
-    const internal = parseFloat(internalMarks[id]) || 0;
+    const current = parseFloat(internalMarks[id]) || 0;
+    const expected = parseFloat(expectedRemaining[id]) || 0;
+    const projectedInternals = current + expected;
     const threshold = GRADE_THRESHOLDS[targetGrade];
     if (threshold === 0) return 0;
     
-    // threshold = internal + (needed / 75) * 40
-    const needed = (threshold - internal) * 75 / 40;
+    // threshold = projectedInternals + (needed / 75) * 40
+    const needed = (threshold - projectedInternals) * 75 / 40;
     return Math.max(0, Math.ceil(needed));
   };
 
   if (!courses.length) return null;
 
   return (
-    <div className="sgpa-modal-overlay">
-      <div className="sgpa-modal-container animate-scale-up">
-        <header className="sgpa-modal-header">
-          <div className="header-left">
-            <h2>GPA Calculator</h2>
-            <button className="status-pill green" onClick={resetToO}>Target All O</button>
+    <div className="sgpa-inline-container animate-fade-in-up">
+      <header className="sgpa-inline-header">
+        <div className="header-left">
+          <div className="title-row">
+            <button className="back-btn" onClick={onClose}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            </button>
+            <h2>SGPA Predictor</h2>
           </div>
-          <div className="header-right">
-             <div className={`sgpa-badge-large ${parseFloat(stats.sgpa) >= 9 ? 'excellent' : ''}`}>
-               <span className="lbl">SGPA</span>
-               <span className="val">{stats.sgpa}</span>
-             </div>
-             <button className="close-predictor-btn" onClick={onClose}>
-               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
-             </button>
-          </div>
-        </header>
+          <p>Adjust your expected marks to simulate your semester results.</p>
+        </div>
+        <div className="header-actions">
+           <button className="apple-btn-secondary" onClick={resetToO}>Target All O</button>
+           <div className={`sgpa-summary-badge ${parseFloat(stats.sgpa) >= 9 ? 'excellent' : ''}`}>
+             <span className="lbl">Estimated SGPA</span>
+             <span className="val">{stats.sgpa}</span>
+           </div>
+        </div>
+      </header>
 
-        <div className="sgpa-modal-body custom-scrollbar">
-          <div className="sgpa-card-grid">
-            {courses.map((c) => {
-              const id = c.courseCode;
-              const isEnabled = enabledCourses[id];
-              const internal = internalMarks[id];
-              const target = targetGrades[id];
-              const needed = calculateFinalsNeeded(id, target);
-              const isHard = needed > 55;
-              const isImpossible = needed > 75;
+      <div className="sgpa-grid-apple stagger-children">
+        {courses.map((c) => {
+          const id = c.courseCode;
+          const isEnabled = enabledCourses[id];
+          const current = internalMarks[id];
+          const remainingMax = Math.max(0, 60 - (c.total?.maxMark || 0));
+          const expected = expectedRemaining[id];
+          const target = targetGrades[id];
+          const needed = calculateFinalsNeeded(id, target);
+          const isHard = needed > 55;
+          const isImpossible = needed > 75;
+          const projectedInternals = (parseFloat(current) || 0) + (parseFloat(expected) || 0);
 
-              return (
-                <div key={id} className={`sgpa-course-card ${!isEnabled ? 'disabled' : ''}`}>
-                  <div className="card-top-row">
-                    <label className="toggle-switch">
-                      <input 
-                        type="checkbox" 
-                        checked={isEnabled} 
-                        onChange={() => setEnabledCourses(p => ({ ...p, [id]: !p[id] }))} 
-                      />
-                      <span className="slider"></span>
-                    </label>
-                    <h3>{c.course || id}</h3>
-                  </div>
-
-                  <div className="marks-inputs">
-                    <div className="input-group">
-                      <span className="label">Current (Internals)</span>
-                      <div className="input-with-limit">
-                        <input 
-                          type="number" 
-                          max="60" 
-                          value={internal} 
-                          onChange={(e) => setInternalMarks(p => ({ ...p, [id]: e.target.value }))}
-                        />
-                        <span className="limit">/ 60</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="target-slider-section">
-                    <div className="slider-label-row">
-                      <span>Target Grade</span>
-                      <strong>{target}</strong>
-                    </div>
+          return (
+            <div key={id} className={`sgpa-item-card ${!isEnabled ? 'disabled' : ''}`}>
+              <header>
+                <div className="header-main">
+                  <label className="apple-switch">
                     <input 
-                      type="range" 
-                      className="grade-slider-range" 
-                      min="0" 
-                      max={GRADES.length - 2} // Exclude F
-                      value={GRADES.indexOf(target)}
-                      onChange={(e) => setTargetGrades(p => ({ ...p, [id]: GRADES[parseInt(e.target.value)] }))}
-                      style={{ direction: 'rtl' }}
+                      type="checkbox" 
+                      checked={isEnabled} 
+                      onChange={() => setEnabledCourses(p => ({ ...p, [id]: !p[id] }))} 
                     />
-                    <div className="grade-ticks">
-                      {GRADES.slice(0, -1).map(g => (
-                        <span key={g} className={target === g ? 'active' : ''}>{g}</span>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="finals-needed-row">
-                    <span className="label">Finals needed</span>
-                    <div className="value-group">
-                      <span className={`needed-val ${isImpossible ? 'impossible' : ''}`}>
-                        {isImpossible ? 'Impossible' : `${needed}/75`}
-                      </span>
-                      {!isImpossible && (
-                        <span className={`difficulty-tag ${isHard ? 'hard' : 'easy'}`}>
-                          {isHard ? 'Hard' : 'Easy'}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="card-footer-info">
-                    <span className="points">{GRADE_POINTS[target]} pts • {c.course?.toLowerCase().includes('lab') ? 1.5 : 4} Credits</span>
-                    <span className="total-pct">{GRADE_THRESHOLDS[target]}% Target</span>
+                    <span className="slider"></span>
+                  </label>
+                  <div className="course-info">
+                    <h3>{c.course || id}</h3>
+                    <span className="code">{id}</span>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </div>
+              </header>
+
+              <div className="sgpa-inputs-row">
+                <div className="apple-input-group">
+                  <label>Current Internals</label>
+                  <div className="input-wrap">
+                    <input 
+                      type="number" 
+                      value={current} 
+                      onChange={(e) => setInternalMarks(p => ({ ...p, [id]: e.target.value }))}
+                    />
+                    <span className="denom">/ {c.total?.maxMark || 0}</span>
+                  </div>
+                </div>
+                <div className="apple-input-group">
+                  <label>Expected Remaining</label>
+                  <div className="input-wrap">
+                    <input 
+                      type="number" 
+                      max={remainingMax}
+                      value={expected} 
+                      onChange={(e) => setExpectedRemaining(p => ({ ...p, [id]: e.target.value }))}
+                    />
+                    <span className="denom">/ {remainingMax}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grade-slider-wrap">
+                <div className="slider-header">
+                  <span>Target Grade</span>
+                  <strong>{target}</strong>
+                </div>
+                <input 
+                  type="range" 
+                  className="apple-range" 
+                  min="0" 
+                  max={GRADES.length - 2} 
+                  value={GRADES.indexOf(target)}
+                  onChange={(e) => setTargetGrades(p => ({ ...p, [id]: GRADES[parseInt(e.target.value)] }))}
+                  style={{ direction: 'rtl', backgroundSize: `${(GRADES.indexOf(target) / (GRADES.length - 2)) * 100}% 100%` }}
+                />
+                <div className="grade-marks">
+                  {GRADES.slice(0, -1).map(g => (
+                    <span key={g} className={target === g ? 'active' : ''}>{g}</span>
+                  ))}
+                </div>
+              </div>
+
+              <div className="sgpa-item-footer">
+                <div className="needed">
+                  <span className="lbl">Finals needed</span>
+                  <span className={`val ${isImpossible ? 'impossible' : ''}`}>
+                    {isImpossible ? 'Impossible' : `${needed}/75`}
+                  </span>
+                </div>
+                <div className="footer-right">
+                   {isEnabled && !isImpossible && (
+                     <span className={`diff-tag ${isHard ? 'red' : 'green'}`}>
+                       {isHard ? 'Hard' : 'Easy'}
+                     </span>
+                   )}
+                   <span className="pct-info">{projectedInternals.toFixed(1)} / 60 Internals</span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -391,15 +415,14 @@ export default function MarksPage() {
         </section>
       )}
 
-      {isPredictorOpen && (
+      {isPredictorOpen ? (
         <SgpaPredictor 
           courses={FILTERED_MARKS} 
           onClose={() => setIsPredictorOpen(false)} 
         />
-      )}
-
-      {FILTERED_MARKS.length > 0 ? (
-        <div className="marks-grid-apple stagger-children">
+      ) : (
+        FILTERED_MARKS.length > 0 && (
+          <div className="marks-grid-apple stagger-children">
           {FILTERED_MARKS.map((m, i) => {
             const displayName = getDisplayCourseName(m, courseNameByCode);
             const pctValue = m.total?.maxMark > 0 ? (m.total.obtained / m.total.maxMark) * 100 : 0;
@@ -493,11 +516,13 @@ export default function MarksPage() {
           })}
         </div>
       ) : (
-        <div className="empty-state">
-          <div className="icon">{Icons.marks}</div>
-          <h3>No records found</h3>
-          <p>Login to sync your academic performance.</p>
-        </div>
+        !isPredictorOpen && (
+          <div className="empty-state">
+            <div className="icon">{Icons.marks}</div>
+            <h3>No records found</h3>
+            <p>Login to sync your academic performance.</p>
+          </div>
+        )
       )}
 
     </div>
