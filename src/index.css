@@ -203,6 +203,13 @@ body {
   transition: background var(--transition-base), color var(--transition-base);
 }
 
+@media (max-width: 768px) {
+  body {
+    /* 2px extra height is required for the window.scrollTo(0, 1) hack to work reliably */
+    min-height: calc(100dvh + 1.5px);
+  }
+}
+
 body.mobile-sheet-open {
   overflow: hidden;
 }

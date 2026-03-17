@@ -219,25 +219,35 @@ export default function Dashboard({ children }) {
     setMobileMoreOpen(false);
   }, [activePath, isMobile]);
 
+  // ── Body Scroll Lock & Immersion Manager ─────────────────────────
   useEffect(() => {
-    if (isMobile) {
+    const shouldLock = isMobile && (profileOpen || mobileMoreOpen);
+    document.body.classList.toggle('mobile-sheet-open', shouldLock);
+    
+    // When unlocking (closing panels), re-trigger immersion immediately
+    if (isMobile && !shouldLock) {
       window.scrollTo(0, 1);
+      const t = setTimeout(() => window.scrollTo(0, 1), 100);
+      return () => clearTimeout(t);
     }
-  }, [isMobile, activePath]);
+    
+    return () => document.body.classList.remove('mobile-sheet-open');
+  }, [isMobile, profileOpen, mobileMoreOpen]);
 
+  // ── Tab Navigation Reset ──────────────────────────────────────────
   useEffect(() => {
     const el = mainContentRef.current;
     if (el) {
       el.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     }
-    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-  }, [activePath]);
-
-  useEffect(() => {
-    const shouldLockScroll = isMobile && (profileOpen || mobileMoreOpen);
-    document.body.classList.toggle('mobile-sheet-open', shouldLockScroll);
-    return () => document.body.classList.remove('mobile-sheet-open');
-  }, [isMobile, profileOpen, mobileMoreOpen]);
+    
+    if (isMobile) {
+      // Hide bars after path change
+      setTimeout(() => window.scrollTo(0, 1), 50);
+    } else {
+      window.scrollTo(0, 0);
+    }
+  }, [activePath, isMobile]);
 
   const handleLogout = () => {
     localStorage.clear();
