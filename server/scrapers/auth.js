@@ -3,38 +3,17 @@
 // Handles login, password verification, captcha, session management
 // ═══════════════════════════════════════════════════════════════════════
 
-
 import axios from 'axios';
 import dotenv from 'dotenv';
-import { updateEnvVars } from '../utils/env.js';
+import { getSrmSession, setSrmSession } from '../lib/srmSession.js';
 dotenv.config();
 
-let SRM_CSRF_TOKEN = process.env.SRM_CSRF_TOKEN || '';
-let SRM_SESSION_COOKIES = process.env.SRM_SESSION_COOKIES || '';
-
-// Helper to refresh CSRF/session if expired and update .env
-export async function ensureFreshSrmSession() {
-  // Try a lightweight request to check if token is valid (customize as needed)
+// Always fetch latest session from Supabase
+async function getCurrentSession() {
   try {
-    const testResp = await axios.get('https://academia.srmist.edu.in/portal/academia-academic-services/', {
-      headers: {
-        ...SRM_LOGIN_HEADERS,
-        'x-zcsrf-token': SRM_CSRF_TOKEN,
-        'cookie': SRM_SESSION_COOKIES,
-      },
-      validateStatus: () => true,
-    });
-    if (testResp.status !== 200 && testResp.status !== 302) {
-      throw new Error('CSRF/session expired');
-    }
-    return { csrfToken: SRM_CSRF_TOKEN, cookies: SRM_SESSION_COOKIES };
-  } catch (e) {
-    // Fetch new session and update .env
-    const { cookies, csrfToken } = await getFreshSrmSession();
-    updateEnvVars({ SRM_CSRF_TOKEN: csrfToken, SRM_SESSION_COOKIES: cookies });
-    SRM_CSRF_TOKEN = csrfToken;
-    SRM_SESSION_COOKIES = cookies;
-    return { csrfToken, cookies };
+    return await getSrmSession();
+  } catch {
+    return { csrf_token: '', cookies: '' };
   }
 }
 
@@ -53,7 +32,7 @@ const SRM_LOGIN_HEADERS = {
 };
 
 /**
- * Fetches fresh session cookies and CSRF token from SRM login page.
+ * Fetches fresh session cookies and CSRF token from SRM login page and updates Supabase.
  */
 export async function getFreshSrmSession() {
   const resp = await fetch(
@@ -67,8 +46,10 @@ export async function getFreshSrmSession() {
 
   const cookieStr = cookies.join('; ');
   const iamcsrMatch = cookieStr.match(/iamcsr=([^;]+)/);
-  const csrfToken = iamcsrMatch ? `iamcsrcoo=${iamcsrMatch[1]}` : SRM_CSRF_TOKEN;
+  const csrfToken = iamcsrMatch ? `iamcsrcoo=${iamcsrMatch[1]}` : '';
 
+  // Save to Supabase
+  await setSrmSession(csrfToken, cookieStr);
   console.log('[SRM] Fresh session cookies obtained, CSRF:', csrfToken.substring(0, 30) + '...');
   return { cookies: cookieStr, csrfToken };
 }
@@ -80,19 +61,42 @@ export async function srmVerifyUser(username) {
   if (!username.includes('@')) {
     username = `${username}@srmist.edu.in`;
   }
-  const session = await getFreshSrmSession();
-  const response = await axios(
-    `https://academia.srmist.edu.in/accounts/p/40-10002227248/signin/v2/lookup/${encodeURIComponent(username)}`,
-    {
-      method: 'POST',
-      headers: {
-        ...SRM_LOGIN_HEADERS,
-        'x-zcsrf-token': session.csrfToken,
-        'cookie': session.cookies,
-      },
-      data: `mode=primary&cli_time=${Date.now()}&servicename=ZohoCreator&service_language=en&serviceurl=https%3A%2F%2Facademia.srmist.edu.in%2Fportal%2Facademia-academic-services%2FredirectFromLogin`,
+  let session = await getCurrentSession();
+  let response;
+  try {
+    response = await axios(
+      `https://academia.srmist.edu.in/accounts/p/40-10002227248/signin/v2/lookup/${encodeURIComponent(username)}`,
+      {
+        method: 'POST',
+        headers: {
+          ...SRM_LOGIN_HEADERS,
+          'x-zcsrf-token': session.csrf_token,
+          'cookie': session.cookies,
+        },
+        data: `mode=primary&cli_time=${Date.now()}&servicename=ZohoCreator&service_language=en&serviceurl=https%3A%2F%2Facademia.srmist.edu.in%2Fportal%2Facademia-academic-services%2FredirectFromLogin`,
+        validateStatus: () => true,
+      }
+    );
+    if (response.status === 400) {
+      // Refresh session and retry once
+      session = await getFreshSrmSession();
+      response = await axios(
+        `https://academia.srmist.edu.in/accounts/p/40-10002227248/signin/v2/lookup/${encodeURIComponent(username)}`,
+        {
+          method: 'POST',
+          headers: {
+            ...SRM_LOGIN_HEADERS,
+            'x-zcsrf-token': session.csrfToken || session.csrf_token,
+            'cookie': session.cookies,
+          },
+          data: `mode=primary&cli_time=${Date.now()}&servicename=ZohoCreator&service_language=en&serviceurl=https%3A%2F%2Facademia.srmist.edu.in%2Fportal%2Facademia-academic-services%2FredirectFromLogin`,
+          validateStatus: () => true,
+        }
+      );
     }
-  );
+  } catch (err) {
+    throw new Error('SRM username verification failed: ' + err.message);
+  }
   const data = response.data;
   return {
     identity: data.lookup?.identifier,
@@ -110,8 +114,8 @@ export async function srmVerifyUser(username) {
 export async function srmVerifyPassword(digest, identifier, password, session) {
   const url = `https://academia.srmist.edu.in/accounts/p/40-10002227248/signin/v2/primary/${encodeURIComponent(identifier)}/password?digest=${digest}&cli_time=${Date.now()}&servicename=ZohoCreator&service_language=en&serviceurl=https%3A%2F%2Facademia.srmist.edu.in%2Fportal%2Facademia-academic-services%2FredirectFromLogin`;
 
-  const loginCookies = session?.cookies || SRM_SESSION_COOKIES;
-  const loginCsrf = session?.csrfToken || SRM_CSRF_TOKEN;
+  const loginCookies = session?.cookies || (await getCurrentSession()).cookies;
+  const loginCsrf = session?.csrfToken || (await getCurrentSession()).csrf_token;
 
   const response = await fetch(url, {
     method: 'POST',
@@ -255,8 +259,8 @@ export async function srmVerifyWithCaptcha(identifier, digest, captcha, cdigest,
     headers: {
       ...SRM_LOGIN_HEADERS,
       'content-type': 'application/x-www-form-urlencoded;charset=UTF-8',
-      'x-zcsrf-token': SRM_CSRF_TOKEN,
-      'cookie': SRM_SESSION_COOKIES,
+      'x-zcsrf-token': (await getCurrentSession()).csrf_token,
+      'cookie': (await getCurrentSession()).cookies,
     },
     body: JSON.stringify({ passwordauth: { password } }),
   });
