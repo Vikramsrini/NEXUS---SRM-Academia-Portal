@@ -63,7 +63,13 @@
 @media (max-width: 768px) {
   .subpage-header {
     flex-direction: column;
-    gap: 12px;
+    gap: 20px;
+    align-items: stretch;
+  }
+
+  .subpage-header .apple-btn {
+    width: 100%;
+    padding: 12px 20px;
   }
 
   .subpage-title {
@@ -2981,27 +2987,64 @@
   }
 
   .apple-modal-overlay {
-    align-items: center;
-    justify-content: center;
-    padding: 20px 16px;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.15) !important;
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+  }
+
+  [data-theme="dark"] .apple-modal-overlay {
+    background: rgba(0, 0, 0, 0.35) !important;
   }
 
   .apple-modal-card {
-    max-width: 100%;
-    border-radius: var(--radius-lg);
+    max-width: 360px;
+    margin: 0 auto;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.82) !important;
+    backdrop-filter: blur(25px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+  }
+
+  [data-theme="dark"] .apple-modal-card {
+    background: rgba(28, 28, 30, 0.85) !important;
   }
 
   .apple-modal-header {
-    padding: 16px 18px 14px;
+    padding: 18px 20px 12px;
+  }
+
+  .apple-modal-header h2 {
+    font-size: 1rem;
   }
 
   .apple-modal-body {
-    padding: 16px 18px;
+    padding: 12px 20px 18px;
+    gap: 12px;
+  }
+
+  .apple-modal-body .primary-text {
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+
+  .apple-bullet-list li {
+    font-size: 0.78rem;
+    gap: 8px;
   }
 
   .apple-modal-footer {
-    padding: 14px 18px 16px;
-    flex-direction: column;
+    padding: 12px 20px 18px;
+    gap: 8px;
+    flex-direction: row !important;
+  }
+
+  .apple-modal-footer .apple-btn {
+    flex: 1;
+    min-height: 42px;
+    font-size: 0.8rem;
+    border-radius: 12px;
   }
 
   .apple-modal-footer .apple-btn {

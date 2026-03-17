@@ -412,7 +412,7 @@ export default function MarksPage() {
           <h1 className="subpage-title">Marks & Grades</h1>
           <p className="subpage-desc">Track performance and predict your semester SGPA.</p>
         </div>
-        <button className="apple-btn primary" onClick={() => setIsPredictorOpen(true)}>
+        <button className="apple-btn primary" onClick={() => setIsPredictorOpen(!isPredictorOpen)}>
           <span style={{ marginRight: '8px', display: 'flex', alignItems: 'center' }}>{Icons.calculator}</span>
           SGPA Calculator
         </button>
