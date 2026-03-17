@@ -28,6 +28,7 @@ export default function CgpaPage() {
   const [selectedRegulation, setSelectedRegulation] = useState('');
   const [selectedCourse, setSelectedCourse] = useState('');
   const [semesterInputs, setSemesterInputs] = useState({});
+  const [creditInputs, setCreditInputs] = useState({});
   const [loadedRemoteState, setLoadedRemoteState] = useState(false);
 
   useEffect(() => {
@@ -101,6 +102,9 @@ export default function CgpaPage() {
         if (remote?.semesterInputs && typeof remote.semesterInputs === 'object') {
           setSemesterInputs(remote.semesterInputs);
         }
+        if (remote?.creditInputs && typeof remote.creditInputs === 'object') {
+          setCreditInputs(remote.creditInputs);
+        }
       } catch (e) {
         if (!cancelled) {
           setSaveState({ type: 'error', message: e.message || 'Failed to load saved CGPA state' });
@@ -136,8 +140,10 @@ export default function CgpaPage() {
     semesterRows.forEach((row) => {
       const gpa = clampGpa(semesterInputs[row.semester]);
       if (gpa === null) return;
-      weighted += gpa * row.credits;
-      creditsUsed += row.credits;
+      const typedCredits = Number(creditInputs[row.semester]);
+      const credits = Number.isFinite(typedCredits) && typedCredits >= 0 ? typedCredits : row.credits;
+      weighted += gpa * credits;
+      creditsUsed += credits;
       enteredCount += 1;
     });
 
@@ -149,14 +155,19 @@ export default function CgpaPage() {
       enteredCount,
       totalSemesters: semesterRows.length,
     };
-  }, [semesterRows, semesterInputs]);
+  }, [semesterRows, semesterInputs, creditInputs]);
 
   const handleSemesterChange = (semester, value) => {
     setSemesterInputs((prev) => ({ ...prev, [semester]: value }));
   };
 
+  const handleCreditChange = (semester, value) => {
+    setCreditInputs((prev) => ({ ...prev, [semester]: value }));
+  };
+
   const clearInputs = () => {
     setSemesterInputs({});
+    setCreditInputs({});
     setSaveState({ type: '', message: '' });
   };
 
@@ -175,6 +186,7 @@ export default function CgpaPage() {
         selectedRegulation,
         selectedCourse,
         semesterInputs,
+        creditInputs,
       });
 
       if (result?.syncEnabled === false) {
@@ -194,7 +206,7 @@ export default function CgpaPage() {
       <div className="subpage-header">
         <div className="subpage-title-group">
           <h1 className="subpage-title">CGPA Calculator</h1>
-          <p className="subpage-desc">Credits are auto-scraped by regulation and branch. Enter only semester GPA values.</p>
+          <p className="subpage-desc">Credits are prefilled by regulation and branch. You can edit credits and GPA values.</p>
         </div>
         <div className="cgpa-header-actions">
           <button className="apple-btn primary" onClick={handleSave} disabled={saving || !selectedRegulation || !selectedCourse}>
@@ -212,7 +224,7 @@ export default function CgpaPage() {
         <div className="cgpa-hero-main">
           <span className="cgpa-kicker">Current CGPA</span>
           <h2>{cgpaStats.creditsUsed > 0 ? cgpaStats.cgpa.toFixed(2) : '0.00'}</h2>
-          <p>Calculated with scraped semester-credit mapping from srmcgpa.netlify.app.</p>
+          <p>Calculated using your selected semester credits and GPA values.</p>
         </div>
         <div className="cgpa-hero-grid">
           <div className="cgpa-mini-stat">
@@ -236,11 +248,11 @@ export default function CgpaPage() {
 
       <section className="cgpa-sheet animate-fade-in-up" style={{ animationDelay: '80ms' }}>
         <div className="cgpa-sheet-head">
-          <h3>Auto Credit Mapping</h3>
-          <p>Select regulation and branch/course, then fill semester GPA.</p>
+          <h3>Semester Credit Mapping</h3>
+          <p>Select regulation and branch/course, then edit credits and fill semester GPA.</p>
         </div>
 
-        {loading && <p className="cgpa-state-note">Loading scraped credit data...</p>}
+        {loading && <p className="cgpa-state-note">Loading credit reference data...</p>}
         {!loading && error && <p className="cgpa-state-note error">{error}</p>}
 
         {!loading && !error && (
@@ -266,7 +278,7 @@ export default function CgpaPage() {
 
             <div className="cgpa-grid-head auto-credits">
               <span>Semester</span>
-              <span>Credits (Auto)</span>
+              <span>Credits</span>
               <span>GPA</span>
             </div>
 
@@ -274,7 +286,15 @@ export default function CgpaPage() {
               {semesterRows.map((row) => (
                 <div className="cgpa-row auto-credits" key={`sem-${row.semester}`}>
                   <div className="cgpa-semester-tag">Semester {row.semester}</div>
-                  <div className="cgpa-credit-pill">{row.credits}</div>
+                  <input
+                    className="cgpa-number"
+                    type="number"
+                    min="0"
+                    step="0.5"
+                    value={creditInputs[row.semester] ?? row.credits}
+                    onChange={(e) => handleCreditChange(row.semester, e.target.value)}
+                    placeholder="Credits"
+                  />
                   <input
                     className="cgpa-number"
                     type="number"
