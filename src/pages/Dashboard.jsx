@@ -219,34 +219,39 @@ export default function Dashboard({ children }) {
     setMobileMoreOpen(false);
   }, [activePath, isMobile]);
 
+  // ── Body Scroll Lock Manager ───────────────────────────────────────
+  useEffect(() => {
+    if (!isMobile) return;
+    const shouldLock = profileOpen || mobileMoreOpen;
+    document.body.classList.toggle('mobile-sheet-open', shouldLock);
+    return () => document.body.classList.remove('mobile-sheet-open');
+  }, [isMobile, profileOpen, mobileMoreOpen]);
+
+  // ── Immersion (Address Bar) Manager ────────────────────────────────
+  useEffect(() => {
+    if (!isMobile) return;
+
+    const performImmersion = () => {
+      // Browsers refuse to hide bars if body is locked or already scrolling
+      if (!profileOpen && !mobileMoreOpen) {
+        window.scrollTo(0, 1);
+      }
+    };
+
+    // Sequential retry logic: Browsers often ignore the first few requests
+    // while the layout is settling or after unlocking overflow:hidden.
+    const intervals = [0, 50, 150, 300, 600, 1000, 1500];
+    const timers = intervals.map(ms => setTimeout(performImmersion, ms));
+
+    return () => timers.forEach(clearTimeout);
+  }, [activePath, isMobile, profileOpen, mobileMoreOpen]);
+
+  // ── Tab Content Reset ──────────────────────────────────────────────
   useEffect(() => {
     const el = mainContentRef.current;
-    if (el) {
-      el.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-    }
-    
-    if (isMobile) {
-      const performImmersion = () => {
-        if (!profileOpen && !mobileMoreOpen) {
-          window.scrollTo(0, 1);
-        }
-      };
-
-      // Path change triggers
-      performImmersion();
-      const timers = [10, 100, 300, 600].map(ms => setTimeout(performImmersion, ms));
-
-      const shouldLockScroll = profileOpen || mobileMoreOpen;
-      document.body.classList.toggle('mobile-sheet-open', shouldLockScroll);
-      
-      return () => {
-        timers.forEach(clearTimeout);
-        document.body.classList.remove('mobile-sheet-open');
-      };
-    } else {
-      window.scrollTo(0, 0);
-    }
-  }, [activePath, isMobile, profileOpen, mobileMoreOpen]);
+    if (el) el.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    if (!isMobile) window.scrollTo(0, 0);
+  }, [activePath, isMobile]);
 
   const handleLogout = () => {
     localStorage.clear();
