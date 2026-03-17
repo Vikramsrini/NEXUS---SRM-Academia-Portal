@@ -43,9 +43,9 @@
   --bg-primary: #F2F2F7;
   --bg-secondary: #FFFFFF;
   --bg-tertiary: #F9F9FB;
-  --bg-sidebar: rgba(255, 255, 255, 0.85);
-  --bg-glass: rgba(255, 255, 255, 0.72);
-  --bg-glass-hover: rgba(0, 0, 0, 0.04);
+  --bg-sidebar: rgba(255, 255, 255, 0.65);
+  --bg-glass: rgba(255, 255, 255, 0.6);
+  --bg-glass-hover: rgba(0, 0, 0, 0.05);
   --bg-elevated: #FFFFFF;
 
   --surface-primary: #FFFFFF;
