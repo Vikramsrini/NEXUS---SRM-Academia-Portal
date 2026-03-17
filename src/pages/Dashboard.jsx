@@ -270,14 +270,12 @@ export default function Dashboard({ children }) {
     navigate('/');
   };
 
-  const handleSync = async () => {
+  const handleSync = () => {
     setSyncing(true);
-    try {
-      await new Promise(r => setTimeout(r, 1500));
-      setSyncing(false);
-    } catch {
-      setSyncing(false);
-    }
+    // Allow animation to play briefly then reload
+    setTimeout(() => {
+      window.location.reload();
+    }, 800);
   };
 
   const closeMobilePanels = () => {
