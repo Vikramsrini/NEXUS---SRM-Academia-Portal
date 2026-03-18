@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../ThemeContext';
 import { fetchThoughtOfDay } from '../lib/api';
@@ -143,8 +144,15 @@ export default function Dashboard({ children }) {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [thoughtOfDay, setThoughtOfDay] = useState(null);
   const [thoughtLoading, setThoughtLoading] = useState(true);
+  const [syncError, setSyncError] = useState(false);
   const student = getStudentData();
-  const displayName = student.name || 'Student';
+  const displayName = student.name || 'User';
+
+  useEffect(() => {
+    if (!student.name && !syncing) {
+      setSyncError(true);
+    }
+  }, [student.name, syncing]);
   const compactDisplayName = getShortDisplayName(displayName, 18);
   const compactWelcomeName = getShortDisplayName(displayName, 24);
   const activePath = location.pathname === '/dashboard/' ? '/dashboard' : location.pathname;
@@ -300,8 +308,7 @@ export default function Dashboard({ children }) {
     const pwd = localStorage.getItem('academia_password') ? atob(localStorage.getItem('academia_password')) : null;
 
     if (!token) {
-      alert('Session expired. Please log in again.');
-      handleLogout();
+      setSyncError(true);
       return;
     }
 
@@ -342,7 +349,7 @@ export default function Dashboard({ children }) {
       }, 500);
     } catch (err) {
       console.error('Refresh error:', err);
-      alert('Session expired or portal unreachable. Please log in again.');
+      setSyncError(true);
       setSyncing(false);
     }
   };
@@ -709,9 +716,29 @@ export default function Dashboard({ children }) {
       {!isMobile && renderProfileCard()}
     </div>
   );
+  const renderSessionModal = () => (
+    <div className="apple-modal-overlay">
+      <div className="apple-modal-card compact">
+        <header className="apple-modal-header">
+          <div className="warning-icon-wrap" style={{ background: 'var(--badge-red-bg)', color: 'var(--badge-red-text)', marginBottom: '16px' }}>
+            {Icons.warning}
+          </div>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: '800', letterSpacing: '-0.02em', marginBottom: '8px' }}>Session Expired</h2>
+        </header>
+        <div className="apple-modal-body" style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <p className="primary-text" style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '8px' }}>We couldn&apos;t load your student profile or your session has expired.</p>
+          <p className="secondary-text" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Please sign in again to continue accessing your academic portal.</p>
+        </div>
+        <footer className="apple-modal-footer">
+          <button className="apple-btn primary full-width" onClick={handleLogout} style={{ padding: '14px' }}>Sign In Again</button>
+        </footer>
+      </div>
+    </div>
+  );
 
   return (
     <div className={`dashboard-layout ${!isMobile && !sidebarOpen ? 'sidebar-collapsed' : ''} ${isMobile ? 'mobile-layout' : ''}`}>
+      {syncError && createPortal(renderSessionModal(), document.body)}
       <div className={`sidebar-overlay ${sidebarOpen ? 'show' : ''}`} onClick={() => setSidebarOpen(false)} />
       {isMobile && <div className={`mobile-sheet-overlay ${mobileSheetOpen ? 'show' : ''}`} onClick={closeMobilePanels} />}
 
