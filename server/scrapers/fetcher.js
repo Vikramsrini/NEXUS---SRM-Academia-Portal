@@ -66,7 +66,7 @@ export function getTimetableUrls() {
   } else {
     urls.push(`${base}${year - 1}_${String(year).slice(-2)}`);
   }
-  for (let y = year - 1; y >= year - 3; y--) {
+  for (let y = year - 1; y >= year - 5; y--) {
     const url = `${base}${y}_${String(y + 1).slice(-2)}`;
     if (!urls.includes(url)) urls.push(url);
   }

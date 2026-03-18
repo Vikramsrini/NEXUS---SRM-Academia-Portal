@@ -98,6 +98,8 @@ export default function Login() {
       localStorage.setItem('academia_token', data.token);
       localStorage.setItem('academia_student', JSON.stringify(data.student_data));
       localStorage.setItem('academia_login_time', new Date().toISOString());
+      localStorage.setItem('academia_netid', username.trim());
+      localStorage.setItem('academia_password', btoa(password)); // Simple obfuscation for local storage
 
       setTimeout(() => {
         navigate('/dashboard');

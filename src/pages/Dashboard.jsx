@@ -270,12 +270,60 @@ export default function Dashboard({ children }) {
     navigate('/');
   };
 
-  const handleSync = () => {
+  const handleSync = async () => {
+    if (syncing) return;
     setSyncing(true);
-    // Allow animation to play briefly then reload
-    setTimeout(() => {
-      window.location.reload();
-    }, 800);
+
+    const token = localStorage.getItem('academia_token');
+    const netid = localStorage.getItem('academia_netid');
+    const pwd = localStorage.getItem('academia_password') ? atob(localStorage.getItem('academia_password')) : null;
+
+    if (!token) {
+      alert('Session expired. Please log in again.');
+      handleLogout();
+      return;
+    }
+
+    try {
+      const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000/api';
+      
+      // Try Fast Sync first
+      const res = await fetch(`${API_BASE}/auth/sync-fast`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!res.ok && netid && pwd) {
+        // Fallback to full re-auth sync if fast sync fails
+        const fullRes = await fetch(`${API_BASE}/auth/sync`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: netid, password: pwd }),
+        });
+        if (!fullRes.ok) throw new Error('Refresh failed');
+        const fullData = await fullRes.json();
+        localStorage.setItem('academia_token', fullData.token);
+        localStorage.setItem('academia_student', JSON.stringify(fullData.student_data));
+      } else if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem('academia_student', JSON.stringify(data.student_data));
+      } else {
+        throw new Error('Session expired');
+      }
+
+      localStorage.setItem('academia_login_time', new Date().toISOString());
+      
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    } catch (err) {
+      console.error('Refresh error:', err);
+      alert('Session expired or portal unreachable. Please log in again.');
+      setSyncing(false);
+    }
   };
 
   const closeMobilePanels = () => {

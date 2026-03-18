@@ -208,7 +208,18 @@ export async function srmVerifyPassword(digest, identifier, password, session) {
     const hasSession = allCookies.includes('JSESSIONID');
     console.log('[SRM] Creator session established:', hasSession, '| Cookie count:', allCookies.split(';').length);
 
-    return { isAuthenticated: true, cookies: allCookies };
+    if (hasSession) {
+      return { isAuthenticated: true, cookies: allCookies };
+    } else {
+      // IF JSESSIONID is STILL missing, we likely have a "Successful Zoho login" but "Failed Academia landing"
+      // We'll return a specific state to let the controller know we need to repair it.
+      return { 
+        isAuthenticated: true, 
+        cookies: allCookies, 
+        needsRepair: true,
+        message: 'Zoho login successful but Academia session pending.' 
+      };
+    }
   }
 
   const authMessage = String(data.localized_message || data.message || '').toLowerCase();
@@ -240,7 +251,7 @@ export async function srmGetCaptchaImage(captchaDigest) {
         'sec-fetch-dest': 'empty',
         'sec-fetch-mode': 'cors',
         'sec-fetch-site': 'same-origin',
-        'cookie': SRM_SESSION_COOKIES,
+        'cookie': (await getCurrentSession()).cookies,
       },
     }
   );
@@ -268,16 +279,5 @@ export async function srmVerifyWithCaptcha(identifier, digest, captcha, cdigest,
   const data = await response.json();
 
   if (data.status_code === 201) {
-    const cookies = response.headers.getSetCookie()
-      .filter(cookie => !cookie.includes('Max-Age=0'))
-      .map(cookie => cookie.split(';')[0])
-      .join('; ');
-    return { isAuthenticated: true, cookies };
-  }
-
-  return {
-    isAuthenticated: false,
-    statusCode: data.status_code,
-    message: data.localized_message || data.message,
   };
 }

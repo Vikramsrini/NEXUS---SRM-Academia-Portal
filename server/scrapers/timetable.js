@@ -26,8 +26,12 @@ export function parseCourses(html) {
   const regNumberMatch = html.match(/RA2\d{12}/);
   const regNumber = regNumberMatch ? regNumberMatch[0] : '';
 
+  // Robust Name Detection: Look for "Welcome NAME (REG)" in the header
+  const welcomeMatch = html.match(/Welcome\s+([^(\n<]+)\s+\(/i);
+  const detectedName = welcomeMatch ? welcomeMatch[1].trim() : '';
+
   let batch = '1';
-  let studentName = '';
+  let studentName = detectedName || '';
   const infoMap = {};
 
   $('table').each((_, table) => {
@@ -44,7 +48,7 @@ export function parseCourses(html) {
   });
 
   batch = infoMap.batch || batch;
-  studentName = infoMap.name || studentName;
+  studentName = infoMap.name || infoMap['student name'] || infoMap['candidate name'] || studentName;
   const program = infoMap.program || '';
   const deptRaw = infoMap.department || '';
   const deptParts = deptRaw.split('-');

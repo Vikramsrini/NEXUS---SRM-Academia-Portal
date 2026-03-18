@@ -5,7 +5,7 @@
 import * as cheerio from 'cheerio';
 import { normalizeText, normalizeKey } from '../utils/html.js';
 import { deriveAcademicBranch } from '../utils/courses.js';
-import { fetchRawAcademicPage, getCourseDynamicUrl } from './fetcher.js';
+import { fetchRawAcademicPage, getCourseDynamicUrl, getTimetableUrls } from './fetcher.js';
 
 /**
  * Parses student profile info from the raw pageSanitizer response.
@@ -21,6 +21,10 @@ export function parseSrmUserInfo(rawResponse) {
 
   const $ = cheerio.load(decodedHtml, { decodeEntities: true, lowerCaseTags: true, xmlMode: false });
   const getText = (sel) => $(sel).text().trim();
+
+  // Robust Name Detection: Look for "Welcome NAME (REG)" pattern
+  const welcomeMatch = decodedHtml.match(/Welcome\s+([^(\n<]+)\s+\(/i);
+  const detectedName = welcomeMatch ? welcomeMatch[1].trim() : '';
 
   const infoMap = {};
   $('table').each((_, table) => {
@@ -43,7 +47,7 @@ export function parseSrmUserInfo(rawResponse) {
 
   const userInfo = {
     regNumber: infoMap['registration number'] || getText('td:contains("Registration Number:") + td strong'),
-    name: infoMap.name || getText('td:contains("Name:") + td strong'),
+    name: detectedName || infoMap.name || infoMap['student name'] || infoMap['candidate name'] || getText('td:contains("Name:") + td strong') || getText('td:contains("Student Name:") + td strong'),
     mobile: infoMap.mobile || getText('td:contains("Mobile:") + td strong'),
     program,
     department,
@@ -60,16 +64,22 @@ export function parseSrmUserInfo(rawResponse) {
  * Fetches and parses user info from the course/timetable page.
  */
 export async function fetchRealUserInfo(authCookie) {
-  const url = getCourseDynamicUrl();
-  const rawData = await fetchRawAcademicPage(authCookie, url);
-  if (rawData?.error) {
-    throw new Error(rawData.error);
+  const urls = getTimetableUrls();
+  
+  for (const url of urls) {
+    try {
+      const rawData = await fetchRawAcademicPage(authCookie, url);
+      if (rawData && typeof rawData === 'string' && rawData.includes('pageSanitizer.sanitize')) {
+        const parsed = parseSrmUserInfo(rawData);
+        if (parsed.userInfo && parsed.userInfo.regNumber) {
+          console.log('[SRM] Profile loaded from:', url);
+          return parsed.userInfo;
+        }
+      }
+    } catch {
+      // try next URL
+    }
   }
 
-  const parsed = parseSrmUserInfo(rawData);
-  if (parsed.error) {
-    throw new Error(parsed.error);
-  }
-
-  return parsed.userInfo || {};
+  throw new Error('Could not find SRM profile on any academic year page.');
 }

@@ -47,6 +47,15 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
+// ── Error Handling ────────────────────────────────────────────────────
+app.use((err, req, res, next) => {
+  console.error('[Global Error]', err.stack);
+  res.status(err.status || 500).json({
+    status: 'error',
+    message: err.message || 'An unexpected backend error occurred'
+  });
+});
+
 // ── Start Server ──────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`✨ Academia Backend running on http://localhost:${PORT}`);
