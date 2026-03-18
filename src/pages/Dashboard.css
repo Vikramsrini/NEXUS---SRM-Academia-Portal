@@ -1302,7 +1302,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 6px 16px rgba(252, 60, 68, 0.25);
+    box-shadow: 0 6px 16px var(--accent-glow);
     flex-shrink: 0;
   }
 

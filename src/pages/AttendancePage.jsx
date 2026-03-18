@@ -32,7 +32,9 @@ function getStudentData() {
   try { return JSON.parse(localStorage.getItem('academia_student') || '{}'); } catch { return {}; }
 }
 
-function getProgressColor(pct) {
+function getProgressColor(statusType) {
+  if (statusType === 'red') return 'progress-red';
+  if (statusType === 'amber') return 'progress-amber';
   return 'progress-green';
 }
 
@@ -617,7 +619,7 @@ export default function AttendancePage() {
                             })()}
                           </div>
                         </div>
-                        <div className={`percent-ring ${getProgressColor(pct)}`}>
+                        <div className={`percent-ring ${isPredicting ? getProgressColor(predStatus.type) : getProgressColor(status.type)}`}>
                           <svg viewBox="0 0 36 36">
                             <path 
                               className="ring-path-track"
@@ -631,6 +633,11 @@ export default function AttendancePage() {
                               fill="none" 
                               strokeWidth="3.2" 
                               strokeDasharray={`${isPredicting ? predPct : pct}, 100`}
+                              stroke={`url(#ring-gradient-${(() => {
+                                const st = isPredicting ? predStatus.type : status.type;
+                                if (st === 'red' || st === 'amber') return st;
+                                return 'green';
+                              })()})`}
                               filter="url(#ring-glow)"
                             />
                           </svg>
