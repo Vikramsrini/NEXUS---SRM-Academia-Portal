@@ -1924,9 +1924,9 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(10, 11, 14, 0.2) !important;
-  backdrop-filter: blur(14px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(14px) saturate(180%) !important;
+  background: rgba(10, 11, 14, 0.45) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
   transform: translateZ(0);
   pointer-events: auto;
 }
@@ -3049,28 +3049,28 @@
 
   .apple-modal-overlay {
     padding: 16px;
-    background: rgba(0, 0, 0, 0.35) !important;
-    backdrop-filter: blur(10px) saturate(160%) !important;
-    -webkit-backdrop-filter: blur(10px) saturate(160%) !important;
+    background: rgba(0, 0, 0, 0.55) !important;
+    backdrop-filter: blur(12px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
     transform: translateZ(0);
   }
 
   [data-theme="dark"] .apple-modal-overlay {
-    background: rgba(0, 0, 0, 0.55) !important;
+    background: rgba(0, 0, 0, 0.72) !important;
   }
 
   .apple-modal-card {
     max-width: 360px;
     margin: 0 auto;
     border-radius: 24px;
-    background: rgba(255, 255, 255, 0.82) !important;
-    backdrop-filter: blur(25px) saturate(180%) !important;
-    -webkit-backdrop-filter: blur(25px) saturate(180%) !important;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+    background: rgba(255, 255, 255, 0.94) !important;
+    backdrop-filter: blur(30px) saturate(190%) !important;
+    -webkit-backdrop-filter: blur(30px) saturate(190%) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.14);
   }
 
   [data-theme="dark"] .apple-modal-card {
-    background: rgba(28, 28, 30, 0.85) !important;
+    background: rgba(26, 26, 28, 0.96) !important;
   }
 
   .apple-modal-header {

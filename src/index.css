@@ -102,10 +102,10 @@
                     radial-gradient(at 50% 0%, rgba(175, 82, 222, 0.12) 0, transparent 50%),
                     radial-gradient(at 100% 0%, rgba(255, 149, 0, 0.12) 0, transparent 50%);
   --bg-primary: #F8F8FA;
-  --bg-sidebar: rgba(255, 255, 255, 0.74);
-  --bg-glass: rgba(255, 255, 255, 0.72);
-  --bg-glass-hover: rgba(255, 255, 255, 0.84);
-  --border-glass: rgba(255, 255, 255, 0.78);
+  --bg-sidebar: rgba(255, 255, 255, 0.88);
+  --bg-glass: rgba(255, 255, 255, 0.86);
+  --bg-glass-hover: rgba(255, 255, 255, 0.94);
+  --border-glass: rgba(255, 255, 255, 0.84);
 }
 
 [data-theme="dark"] {
@@ -169,10 +169,10 @@
                     radial-gradient(at 86% 0%, rgba(90, 200, 250, 0.1) 0, transparent 38%),
                     radial-gradient(at 100% 100%, rgba(255, 149, 0, 0.08) 0, transparent 36%),
                     linear-gradient(180deg, #171920 0%, #111318 100%);
-  --bg-sidebar: rgba(21, 23, 30, 0.84);
-  --bg-glass: rgba(26, 29, 36, 0.72);
-  --bg-glass-hover: rgba(34, 37, 46, 0.84);
-  --border-glass: rgba(255, 255, 255, 0.08);
+  --bg-sidebar: rgba(21, 23, 30, 0.92);
+  --bg-glass: rgba(26, 29, 36, 0.9);
+  --bg-glass-hover: rgba(34, 37, 46, 0.94);
+  --border-glass: rgba(255, 255, 255, 0.12);
 }
 
 /* ══════════════════════════════════════════════════════════════════════
