@@ -67,7 +67,7 @@ function getAttendanceStatus(conducted, absent) {
 
   if (pct >= 75) {
     const margin = Math.floor((P / 0.75) - C);
-    if (margin === 0) return { type: 'amber', text: 'At Threshold' };
+    if (pct >= 75 && pct < 76) return { type: 'amber', text: 'At Threshold' };
     return { type: 'green', text: `Margin: ${margin}` };
   } else {
     const require = Math.ceil(3 * C - 4 * P);
