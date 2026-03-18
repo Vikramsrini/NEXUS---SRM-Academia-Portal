@@ -279,11 +279,15 @@ input::placeholder { color: var(--text-tertiary); }
   color: var(--text-primary);
 }
 
-/* ── Scrollbar ───────────────────────────────────────────────────────── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 999px; }
-::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-hover); }
+/* ── Scrollbar — Hidden for a cleaner look ──────────────────────────────── */
+::-webkit-scrollbar {
+  display: none;
+}
+
+* {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
 
 /* ══════════════════════════════════════════════════════════════════════
    ANIMATIONS
