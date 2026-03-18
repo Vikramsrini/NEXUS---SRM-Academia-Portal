@@ -134,6 +134,17 @@ export default function AttendancePage() {
   const [odSyncReady, setOdSyncReady] = useState(false);
   const [odSyncEnabled, setOdSyncEnabled] = useState(false);
 
+  // ── Predict Attendance Logic ──────────────────────────────────────
+  const [showPredictModal, setShowPredictModal] = useState(false);
+  const [predictDates, setPredictDates] = useState(() => {
+    try {
+      const stored = localStorage.getItem('academia_predict_dates');
+      return stored ? JSON.parse(stored) : [];
+    } catch { return []; }
+  });
+  const [predictFrom, setPredictFrom] = useState('');
+  const [predictTo, setPredictTo] = useState('');
+
   const FILTERED_ATTENDANCE = useMemo(() => {
     return attendance.filter(a => {
       const title = (a.courseTitle || '').trim();
@@ -170,6 +181,10 @@ export default function AttendancePage() {
   useEffect(() => {
     localStorage.setItem('academia_attendance_adjs', JSON.stringify(manualAdjs));
   }, [manualAdjs]);
+
+  useEffect(() => {
+    localStorage.setItem('academia_predict_dates', JSON.stringify(predictDates));
+  }, [predictDates]);
 
   useEffect(() => {
     let ignore = false;
@@ -271,8 +286,6 @@ export default function AttendancePage() {
   const odDayOrders = useMemo(() => {
     const calendar = student.calendar || [];
     const tallies = {};
-    
-    // Convert 'YYYY-MM-DD' back to segments
     const parsedOdDates = odDates.map(d => {
       const [y, m, day] = d.split('-').map(Number);
       return { year: y, monthIdx: m - 1, date: day };
@@ -283,44 +296,55 @@ export default function AttendancePage() {
       calMonth.days?.forEach(d => {
         if (!d.dayOrder) return;
         let dateNum = parseInt(d.date);
-        if (!dateNum) return;
-        
-        const isOdDate = parsedOdDates.some(od => 
-          od.year === pm.year && od.monthIdx === pm.monthIdx && od.date === dateNum
-        );
-
-        if (isOdDate) {
-          let order = d.dayOrder;
-          if (!order.startsWith('DO') && order.match(/^\d+$/)) {
-            order = `DO${order}`;
-          }
-          tallies[order] = (tallies[order] || 0) + 1;
-        }
+        if (!dateNum || !parsedOdDates.some(od => od.year === pm.year && od.monthIdx === pm.monthIdx && od.date === dateNum)) return;
+        let order = d.dayOrder;
+        if (!order.startsWith('DO') && order.match(/^\d+$/)) order = `DO${order}`;
+        tallies[order] = (tallies[order] || 0) + 1;
       });
     });
     return tallies;
-    // eslint-disable-next-line
   }, [odDates, student.calendar]);
 
-  const getOdBonus = (courseCode, slotType) => {
-    const timetable = student.timetable || [];
+  const predictDayOrders = useMemo(() => {
+    const calendar = student.calendar || [];
+    const tallies = {};
+    const parsedPredictDates = predictDates.map(d => {
+      const [y, m, day] = d.split('-').map(Number);
+      return { year: y, monthIdx: m - 1, date: day };
+    });
+
+    calendar.forEach(calMonth => {
+      const pm = parseMonthYear(calMonth.month);
+      calMonth.days?.forEach(d => {
+        if (!d.dayOrder) return;
+        let dateNum = parseInt(d.date);
+        if (!dateNum || !parsedPredictDates.some(pd => pd.year === pm.year && pd.monthIdx === pm.monthIdx && pd.date === dateNum)) return;
+        let order = d.dayOrder;
+        if (!order.startsWith('DO') && order.match(/^\d+$/)) order = `DO${order}`;
+        tallies[order] = (tallies[order] || 0) + 1;
+      });
+    });
+    return tallies;
+  }, [predictDates, student.calendar]);
+
+  const calculateHoursFromDayOrders = (courseCode, slotType, tallies) => {
     const norm = normalizeSlot(slotType);
     if (!timetable.length) return 0;
-    
     let sum = 0;
     timetable.forEach(cls => {
       const clsNorm = normalizeSlot(cls.slotType);
       if (cls.courseCode === courseCode && clsNorm.label === norm.label) {
-         let order = cls.dayOrder;
-         if (!order) return;
-         if (!order.startsWith('DO') && order.match(/^\d+$/)) {
-           order = `DO${order}`;
-         }
-         sum += (odDayOrders[order] || 0);
+        let order = cls.dayOrder;
+        if (!order) return;
+        if (!order.startsWith('DO') && order.match(/^\d+$/)) order = `DO${order}`;
+        sum += (tallies[order] || 0);
       }
     });
     return sum;
   };
+
+  const getOdBonus = (courseCode, slotType) => calculateHoursFromDayOrders(courseCode, slotType, odDayOrders);
+  const getPredictHours = (courseCode, slotType) => calculateHoursFromDayOrders(courseCode, slotType, predictDayOrders);
 
   const attendanceInsights = useMemo(() => {
     if (!FILTERED_ATTENDANCE.length) return null;
@@ -401,6 +425,75 @@ export default function AttendancePage() {
         document.body
       )}
 
+      {showPredictModal && createPortal(
+        <div className="apple-modal-overlay">
+          <div className="apple-modal-card compact">
+            <header className="apple-modal-header">
+              <div className="warning-icon-wrap" style={{ background: 'var(--accent-subtle)', color: 'var(--accent)' }}>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              </div>
+              <h2>Predict Absences</h2>
+            </header>
+            <div className="apple-modal-body">
+              <p className="secondary-text">Select a future range to see how leaves will impact your percentages.</p>
+
+              <div className="apple-form-group">
+                <div className="date-row">
+                  <div className="input-field">
+                    <label>Start Date</label>
+                    <input type="date" value={predictFrom} onChange={e => setPredictFrom(e.target.value)} />
+                  </div>
+                  <div className="input-field">
+                    <label>End Date</label>
+                    <input type="date" value={predictTo} onChange={e => setPredictTo(e.target.value)} min={predictFrom} />
+                  </div>
+                </div>
+                <button
+                  className="apple-btn primary full-width"
+                  onClick={() => {
+                    if (predictFrom && predictTo) {
+                      const start = new Date(predictFrom);
+                      const end = new Date(predictTo);
+                      const newDates = [];
+                      let current = new Date(start);
+                      while (current <= end) {
+                        const tzOffset = current.getTimezoneOffset() * 60000;
+                        const localISO = (new Date(current - tzOffset)).toISOString().split('T')[0];
+                        if (!predictDates.includes(localISO)) newDates.push(localISO);
+                        current.setDate(current.getDate() + 1);
+                      }
+                      setPredictDates([...predictDates, ...newDates]);
+                      setPredictFrom(''); setPredictTo('');
+                    }
+                  }}
+                  disabled={!predictFrom || !predictTo}
+                >
+                  Apply Leave Range
+                </button>
+              </div>
+
+              {predictDates.length > 0 && (
+                <div className="od-date-scroller">
+                  {predictDates.map(date => (
+                    <div key={date} className="od-date-pill predict">
+                      <span>{new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
+                      <button onClick={() => setPredictDates(predictDates.filter(d => d !== date))}>{Icons.closeSmall}</button>
+                    </div>
+                  ))}
+                  <button className="clear-all-predict" onClick={() => setPredictDates([])}>Clear All</button>
+                </div>
+              )}
+            </div>
+            <footer className="apple-modal-footer">
+              <button className="apple-btn blur full-width" onClick={() => setShowPredictModal(false)}>
+                See Results
+              </button>
+            </footer>
+          </div>
+        </div>,
+        document.body
+      )}
+
       {/* Redesigned OD / ML Modal — rendered via portal */}
       {showOdModal && createPortal(
         <div className="apple-modal-overlay">
@@ -457,12 +550,22 @@ export default function AttendancePage() {
           <h1 className="subpage-title">Attendance</h1>
           <p className="subpage-desc">Track and predict your course presence with ease.</p>
         </div>
-        <button 
-          className={`apple-btn-secondary ${odDates.length > 0 ? 'active' : ''}`}
-          onClick={() => setShowDisclaimer(true)}
-        >
-          {Icons.od} Apply OD/ML {odDates.length > 0 && <span>({odDates.length})</span>}
-        </button>
+        <div className="subpage-actions">
+          <button 
+            className={`apple-btn-secondary ${predictDates.length > 0 ? 'active' : ''}`}
+            onClick={() => setShowPredictModal(true)}
+            style={{ marginRight: '8px' }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+            Predict {predictDates.length > 0 && <span>({predictDates.length})</span>}
+          </button>
+          <button 
+            className={`apple-btn-secondary ${odDates.length > 0 ? 'active' : ''}`}
+            onClick={() => setShowDisclaimer(true)}
+          >
+            {Icons.od} Apply OD/ML {odDates.length > 0 && <span>({odDates.length})</span>}
+          </button>
+        </div>
       </div>
 
 
@@ -486,8 +589,18 @@ export default function AttendancePage() {
                   const finalAppliedOd = Math.min(Math.max(0, Math.min(odBonus, originalA) + safeOdAdj), originalA);
                   const A = Math.max(0, originalA - finalAppliedOd);
                   const P = Math.max(0, C - A);
+                  
+                  // Prediction logic
+                  const predictHrs = getPredictHours(a.courseCode, type);
+                  const predC = C + predictHrs;
+                  const predA = A + predictHrs;
+                  const predP = P; // Present hours don't change if you skip
+                  const predPct = predC === 0 ? 100 : (predP / predC) * 100;
+                  const predStatus = getAttendanceStatus(predC, predA);
+
                   const pct = C === 0 ? 100 : (P / C) * 100;
                   const status = getAttendanceStatus(C, A);
+                  const isPredicting = predictDates.length > 0;
 
                   return (
                     <div key={i} className="attendance-card-apple">
@@ -517,28 +630,36 @@ export default function AttendancePage() {
                               d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
                               fill="none" 
                               strokeWidth="3.2" 
-                              strokeDasharray={`${pct}, 100`}
+                              strokeDasharray={`${isPredicting ? predPct : pct}, 100`}
                               filter="url(#ring-glow)"
                             />
                           </svg>
-                          <span className="pct-text">{pct.toFixed(0)}</span>
+                          <span className="pct-text">{isPredicting ? predPct.toFixed(0) : pct.toFixed(0)}</span>
                         </div>
                       </div>
 
                       <div className="card-metrics">
                         <div className="metric">
-                          <span className="label">Conducted</span>
-                          <span className="value">{C}</span>
+                          <span className="label">{isPredicting ? 'Pred. Conducted' : 'Conducted'}</span>
+                          <span className="value">{isPredicting ? predC : C}</span>
                         </div>
                         <div className="metric">
-                          <span className="label">Absent</span>
-                          <span className="value">{A}</span>
+                          <span className="label">{isPredicting ? 'Pred. Absent' : 'Absent'}</span>
+                          <span className="value">{isPredicting ? predA : A}</span>
                         </div>
                         <div className="metric">
                           <span className="label">Status</span>
-                          <span className={`status-pill ${status.type}`}>{status.text}</span>
+                          <span className={`status-pill ${isPredicting ? predStatus.type : status.type}`}>
+                            {isPredicting ? predStatus.text : status.text}
+                          </span>
                         </div>
                       </div>
+
+                      {isPredicting && (
+                        <div className="prediction-overlay-hint">
+                          PREDICTION ACTIVE: {predictHrs} hrs missed in range
+                        </div>
+                      )}
 
                       <div className="card-actions">
                          <div className="od-indicator">

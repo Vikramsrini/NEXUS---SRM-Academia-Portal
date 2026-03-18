@@ -197,7 +197,62 @@
   border-color: var(--border-active);
   color: var(--accent);
 }
+.prediction-overlay-hint {
+  background: var(--accent-subtle);
+  color: var(--accent);
+  padding: 8px 20px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-align: center;
+  border-top: 1px solid var(--border-active);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
 
+.od-date-pill.predict {
+  background: var(--accent-subtle);
+  border-color: var(--border-active);
+  color: var(--accent);
+}
+
+.clear-all-predict {
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 8px;
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+
+.clear-all-predict:hover {
+  color: var(--ring-red);
+}
+
+.subpage-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (max-width: 768px) {
+  .subpage-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+    margin-top: 4px;
+  }
+
+  .subpage-actions .apple-btn-secondary {
+    padding: 12px 10px;
+    font-size: 0.78rem;
+    justify-content: center;
+    text-align: center;
+    height: 100%;
+  }
+}
 
 .attendance-group-container {
   display: flex;
