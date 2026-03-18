@@ -230,6 +230,27 @@ export default function Dashboard({ children }) {
     };
   }, []);
 
+  // ── Automatic Hourly Sync ──────────────────────────────────────────
+  useEffect(() => {
+    // Check if we already synced recently to avoid reload loops
+    const lastSyncStr = localStorage.getItem('academia_login_time');
+    const lastSyncTime = lastSyncStr ? new Date(lastSyncStr).getTime() : 0;
+    const timeSinceSync = Date.now() - lastSyncTime;
+    const SYNC_THRESHOLD = 58 * 60 * 1000; // 58 minutes
+
+    if (timeSinceSync >= SYNC_THRESHOLD) {
+      console.log('[Auto Sync] Site just loaded and last sync was old. Fetching fresh data...');
+      handleSync();
+    }
+
+    const autoSyncInterval = setInterval(() => {
+      console.log('[Auto Sync] Interval heartbeat: Hourly update triggered.');
+      handleSync();
+    }, 60 * 60 * 1000);
+
+    return () => clearInterval(autoSyncInterval);
+  }, []);
+
   useEffect(() => {
     setProfileOpen(false);
     setMobileMoreOpen(false);
