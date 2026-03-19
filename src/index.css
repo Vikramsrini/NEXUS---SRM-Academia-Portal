@@ -48,7 +48,7 @@
   --bg-glass-hover: rgba(0, 0, 0, 0.04);
   --bg-elevated: #FFFFFF;
 
-  --surface-primary: rgba(255, 255, 255, 0.94);
+  --surface-primary: rgba(255, 255, 255, 0.98);
   --surface-secondary: rgba(0, 0, 0, 0.03);
   --surface-tertiary: rgba(0, 0, 0, 0.05);
   --surface-active: rgba(0, 122, 255, 0.08);
@@ -91,7 +91,7 @@
   --ring-red: #FF3B30;
   --ring-track: rgba(0, 0, 0, 0.06);
 
-  --input-bg: rgba(255, 255, 255, 0.94);
+  --input-bg: rgba(255, 255, 255, 0.98);
   --input-border: rgba(0, 0, 0, 0.1);
   --input-focus-border: rgba(0, 122, 255, 0.5);
   --input-focus-ring: rgba(0, 122, 255, 0.12);
@@ -101,21 +101,21 @@
   /* ── Frosted Glass Design Tokens ── */
   --glass-blur: 20px;
   --glass-saturation: 180%;
-  --glass-bg-card: rgba(255, 255, 255, 0.92);
-  --glass-bg-card-hover: rgba(255, 255, 255, 0.96);
-  --glass-border: rgba(255, 255, 255, 0.8);
+  --glass-bg-card: rgba(255, 255, 255, 0.96);
+  --glass-bg-card-hover: rgba(255, 255, 255, 0.98);
+  --glass-border: rgba(255, 255, 255, 0.9);
   --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), inset 0 0 0 0.5px rgba(255, 255, 255, 0.5);
   --glass-shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 0 0 0.5px rgba(255, 255, 255, 0.6);
-  --glass-bg-elevated: rgba(255, 255, 255, 0.96);
+  --glass-bg-elevated: rgba(255, 255, 255, 0.98);
 
   --gradient-page: radial-gradient(at 0% 0%, rgba(0, 122, 255, 0.15) 0, transparent 50%),
                     radial-gradient(at 50% 0%, rgba(175, 82, 222, 0.12) 0, transparent 50%),
                     radial-gradient(at 100% 0%, rgba(255, 149, 0, 0.12) 0, transparent 50%);
   --bg-primary: #F8F8FA;
-  --bg-sidebar: rgba(255, 255, 255, 0.88);
-  --bg-glass: rgba(255, 255, 255, 0.9);
-  --bg-glass-hover: rgba(255, 255, 255, 0.95);
-  --border-glass: rgba(255, 255, 255, 0.85);
+  --bg-sidebar: rgba(255, 255, 255, 0.95);
+  --bg-glass: rgba(255, 255, 255, 0.96);
+  --bg-glass-hover: rgba(255, 255, 255, 0.98);
+  --border-glass: rgba(255, 255, 255, 0.9);
 }
 
 [data-theme="dark"] {
