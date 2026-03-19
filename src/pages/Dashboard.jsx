@@ -145,6 +145,9 @@ export default function Dashboard({ children }) {
   const [thoughtOfDay, setThoughtOfDay] = useState(null);
   const [thoughtLoading, setThoughtLoading] = useState(true);
   const [syncError, setSyncError] = useState(false);
+  const [showUpdateModal, setShowUpdateModal] = useState(() => {
+    return !localStorage.getItem('academia_update_v1_dismissed');
+  });
   const student = getStudentData();
   const displayName = student.name || 'User';
 
@@ -719,7 +722,7 @@ export default function Dashboard({ children }) {
     </div>
   );
   const renderSessionModal = () => (
-    <div className="apple-modal-overlay">
+    <div className="apple-modal-overlay show">
       <div className="apple-modal-card compact">
         <header className="apple-modal-header">
           <div className="warning-icon-wrap" style={{ background: 'var(--badge-red-bg)', color: 'var(--badge-red-text)', marginBottom: '16px' }}>
@@ -738,8 +741,64 @@ export default function Dashboard({ children }) {
     </div>
   );
 
+  const handleDismissUpdate = () => {
+    localStorage.setItem('academia_update_v1_dismissed', 'true');
+    setShowUpdateModal(false);
+  };
+
+  const renderUpdateModal = () => (
+    <div className="apple-modal-overlay show" style={{ zIndex: 9999 }}>
+      <div className="apple-modal-card compact" style={{ maxWidth: '440px' }}>
+        <header className="apple-modal-header" style={{ alignItems: 'flex-start', borderBottom: '1px solid var(--border-secondary)', paddingBottom: '16px', marginBottom: '16px' }}>
+          <div className="icon-wrapper" style={{ background: 'var(--accent-subtle)', color: 'var(--accent)', padding: '10px', borderRadius: '12px', marginBottom: '16px' }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="7.5 4.21 12 6.81 16.5 4.21"/><polyline points="7.5 19.79 7.5 14.6 3 12"/><polyline points="21 12 16.5 14.6 16.5 19.79"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          </div>
+          <h2 style={{ fontSize: '1.35rem', fontWeight: '800', letterSpacing: '-0.02em', margin: '0 0 8px 0' }}>What's New in NEXUS</h2>
+          <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>Version 1.2 is here! We've added some highly requested features and fixed a few bugs.</p>
+        </header>
+        <div className="apple-modal-body" style={{ padding: '0 24px 24px' }}>
+          
+          <div className="update-feature" style={{ display: 'flex', gap: '14px', marginBottom: '22px' }}>
+             <div style={{ color: 'var(--badge-green-text)', background: 'var(--badge-green-bg)', padding: '8px', borderRadius: '10px', height: 'fit-content' }}>
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+             </div>
+             <div>
+               <h4 style={{ fontSize: '0.95rem', fontWeight: '700', marginBottom: '4px', color: 'var(--text-primary)' }}>Edit Optional Hours</h4>
+               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>You can now manually edit optional/lab hours in your timetable. Perfect for adjusting those flexible schedules.</p>
+             </div>
+          </div>
+
+          <div className="update-feature" style={{ display: 'flex', gap: '14px', marginBottom: '22px' }}>
+             <div style={{ color: 'var(--badge-blue-text)', background: 'var(--badge-blue-bg)', padding: '8px', borderRadius: '10px', height: 'fit-content' }}>
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2v0a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12v0a2 2 0 0 1-2-2V7"/></svg>
+             </div>
+             <div>
+               <h4 style={{ fontSize: '0.95rem', fontWeight: '700', marginBottom: '4px', color: 'var(--text-primary)' }}>Smooth Frosted Glass UI</h4>
+               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>The entire interface has been upgraded with a sleek, cross-platform glassmorphism effect.</p>
+             </div>
+          </div>
+          
+          <div className="update-feature" style={{ display: 'flex', gap: '14px' }}>
+             <div style={{ color: 'var(--badge-amber-text)', background: 'var(--badge-amber-bg)', padding: '8px', borderRadius: '10px', height: 'fit-content' }}>
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+             </div>
+             <div>
+               <h4 style={{ fontSize: '0.95rem', fontWeight: '700', marginBottom: '4px', color: 'var(--text-primary)' }}>Bug Fixes & Polish</h4>
+               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>Squashed UI bugs on mobile, fixed the marks card bleed issue, and improved sync reliability.</p>
+             </div>
+          </div>
+
+        </div>
+        <footer className="apple-modal-footer" style={{ borderTop: 'none', padding: '0 24px 24px', justifyContent: 'center' }}>
+          <button className="apple-btn primary full-width" onClick={handleDismissUpdate} style={{ padding: '14px', borderRadius: '12px', fontSize: '1rem', fontWeight: '700' }}>Awesome, got it!</button>
+        </footer>
+      </div>
+    </div>
+  );
+
   return (
     <div className={`dashboard-layout ${!isMobile && !sidebarOpen ? 'sidebar-collapsed' : ''} ${isMobile ? 'mobile-layout' : ''}`}>
+      {showUpdateModal && createPortal(renderUpdateModal(), document.body)}
       {syncError && createPortal(renderSessionModal(), document.body)}
       <div className={`sidebar-overlay ${sidebarOpen ? 'show' : ''}`} onClick={() => setSidebarOpen(false)} />
       {isMobile && <div className={`mobile-sheet-overlay ${mobileSheetOpen ? 'show' : ''}`} onClick={closeMobilePanels} />}

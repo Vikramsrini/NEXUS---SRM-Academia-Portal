@@ -99,23 +99,23 @@
   --modal-overlay: rgba(0, 0, 0, 0.2);
 
   /* ── Frosted Glass Design Tokens ── */
-  --glass-blur: 20px;
-  --glass-saturation: 180%;
-  --glass-bg-card: rgba(255, 255, 255, 0.96);
-  --glass-bg-card-hover: rgba(255, 255, 255, 0.98);
+  --glass-blur: 32px;
+  --glass-saturation: 200%;
+  --glass-bg-card: rgba(255, 255, 255, 0.75);
+  --glass-bg-card-hover: rgba(255, 255, 255, 0.85);
   --glass-border: rgba(255, 255, 255, 0.9);
-  --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), inset 0 0 0 0.5px rgba(255, 255, 255, 0.5);
-  --glass-shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.1), inset 0 0 0 0.5px rgba(255, 255, 255, 0.6);
-  --glass-bg-elevated: rgba(255, 255, 255, 0.98);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.04), inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+  --glass-shadow-hover: 0 12px 48px rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0.9);
+  --glass-bg-elevated: rgba(255, 255, 255, 0.85);
 
   --gradient-page: radial-gradient(at 0% 0%, rgba(0, 122, 255, 0.15) 0, transparent 50%),
                     radial-gradient(at 50% 0%, rgba(175, 82, 222, 0.12) 0, transparent 50%),
                     radial-gradient(at 100% 0%, rgba(255, 149, 0, 0.12) 0, transparent 50%);
   --bg-primary: #F8F8FA;
-  --bg-sidebar: rgba(255, 255, 255, 0.95);
-  --bg-glass: rgba(255, 255, 255, 0.96);
-  --bg-glass-hover: rgba(255, 255, 255, 0.98);
-  --border-glass: rgba(255, 255, 255, 0.9);
+  --bg-sidebar: rgba(255, 255, 255, 0.75);
+  --bg-glass: rgba(255, 255, 255, 0.75);
+  --bg-glass-hover: rgba(255, 255, 255, 0.85);
+  --border-glass: rgba(255, 255, 255, 0.8);
 }
 
 [data-theme="dark"] {
