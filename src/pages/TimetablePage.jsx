@@ -170,9 +170,8 @@ export default function TimetablePage() {
   };
 
   const visibleTimetable = useMemo(() => {
-    if (isEditing) return rawTimetable;
-    return rawTimetable.filter(cls => !hiddenClasses.includes(generateClassId(cls)));
-  }, [rawTimetable, hiddenClasses, isEditing]);
+    return rawTimetable;
+  }, [rawTimetable]);
 
   const grouped = useMemo(() => {
     const map = {};
@@ -259,7 +258,7 @@ export default function TimetablePage() {
                     return (
                       <div 
                         key={j} 
-                        className={`class-card-v2 ${isEditing ? 'editing' : ''} ${isHidden ? 'hidden-class' : ''}`}
+                        className={`class-card-v2 ${isEditing ? 'editing' : ''} ${isHidden ? 'optional-class' : ''}`}
                         onClick={() => isEditing && toggleClassVisibility(cls)}
                         style={isEditing ? { position: 'relative' } : {}}
                       >
@@ -287,7 +286,10 @@ export default function TimetablePage() {
                            
                            <div className="right-content">
                               <div className="time-range">{cls.time}</div>
-                              <span className={`type-tag-v2 ${norm.css}`}>{norm.label}</span>
+                              <div className="type-meta-row">
+                                 <span className={`type-tag-v2 ${norm.css}`}>{norm.label}</span>
+                                 {isHidden && <span className="optional-badge">Optional</span>}
+                              </div>
                            </div>
                         </div>
                       </div>
