@@ -42,16 +42,18 @@
   max-width: 420px;
   padding: 48px 40px;
   border-radius: var(--radius-xl);
-  background: var(--bg-glass);
-  backdrop-filter: blur(40px) saturate(200%);
-  -webkit-backdrop-filter: blur(40px) saturate(200%);
-  border: 1px solid var(--border-glass);
-  box-shadow: 0 16px 64px rgba(0, 0, 0, 0.15);
+  background: var(--glass-bg-elevated, var(--bg-glass));
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+  border: 1px solid var(--glass-border, var(--border-glass));
+  box-shadow: 0 16px 64px rgba(0, 0, 0, 0.15), inset 0 0 0 0.5px rgba(255, 255, 255, 0.3);
   display: flex;
   flex-direction: column;
   gap: 32px;
   animation: slideUp 0.7s cubic-bezier(0.25, 0.1, 0.25, 1);
   transition: all var(--transition-base);
+  transform: translateZ(0);
+  isolation: isolate;
 }
 
 /* ── Logo Area ───────────────────────────────────────────────────── */
@@ -263,14 +265,16 @@
   gap: 10px;
   padding: 10px 14px;
   border-radius: var(--radius-sm);
-  background: var(--bg-glass);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: var(--glass-bg-card, var(--bg-glass));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   color: var(--text-secondary);
-  border: 1px solid var(--border-glass);
+  border: 1px solid var(--glass-border, var(--border-glass));
   font-size: 0.82rem;
   font-weight: 500;
   animation: fadeInUp 0.3s ease both;
+  transform: translateZ(0);
+  isolation: isolate;
 }
 
 .login-status-step.active {

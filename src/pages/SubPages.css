@@ -303,16 +303,21 @@
   display: flex;
   flex-direction: column;
   border-radius: var(--radius-lg);
-  background: var(--surface-primary);
-  border: 1px solid var(--border-primary);
-  box-shadow: var(--shadow-card);
+  background: var(--glass-bg-card, var(--surface-primary));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  border: 1px solid var(--glass-border, var(--border-primary));
+  box-shadow: var(--glass-shadow, var(--shadow-card));
   overflow: hidden;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  transform: translateZ(0);
+  isolation: isolate;
 }
 
 [data-theme="dark"] .attendance-card-apple {
-  backdrop-filter: var(--blur-md);
-  -webkit-backdrop-filter: var(--blur-md);
+  background: var(--glass-bg-card);
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
 }
 
 .attendance-card-apple:hover {
@@ -637,16 +642,21 @@
   display: flex;
   flex-direction: column;
   border-radius: var(--radius-lg);
-  background: var(--surface-primary);
-  border: 1px solid var(--border-primary);
-  box-shadow: var(--shadow-card);
+  background: var(--glass-bg-card, var(--surface-primary));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  border: 1px solid var(--glass-border, var(--border-primary));
+  box-shadow: var(--glass-shadow, var(--shadow-card));
   overflow: hidden;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  transform: translateZ(0);
+  isolation: isolate;
 }
 
 [data-theme="dark"] .marks-card-apple {
-  backdrop-filter: var(--blur-md);
-  -webkit-backdrop-filter: var(--blur-md);
+  background: var(--glass-bg-card);
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
 }
 
 .marks-card-apple:hover {
@@ -889,14 +899,19 @@
   gap: 24px;
   padding: 24px;
   border-radius: var(--radius-lg);
-  background: var(--surface-primary);
-  border: 1px solid var(--border-primary);
-  box-shadow: var(--shadow-card);
+  background: var(--glass-bg-card, var(--surface-primary));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  border: 1px solid var(--glass-border, var(--border-primary));
+  box-shadow: var(--glass-shadow, var(--shadow-card));
+  transform: translateZ(0);
+  isolation: isolate;
 }
 
 [data-theme="dark"] .sgpa-panel-apple {
-  backdrop-filter: var(--blur-md);
-  -webkit-backdrop-filter: var(--blur-md);
+  background: var(--glass-bg-card);
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
 }
 
 /* -- SGPA Predictor Section -- */
@@ -905,18 +920,22 @@
   flex-direction: column;
   gap: 24px;
   padding: 32px;
-  background: var(--surface-primary);
+  background: var(--glass-bg-card, var(--surface-primary));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-primary);
-  box-shadow: var(--shadow-card);
+  border: 1px solid var(--glass-border, var(--border-primary));
+  box-shadow: var(--glass-shadow, var(--shadow-card));
   margin-bottom: 24px;
   animation: fadeInUp 450ms cubic-bezier(0.25, 0.1, 0.25, 1) both;
+  transform: translateZ(0);
+  isolation: isolate;
 }
 
 [data-theme="dark"] .sgpa-section-apple {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: var(--glass-bg-card);
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
 }
 
 @media (max-width: 768px) {
@@ -932,17 +951,21 @@
   flex-direction: column;
   gap: clamp(20px, 4vw, 32px);
   padding: clamp(20px, 5vw, 40px);
-  background: var(--surface-primary);
+  background: var(--glass-bg-card, var(--surface-primary));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-primary);
+  border: 1px solid var(--glass-border, var(--border-primary));
   margin-bottom: clamp(24px, 6vw, 48px);
   animation: slideDownIn 500ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  transform: translateZ(0);
+  isolation: isolate;
 }
 
 [data-theme="dark"] .sgpa-inline-container {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
+  background: var(--glass-bg-card);
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
 }
 
 .sgpa-inline-header {
@@ -1312,15 +1335,19 @@
   gap: 14px;
   padding: 18px;
   border-radius: var(--radius-md);
-  background: var(--bg-tertiary);
-  border: 1px solid var(--border-secondary);
+  background: var(--glass-bg-card, var(--bg-tertiary));
+  backdrop-filter: blur(12px) saturate(160%);
+  -webkit-backdrop-filter: blur(12px) saturate(160%);
+  border: 1px solid var(--glass-border, var(--border-secondary));
   transition: all 0.2s ease;
+  transform: translateZ(0);
+  isolation: isolate;
 }
 
 [data-theme="dark"] .sgpa-item-card {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: var(--glass-bg-card);
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
 }
 
 .sgpa-item-card.disabled {
@@ -1717,18 +1744,22 @@
 
 /* -- Class Card -- */
 .class-card-v2 {
-  background: var(--surface-primary);
-  border: 1px solid var(--border-primary);
+  background: var(--glass-bg-card, var(--surface-primary));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  border: 1px solid var(--glass-border, var(--border-primary));
   border-radius: var(--radius-lg);
   padding: 18px 20px;
   transition: all var(--transition-base);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--glass-shadow, var(--shadow-sm));
+  transform: translateZ(0);
+  isolation: isolate;
 }
 
 [data-theme="dark"] .class-card-v2 {
-  background: linear-gradient(135deg, rgba(25, 27, 32, 0.8) 0%, rgba(15, 17, 21, 0.6) 100%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--glass-bg-card);
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
 }
 
 .class-card-v2:hover {
@@ -1858,16 +1889,21 @@
 .course-card-apple {
   display: flex;
   border-radius: var(--radius-lg);
-  background: var(--surface-primary);
-  border: 1px solid var(--border-primary);
-  box-shadow: var(--shadow-card);
+  background: var(--glass-bg-card, var(--surface-primary));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  border: 1px solid var(--glass-border, var(--border-primary));
+  box-shadow: var(--glass-shadow, var(--shadow-card));
   overflow: hidden;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  transform: translateZ(0);
+  isolation: isolate;
 }
 
 [data-theme="dark"] .course-card-apple {
-  backdrop-filter: var(--blur-md);
-  -webkit-backdrop-filter: var(--blur-md);
+  background: var(--glass-bg-card);
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
 }
 
 .course-card-apple:hover {
@@ -2408,16 +2444,21 @@
   gap: 4px;
   padding: 18px 16px;
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-primary);
-  background: var(--surface-primary);
-  box-shadow: var(--shadow-card);
+  border: 1px solid var(--glass-border, var(--border-primary));
+  background: var(--glass-bg-card, var(--surface-primary));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  box-shadow: var(--glass-shadow, var(--shadow-card));
   text-align: center;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  transform: translateZ(0);
+  isolation: isolate;
 }
 
 [data-theme="dark"] .skippro-stat-card {
-  backdrop-filter: var(--blur-md);
-  -webkit-backdrop-filter: var(--blur-md);
+  background: var(--glass-bg-card);
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
 }
 
 [data-theme="dark"] .skippro-page .skippro-stat-card {
@@ -2532,20 +2573,21 @@
   flex-direction: column;
   min-height: 100%;
   border-radius: var(--radius-lg);
-  background: var(--bg-glass);
-  backdrop-filter: blur(24px) saturate(210%);
-  -webkit-backdrop-filter: blur(24px) saturate(210%);
-  border: 1px solid var(--border-glass);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+  background: var(--glass-bg-card, var(--bg-glass));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  border: 1px solid var(--glass-border, var(--border-glass));
+  box-shadow: var(--glass-shadow);
   overflow: hidden;
   transition: all var(--transition-base);
-  transform: translateZ(0); 
+  transform: translateZ(0);
+  isolation: isolate;
 }
 
 [data-theme="dark"] .skippro-card-apple {
-  background: linear-gradient(180deg, rgba(8, 8, 10, 0.88) 0%, rgba(14, 14, 17, 0.82) 100%);
-  backdrop-filter: blur(32px) saturate(210%);
-  -webkit-backdrop-filter: blur(32px) saturate(210%);
+  background: var(--glass-bg-card);
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
 }
 
 [data-theme="dark"] .skippro-page .skippro-card-apple {
@@ -2809,16 +2851,21 @@
   gap: 12px;
   padding: 16px;
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-primary);
-  background: var(--surface-primary);
-  box-shadow: var(--shadow-card);
+  border: 1px solid var(--glass-border, var(--border-primary));
+  background: var(--glass-bg-card, var(--surface-primary));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  box-shadow: var(--glass-shadow, var(--shadow-card));
   cursor: pointer;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+  transform: translateZ(0);
+  isolation: isolate;
 }
 
 [data-theme="dark"] .semester-card-apple {
-  backdrop-filter: var(--blur-md);
-  -webkit-backdrop-filter: var(--blur-md);
+  background: var(--glass-bg-card);
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
 }
 
 .semester-card-apple:hover {
@@ -2933,16 +2980,21 @@
   gap: 12px;
   padding: 14px;
   border-radius: var(--radius-md);
-  border: 1px solid var(--border-primary);
-  background: var(--surface-primary);
-  box-shadow: var(--shadow-card);
+  border: 1px solid var(--glass-border, var(--border-primary));
+  background: var(--glass-bg-card, var(--surface-primary));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  box-shadow: var(--glass-shadow, var(--shadow-card));
   text-decoration: none;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
+  transform: translateZ(0);
+  isolation: isolate;
 }
 
 [data-theme="dark"] .resource-subject-card {
-  backdrop-filter: var(--blur-md);
-  -webkit-backdrop-filter: var(--blur-md);
+  background: var(--glass-bg-card);
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
 }
 
 .resource-subject-card:hover {
