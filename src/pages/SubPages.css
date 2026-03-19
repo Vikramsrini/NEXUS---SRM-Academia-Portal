@@ -2197,13 +2197,16 @@
 .date-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 12px;
 }
 
 @media (max-width: 480px) {
   .date-row {
-    grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 8px;
+  }
+  .input-field input {
+    padding: 8px 6px;
+    font-size: 0.78rem;
   }
 }
 
