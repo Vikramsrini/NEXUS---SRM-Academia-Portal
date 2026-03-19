@@ -203,7 +203,6 @@ export default function Dashboard({ children }) {
         if (cancelled) return;
         setThoughtOfDay({
           thought: result.thought || '',
-          author: result.author || '',
         });
       } catch {
         if (cancelled) return;
@@ -213,10 +212,10 @@ export default function Dashboard({ children }) {
       }
     };
 
-    const scheduleDailyRefreshAt1223 = () => {
+    const scheduleDailyRefreshAtMidnight = () => {
       const now = new Date();
       const nextRefresh = new Date(now);
-      nextRefresh.setHours(0, 23, 0, 0);
+      nextRefresh.setHours(0, 0, 0, 0);
       if (nextRefresh <= now) {
         nextRefresh.setDate(nextRefresh.getDate() + 1);
       }
@@ -229,7 +228,7 @@ export default function Dashboard({ children }) {
     };
 
     loadThought();
-    scheduleDailyRefreshAt1223();
+    scheduleDailyRefreshAtMidnight();
 
     return () => {
       cancelled = true;
@@ -398,7 +397,15 @@ export default function Dashboard({ children }) {
 
   const getTodaySchedule = () => {
     if (!timetable.length || !currentDayOrder) return [];
-    return timetable.filter(item => item.dayOrder.replace(/\s+/g, '').toUpperCase() === currentDayOrder.toUpperCase());
+    
+    let hidden = [];
+    try { hidden = JSON.parse(localStorage.getItem('academia_hidden_classes') || '[]'); } catch { hidden = []; }
+
+    return timetable.filter(item => {
+      const isToday = item.dayOrder.replace(/\s+/g, '').toUpperCase() === currentDayOrder.toUpperCase();
+      const id = `${item.courseCode}_${item.time}_${item.dayOrder || item.day}`;
+      return isToday && !hidden.includes(id);
+    });
   };
 
   const todaySchedule = getTodaySchedule();
@@ -633,12 +640,7 @@ export default function Dashboard({ children }) {
   const mobileSecondaryNav = NAV_ITEMS.filter(item => !MOBILE_PRIMARY_NAV_IDS.includes(item.id));
   const mobileMoreActive = mobileSecondaryNav.some(item => item.path === activePath);
   const mobileSheetOpen = isMobile && (profileOpen || mobileMoreOpen);
-  const thoughtAuthor = (() => {
-    const author = (thoughtOfDay?.author || '').trim();
-    if (!author) return '';
-    if (/^(unknown|anonymous|n\/?a)$/i.test(author)) return '';
-    return author;
-  })();
+
   const mobileHeaderMeta = isOverview
     ? (currentDayOrder ? `${currentDayOrder} • ${todaySchedule.length} class${todaySchedule.length !== 1 ? 'es' : ''} today` : 'No classes scheduled today')
     : (student.regNumber || 'Student workspace');
@@ -806,7 +808,6 @@ export default function Dashboard({ children }) {
                 ) : thoughtOfDay?.thought ? (
                   <>
                     <p className="tod-quote">{thoughtOfDay.thought}</p>
-                    {thoughtAuthor && <p className="tod-author">- {thoughtAuthor}</p>}
                   </>
                 ) : (
                   <p className="tod-fallback">Could not load today&apos;s thought right now.</p>

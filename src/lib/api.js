@@ -135,4 +135,50 @@ export async function saveOdState({ regNumber, token, odDates, manualAdjs }) {
   return res.json();
 }
 
+export async function fetchTimetableState(regNumber, token) {
+  if (!regNumber || !token) {
+    return { hiddenClasses: [] };
+  }
+
+  const q = new URLSearchParams({ regNumber: String(regNumber) }).toString();
+  const res = await fetch(apiUrl(`/timetable-state?${q}`), {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || err.error || 'Failed to fetch timetable state');
+  }
+
+  return res.json();
+}
+
+export async function saveTimetableState({ regNumber, token, hiddenClasses }) {
+  if (!regNumber || !token) {
+    throw new Error('Missing regNumber or token for saving timetable state');
+  }
+
+  const res = await fetch(apiUrl('/timetable-state'), {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      regNumber,
+      hiddenClasses: Array.isArray(hiddenClasses) ? hiddenClasses : [],
+    }),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || err.error || 'Failed to save timetable state');
+  }
+
+  return res.json();
+}
+
 export { API_BASE };
+

@@ -3,6 +3,7 @@ import axios from 'axios';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { getSupabaseAdmin } from '../lib/supabase.js';
 
 const router = Router();
 
@@ -146,11 +147,14 @@ async function fetchThoughtFromMistral() {
     messages: [
       {
         role: 'system',
-        content: 'You create one short, uplifting quote of the day. Keep it under 180 characters and provide only JSON: {"thought":"...","author":"..."}.',
+        content: `You generate a daily quote. 
+- Topic: Varies daily (discipline, science, resilience, kindness, technology, or philosophy). 
+- Goal: Keep it diverse and avoid repetitive "sunrise" or "good morning" themes. 
+- Format: Under 160 characters. Provide strictly JSON: {"thought":"...","author":"..."}.`,
       },
       {
         role: 'user',
-        content: `Generate today\'s thought for date ${getDateKeyForTimezone(CACHE_TIMEZONE)} in timezone ${CACHE_TIMEZONE}.`,
+        content: `Give me today's thought for ${getDateKeyForTimezone(CACHE_TIMEZONE)}. Use a new topic dissimilar to sunrise.`,
       },
     ],
   }, {
@@ -175,9 +179,11 @@ router.get('/thought-of-the-day', async (req, res) => {
 
   const dateKey = getDateKeyForTimezone(CACHE_TIMEZONE);
   const forceRefresh = req.query.refresh === '1';
-  const cacheIsValid = isUsableThought(dailyThoughtCache.thought);
+  const supabase = getSupabaseAdmin();
 
-  if (!forceRefresh && dailyThoughtCache.dateKey === dateKey && cacheIsValid) {
+  // 1. Try local cache (fastest)
+  const localCacheValid = isUsableThought(dailyThoughtCache.thought) && dailyThoughtCache.dateKey === dateKey;
+  if (!forceRefresh && localCacheValid) {
     return res.json({
       ...dailyThoughtCache,
       fromCache: true,
@@ -185,6 +191,36 @@ router.get('/thought-of-the-day', async (req, res) => {
     });
   }
 
+  // 2. Try Supabase Shared Cache (sync across all users)
+  if (!forceRefresh && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('daily_thoughts')
+        .select('*')
+        .eq('date_key', dateKey)
+        .maybeSingle();
+
+      if (data && isUsableThought(data.thought)) {
+        dailyThoughtCache = {
+          dateKey,
+          thought: data.thought,
+          author: data.author || '',
+          fetchedAt: data.fetched_at || null,
+        };
+        await saveCacheToDisk().catch(() => {});
+        return res.json({
+          ...dailyThoughtCache,
+          fromCache: true,
+          fromDatabase: true,
+          timezone: CACHE_TIMEZONE,
+        });
+      }
+    } catch (e) {
+      console.error('[DB Sync Check Error]', e.message);
+    }
+  }
+
+  // 3. Otherwise, fetch new and sync to both DB and local cache
   try {
     if (!refreshInFlight) {
       refreshInFlight = (async () => {
@@ -197,7 +233,21 @@ router.get('/thought-of-the-day', async (req, res) => {
           fetchedAt: new Date().toISOString(),
         };
 
-        await saveCacheToDisk();
+        // Save to DB for other users
+        if (supabase) {
+          try {
+            await supabase.from('daily_thoughts').upsert({
+              date_key: dateKey,
+              thought: fresh.thought,
+              author: fresh.author,
+              fetched_at: dailyThoughtCache.fetchedAt,
+            }, { onConflict: 'date_key' });
+          } catch (dbSaveErr) {
+            console.error('[DB Shared Save Error]', dbSaveErr.message);
+          }
+        }
+
+        await saveCacheToDisk().catch(() => {});
         return dailyThoughtCache;
       })().finally(() => {
         refreshInFlight = null;
@@ -215,7 +265,7 @@ router.get('/thought-of-the-day', async (req, res) => {
     console.error('Thought of the day API error:', e.message);
 
     // Serve stale quote if available to avoid blank UI during upstream outages.
-    if (cacheIsValid) {
+    if (isUsableThought(dailyThoughtCache.thought)) {
       return res.json({
         ...dailyThoughtCache,
         fromCache: true,

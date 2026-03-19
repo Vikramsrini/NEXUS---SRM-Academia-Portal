@@ -15,6 +15,7 @@ import userinfoRoutes from './routes/userinfo.js';
 import thoughtRoutes from './routes/thought.js';
 import cgpaRoutes from './routes/cgpa.js';
 import odRoutes from './routes/od.js';
+import timetableStateRoutes from './routes/timetable-state.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -37,6 +38,8 @@ app.use('/api', userinfoRoutes);
 app.use('/api', thoughtRoutes);
 app.use('/api', cgpaRoutes);
 app.use('/api', odRoutes);
+app.use('/api', timetableStateRoutes);
+
 
 // ── Health Check ──────────────────────────────────────────────────────
 app.get('/', (req, res) => {

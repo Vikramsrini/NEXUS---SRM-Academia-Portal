@@ -3573,3 +3573,60 @@
     font-size: 1.02rem;
   }
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   13. TIMETABLE CLASS MANAGEMENT
+   ══════════════════════════════════════════════════════════════════════ */
+
+.class-card-v2.editing {
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.19, 1, 0.22, 1);
+  border-style: dashed;
+  position: relative;
+}
+
+.class-card-v2.editing:hover {
+  border-color: var(--accent);
+  background: var(--surface-secondary);
+}
+
+.class-card-v2.hidden-class {
+  opacity: 0.45;
+  filter: grayscale(0.6);
+}
+
+.edit-toggle-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-primary);
+  background: var(--surface-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 2;
+}
+
+.hidden-class .edit-toggle-badge {
+  background: var(--surface-tertiary);
+  border-color: var(--border-secondary);
+}
+
+.class-card-v2:not(.hidden-class) .edit-toggle-badge {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.class-card-v2:not(.hidden-class) .edit-toggle-badge::after {
+  content: "";
+  width: 4px;
+  height: 8px;
+  border-bottom: 2px solid white;
+  border-right: 2px solid white;
+  transform: rotate(45deg);
+  margin-top: -2px;
+}

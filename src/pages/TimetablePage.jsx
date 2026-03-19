@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
+import { fetchTimetableState, saveTimetableState } from '../lib/api';
 import './SubPages.css';
 
 const Icons = {
@@ -6,6 +7,8 @@ const Icons = {
   time: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
   room: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
   person: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+  settings: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+  check: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>,
 };
 
 function getStudentData() {
@@ -118,12 +121,62 @@ function downloadTimetableImage(timetable, studentName) {
 
 export default function TimetablePage() {
   const student = getStudentData();
-  const timetable = useMemo(() => student.timetable || [], [student.timetable]);
+  const rawTimetable = useMemo(() => student.timetable || [], [student.timetable]);
   const [activeDay, setActiveDay] = useState('all');
+  const [isEditing, setIsEditing] = useState(false);
+  const [hiddenClasses, setHiddenClasses] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('academia_hidden_classes') || '[]');
+    } catch {
+      return [];
+    }
+  });
+
+  const generateClassId = (cls) => {
+    return `${cls.courseCode}_${cls.time}_${cls.dayOrder || cls.day}`;
+  };
+
+  useEffect(() => {
+    const token = localStorage.getItem('academia_token');
+    const reg = student.regNumber;
+    if (token && reg) {
+      fetchTimetableState(reg, token).then(data => {
+        if (data && Array.isArray(data.hiddenClasses)) {
+           setHiddenClasses(data.hiddenClasses);
+           localStorage.setItem('academia_hidden_classes', JSON.stringify(data.hiddenClasses));
+        }
+      }).catch(err => console.error('Failed to sync timetable state:', err));
+    }
+  }, [student.regNumber]);
+
+  const toggleClassVisibility = async (cls) => {
+    const id = generateClassId(cls);
+    const newHidden = hiddenClasses.includes(id)
+      ? hiddenClasses.filter(h => h !== id)
+      : [...hiddenClasses, id];
+    
+    setHiddenClasses(newHidden);
+    localStorage.setItem('academia_hidden_classes', JSON.stringify(newHidden));
+
+    const token = localStorage.getItem('academia_token');
+    const reg = student.regNumber;
+    if (token && reg) {
+      try {
+        await saveTimetableState({ regNumber: reg, token, hiddenClasses: newHidden });
+      } catch (err) {
+        console.error('Failed to save timetable state to DB:', err);
+      }
+    }
+  };
+
+  const visibleTimetable = useMemo(() => {
+    if (isEditing) return rawTimetable;
+    return rawTimetable.filter(cls => !hiddenClasses.includes(generateClassId(cls)));
+  }, [rawTimetable, hiddenClasses, isEditing]);
 
   const grouped = useMemo(() => {
     const map = {};
-    timetable.forEach(cls => {
+    visibleTimetable.forEach(cls => {
       const key = cls.dayOrder || cls.day;
       if (!map[key]) map[key] = { dayOrder: cls.dayOrder, day: cls.day, classes: [] };
       map[key].classes.push(cls);
@@ -139,13 +192,13 @@ export default function TimetablePage() {
       const num = g.dayOrder?.replace('DO', '');
       return num === activeDay;
     });
-  }, [timetable, activeDay]);
+  }, [visibleTimetable, activeDay]);
 
   const dayTabs = useMemo(() => {
-    const orders = Array.from(new Set(timetable.map(cls => cls.dayOrder?.replace('DO', '')).filter(Boolean)))
+    const orders = Array.from(new Set(rawTimetable.map(cls => cls.dayOrder?.replace('DO', '')).filter(Boolean)))
       .sort((a, b) => parseInt(a) - parseInt(b));
     return ['all', ...orders];
-  }, [timetable]);
+  }, [rawTimetable]);
 
   return (
     <div className="apple-page-container timetable-v2">
@@ -157,11 +210,23 @@ export default function TimetablePage() {
           </div>
           <p className="subpage-desc">Your weekly course routine organized by day order.</p>
         </div>
-        {timetable.length > 0 && (
-          <button className="apple-btn-secondary" onClick={() => downloadTimetableImage(timetable, student.name)}>
-            {Icons.export} Export Image
-          </button>
-        )}
+        <div className="subpage-actions">
+          {rawTimetable.length > 0 && (
+            <>
+              <button 
+                className={`apple-btn-secondary ${isEditing ? 'active' : ''}`} 
+                onClick={() => setIsEditing(!isEditing)}
+              >
+                {isEditing ? Icons.check : Icons.settings} {isEditing ? 'Done Editing' : 'Edit Optional Hours'}
+              </button>
+              {!isEditing && (
+                <button className="apple-btn-secondary" onClick={() => downloadTimetableImage(visibleTimetable, student.name)}>
+                  {Icons.export} Export Image
+                </button>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       <div className="day-selector-scroller">
@@ -188,8 +253,20 @@ export default function TimetablePage() {
                <div className="classes-grid-v2">
                  {group.classes.map((cls, j) => {
                     const norm = normalizeSlot(cls.slotType);
+                    const classId = generateClassId(cls);
+                    const isHidden = hiddenClasses.includes(classId);
+                    
                     return (
-                      <div key={j} className="class-card-v2">
+                      <div 
+                        key={j} 
+                        className={`class-card-v2 ${isEditing ? 'editing' : ''} ${isHidden ? 'hidden-class' : ''}`}
+                        onClick={() => isEditing && toggleClassVisibility(cls)}
+                        style={isEditing ? { position: 'relative' } : {}}
+                      >
+                        {isEditing && (
+                          <div className="edit-toggle-badge">
+                          </div>
+                        )}
                         <div className="card-main-info">
                            <div className="left-content">
                               <h3 className="course-name">{cls.subject}</h3>
@@ -226,7 +303,7 @@ export default function TimetablePage() {
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </div>
           <h3>No records found</h3>
-          <p>Sync your data to view your personalized schedule.</p>
+          <p>{hiddenClasses.length > 0 ? 'You have hidden all classes for this day. Click Edit Optional Hours to restore them.' : 'Sync your data to view your personalized schedule.'}</p>
         </div>
       )}
     </div>

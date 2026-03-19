@@ -21,3 +21,23 @@ create table if not exists public.cgpa_user_state (
 
 create index if not exists cgpa_user_state_updated_at_idx
   on public.cgpa_user_state (updated_at desc);
+
+create table if not exists public.daily_thoughts (
+  date_key text primary key,
+  thought text not null,
+  author text,
+  fetched_at timestamptz not null default now()
+);
+
+-- Timetable user persistence (hidden/optional classes).
+create table if not exists public.timetable_user_state (
+  user_key text primary key,
+  reg_number text not null,
+  hidden_classes jsonb not null default '[]'::jsonb,
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists timetable_user_state_reg_number_idx
+  on public.timetable_user_state (reg_number);
+
+
