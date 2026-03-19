@@ -4,6 +4,7 @@ create table if not exists public.od_user_state (
   reg_number text not null,
   od_dates jsonb not null default '[]'::jsonb,
   manual_adjs jsonb not null default '{}'::jsonb,
+  update_v1_dismissed boolean not null default false,
   updated_at timestamptz not null default (now() at time zone 'utc' at time zone 'Asia/Kolkata')
 );
 

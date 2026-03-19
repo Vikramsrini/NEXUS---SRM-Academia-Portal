@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../ThemeContext';
-import { fetchThoughtOfDay } from '../lib/api';
+import { fetchThoughtOfDay, fetchOdState, saveOdState } from '../lib/api';
 import { normalizeCourseCode } from '../lib/slotTypes';
 import './Dashboard.css';
 
@@ -155,7 +155,19 @@ export default function Dashboard({ children }) {
     if (!student.name && !syncing) {
       setSyncError(true);
     }
-  }, [student.name, syncing]);
+    
+    // Check if modal was already dismissed on the backend
+    const regNumber = (student.regNumber || '').trim();
+    const token = localStorage.getItem('academia_token');
+    if (regNumber && token && !localStorage.getItem('academia_update_v1_dismissed')) {
+      fetchOdState(regNumber, token).then(remote => {
+        if (remote?.updateV1Dismissed) {
+          localStorage.setItem('academia_update_v1_dismissed', 'true');
+          setShowUpdateModal(false);
+        }
+      }).catch(() => {});
+    }
+  }, [student.name, student.regNumber, syncing]);
   const compactDisplayName = getShortDisplayName(displayName, 18);
   const compactWelcomeName = getShortDisplayName(displayName, 24);
   const activePath = location.pathname === '/dashboard/' ? '/dashboard' : location.pathname;
@@ -745,9 +757,28 @@ export default function Dashboard({ children }) {
     </div>
   );
 
-  const handleDismissUpdate = () => {
+  const handleDismissUpdate = async () => {
     localStorage.setItem('academia_update_v1_dismissed', 'true');
     setShowUpdateModal(false);
+    
+    // Sync dismissal to backend
+    const regNumber = (student.regNumber || '').trim();
+    const token = localStorage.getItem('academia_token');
+    if (regNumber && token) {
+      try {
+        // We fetch current state to avoid overwriting OD dates
+        const current = await fetchOdState(regNumber, token);
+        await saveOdState({
+          regNumber,
+          token,
+          odDates: current?.odDates || [],
+          manualAdjs: current?.manualAdjs || {},
+          updateV1Dismissed: true
+        });
+      } catch (e) {
+        console.warn('Failed to sync modal dismissal to backend', e);
+      }
+    }
   };
 
   const renderUpdateModal = () => (

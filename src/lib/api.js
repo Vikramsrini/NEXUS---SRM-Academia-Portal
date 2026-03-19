@@ -109,7 +109,7 @@ export async function fetchOdState(regNumber, token) {
   return res.json();
 }
 
-export async function saveOdState({ regNumber, token, odDates, manualAdjs }) {
+export async function saveOdState({ regNumber, token, odDates, manualAdjs, updateV1Dismissed }) {
   if (!regNumber || !token) {
     throw new Error('Missing regNumber or token for saving OD state');
   }
@@ -124,6 +124,7 @@ export async function saveOdState({ regNumber, token, odDates, manualAdjs }) {
       regNumber,
       odDates: Array.isArray(odDates) ? odDates : [],
       manualAdjs: manualAdjs && typeof manualAdjs === 'object' ? manualAdjs : {},
+      updateV1Dismissed: !!updateV1Dismissed,
     }),
   });
 

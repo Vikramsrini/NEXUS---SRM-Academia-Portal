@@ -51,7 +51,7 @@ router.get('/od-state', requireAuth, async (req, res) => {
   try {
     const { data: stableData, error } = await supabase
       .from(TABLE)
-      .select('od_dates,manual_adjs,updated_at')
+      .select('od_dates,manual_adjs,update_v1_dismissed,updated_at')
       .eq('user_key', userKey)
       .maybeSingle();
 
@@ -110,6 +110,7 @@ router.get('/od-state', requireAuth, async (req, res) => {
       regNumber: normalizedRegNumber,
       odDates: Array.isArray(data?.od_dates) ? data.od_dates : [],
       manualAdjs: data?.manual_adjs && typeof data.manual_adjs === 'object' ? data.manual_adjs : {},
+      updateV1Dismissed: !!data?.update_v1_dismissed,
       updatedAt: data?.updated_at || null,
       source: data ? 'supabase' : 'default',
       syncEnabled: true,
@@ -147,6 +148,7 @@ router.put('/od-state', requireAuth, async (req, res) => {
       reg_number: normalizedRegNumber,
       od_dates: odDates,
       manual_adjs: manualAdjs,
+      update_v1_dismissed: !!req.body.updateV1Dismissed,
       updated_at: new Date().toISOString(),
     };
 
