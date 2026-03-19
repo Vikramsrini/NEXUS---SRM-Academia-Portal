@@ -390,7 +390,7 @@
 
 .dropdown-reg {
   font-size: 12px;
-  color: var(--text-tertiary);
+  color: var(--text-primary);
   font-weight: 600;
   letter-spacing: 0.02em;
 }
@@ -416,8 +416,8 @@
 
 .dropdown-detail-label {
   font-size: 10px;
-  font-weight: 700;
-  color: var(--text-tertiary);
+  font-weight: 800;
+  color: var(--text-primary);
   text-transform: uppercase;
   letter-spacing: 0.06em;
   flex-shrink: 0;
