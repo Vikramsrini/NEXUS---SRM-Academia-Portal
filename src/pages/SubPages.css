@@ -2200,6 +2200,13 @@
   gap: 10px;
 }
 
+@media (max-width: 480px) {
+  .date-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
+
 .input-field {
   display: flex;
   flex-direction: column;
