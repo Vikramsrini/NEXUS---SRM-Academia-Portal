@@ -298,8 +298,10 @@ export default function Dashboard({ children }) {
 
   const handleLogout = () => {
     const theme = localStorage.getItem('academia_theme');
+    const updateDismissed = localStorage.getItem('academia_update_v1_dismissed');
     localStorage.clear();
     if (theme) localStorage.setItem('academia_theme', theme);
+    if (updateDismissed) localStorage.setItem('academia_update_v1_dismissed', updateDismissed);
     navigate('/');
   };
 
