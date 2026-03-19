@@ -744,11 +744,11 @@ export default function Dashboard({ children }) {
           <div className="warning-icon-wrap" style={{ background: 'var(--badge-red-bg)', color: 'var(--badge-red-text)', marginBottom: '16px' }}>
             {Icons.warning}
           </div>
-          <h2 style={{ fontSize: '1.25rem', fontWeight: '800', letterSpacing: '-0.02em', marginBottom: '8px' }}>Session Expired</h2>
+          <h2 style={{ fontSize: '1.25rem', fontWeight: '800', letterSpacing: '-0.02em', marginBottom: '8px' }}>NEXUS Security</h2>
         </header>
         <div className="apple-modal-body" style={{ textAlign: 'center', marginBottom: '24px' }}>
-          <p className="primary-text" style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '8px' }}>We couldn&apos;t load your student profile or your session has expired.</p>
-          <p className="secondary-text" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Please sign in again to continue accessing your academic portal.</p>
+          <p className="primary-text" style={{ fontSize: '0.95rem', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '8px' }}>Your authentication session has timed out.</p>
+          <p className="secondary-text" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>To protect your academic data, please sign in again to re-sync with SRM Academia.</p>
         </div>
         <footer className="apple-modal-footer">
           <button className="apple-btn primary full-width" onClick={handleLogout} style={{ padding: '14px' }}>Sign In Again</button>
