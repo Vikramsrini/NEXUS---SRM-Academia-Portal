@@ -4,7 +4,7 @@ create table if not exists public.od_user_state (
   reg_number text not null,
   od_dates jsonb not null default '[]'::jsonb,
   manual_adjs jsonb not null default '{}'::jsonb,
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default (now() at time zone 'utc' at time zone 'Asia/Kolkata')
 );
 
 create index if not exists od_user_state_reg_number_idx
@@ -16,7 +16,7 @@ create table if not exists public.cgpa_user_state (
   selected_regulation text not null default '',
   selected_course text not null default '',
   semester_inputs jsonb not null default '{}'::jsonb,
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default (now() at time zone 'utc' at time zone 'Asia/Kolkata')
 );
 
 create index if not exists cgpa_user_state_updated_at_idx
@@ -34,7 +34,7 @@ create table if not exists public.timetable_user_state (
   user_key text primary key,
   reg_number text not null,
   hidden_classes jsonb not null default '[]'::jsonb,
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default (now() at time zone 'utc' at time zone 'Asia/Kolkata')
 );
 
 create index if not exists timetable_user_state_reg_number_idx
@@ -43,7 +43,7 @@ create index if not exists timetable_user_state_reg_number_idx
 create table if not exists public.global_calendar (
   id int primary key default 1,
   data jsonb not null,
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default (now() at time zone 'utc' at time zone 'Asia/Kolkata')
 );
 
 -- Ensure there is only one row for the global calendar
