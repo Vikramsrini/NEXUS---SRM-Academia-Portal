@@ -812,24 +812,22 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 4px 0 0;
-  border-top: 1px solid var(--border-secondary);
+  padding: 8px 4px 2px;
+  gap: 4px;
+  flex-wrap: wrap;
 }
 
 .marks-graph-labels span {
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-}
-
-.marks-graph-labels span {
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   font-weight: 700;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--surface-secondary);
+  border: 1px solid var(--border-secondary);
+  white-space: nowrap;
 }
 
 
@@ -859,33 +857,47 @@
 .marks-card-apple .exams-list {
   display: flex;
   flex-direction: column;
-  padding: 0 20px 16px;
-  gap: 0;
+  padding: 0 16px 16px;
+  gap: 6px;
 }
 
 .marks-card-apple .exam-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--border-secondary);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-secondary);
+  border: 1px solid var(--border-secondary);
+  gap: 12px;
+  transition: background var(--transition-fast);
+}
+
+.marks-card-apple .exam-row:hover {
+  background: var(--surface-tertiary);
 }
 
 .marks-card-apple .exam-row:last-child {
-  border-bottom: none;
+  border-bottom: 1px solid var(--border-secondary);
 }
 
 .marks-card-apple .exam-row .exam-name {
-  font-size: 0.8rem;
-  font-weight: 500;
+  font-size: 0.78rem;
+  font-weight: 600;
   color: var(--text-secondary);
+  letter-spacing: 0.01em;
 }
 
 .marks-card-apple .exam-row .exam-val {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--accent);
   font-variant-numeric: tabular-nums;
+  background: var(--accent-subtle);
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
 }
 
 
