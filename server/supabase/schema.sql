@@ -40,4 +40,11 @@ create table if not exists public.timetable_user_state (
 create index if not exists timetable_user_state_reg_number_idx
   on public.timetable_user_state (reg_number);
 
+create table if not exists public.global_calendar (
+  id int primary key default 1,
+  data jsonb not null,
+  updated_at timestamptz not null default now()
+);
 
+-- Ensure there is only one row for the global calendar
+create unique index if not exists global_calendar_single_row_idx on public.global_calendar (id);

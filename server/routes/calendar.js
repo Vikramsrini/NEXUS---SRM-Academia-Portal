@@ -1,115 +1,128 @@
-// ═══════════════════════════════════════════════════════════════════════
-// Routes — Academic Calendar
-// ═══════════════════════════════════════════════════════════════════════
-
 import { Router } from 'express';
 import axios from 'axios';
 import { requireAuth } from '../middleware/authToken.js';
 import { getCalendarUrls, parseSrmCalendar } from '../scrapers/calendar.js';
+import { getSupabaseAdmin } from '../lib/supabase.js';
 
 const router = Router();
+const SYNC_THRESHOLD_MS = 1000 * 60 * 60 * 24 * 7; // Weekly refresh
 
 /**
- * Fetch calendar with multiple strategies:
- * 1. Authenticated fetch (with user's session cookie)
- * 2. Authenticated fetch with different Accept header
- * 3. Direct POST-based fetch (Zoho Creator embed style)
+ * Fetch calendar with multiple strategies
  */
 async function fetchCalendarPage(authCookie, url) {
-  // Strategy 1: Standard authenticated GET
+  // Strategy 1: Standard XHR
   try {
     const response = await axios({
       method: 'GET',
       url,
       headers: {
         'accept': '*/*',
-        'accept-language': 'en-US,en;q=0.9',
-        'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        'sec-fetch-dest': 'empty',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-origin',
-        'x-requested-with': 'XMLHttpRequest',
         'cookie': authCookie,
         'Referer': 'https://academia.srmist.edu.in/',
-        'Referrer-Policy': 'strict-origin-when-cross-origin',
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
       },
-      timeout: 15000,
-      maxRedirects: 5,
+      timeout: 10000,
     });
-
     const data = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
+    if (data.includes('Academic_Planner') || data.includes('zmlvalue')) return data;
+  } catch (e) {}
 
-    // Check if we got the actual page (not login page)
-    if (data.includes('Academic_Planner') || data.includes('zmlvalue') || data.includes('pageSanitizer')
-        || data.includes('#FAFCFE') || data.includes('FAFCFE')
-        || (data.includes('table') && !data.includes('Academic Web Services Login'))) {
-      return data;
-    }
-  } catch (e) {
-    console.log('[Calendar] Strategy 1 failed:', e.message);
-  }
-
-  // Strategy 2: Fetch as HTML document (not XHR)
+  // Strategy 2: HTML document
   try {
     const response = await axios({
       method: 'GET',
       url,
       headers: {
-        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
-        'accept-language': 'en-US,en;q=0.9',
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
         'cookie': authCookie,
-        'Referer': 'https://academia.srmist.edu.in/',
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
       },
-      timeout: 15000,
-      maxRedirects: 5,
+      timeout: 10000,
     });
-
     const data = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
-    if (!data.includes('Academic Web Services Login')) {
-      return data;
-    }
-  } catch (e) {
-    console.log('[Calendar] Strategy 2 failed:', e.message);
-  }
+    if (data.includes('Academic_Planner') || data.includes('zmlvalue')) return data;
+  } catch (e) {}
 
   return null;
 }
 
 router.get('/calendar', requireAuth, async (req, res) => {
-  const urls = getCalendarUrls();
+  const supabase = getSupabaseAdmin();
+  const forceRefresh = req.query.refresh === '1';
 
-  for (const url of urls) {
+  // 1. Try Shared Cache (Supabase)
+  if (!forceRefresh && supabase) {
     try {
-      console.log('[Calendar] Trying:', url);
-      const rawData = await fetchCalendarPage(req.authCookie, url);
+      const { data, error } = await supabase
+        .from('global_calendar')
+        .select('*')
+        .eq('id', 1)
+        .maybeSingle();
 
-      if (!rawData) {
-        console.log('[Calendar] No valid data from:', url);
-        continue;
+      if (data && data.data) {
+        const age = Date.now() - new Date(data.updated_at).getTime();
+        if (age < SYNC_THRESHOLD_MS) {
+          console.log('[Calendar] Returning shared global cache');
+          return res.json(data.data);
+        }
+        console.log('[Calendar] Global cache expired, attempting background sync...');
       }
-
-      const parsed = parseSrmCalendar(rawData);
-      if (parsed.error) {
-        console.log('[Calendar] Parse failed for', url, ':', parsed.error);
-        continue;
-      }
-
-      if (parsed.calendar?.length > 0) {
-        console.log('[Calendar] Success from:', url);
-        return res.json(parsed);
-      }
-    } catch (e) {
-      console.log('[Calendar] Error for', url, '-', e.message);
+    } catch (dbErr) {
+      console.error('[Calendar DB Error]', dbErr.message);
     }
   }
 
-  // If all fetch attempts fail, return a helpful error with context
+  // 2. Fetch Fresh Data (Scraper)
+  const urls = getCalendarUrls();
+  let freshParsed = null;
+
+  for (const url of urls) {
+    try {
+      const rawData = await fetchCalendarPage(req.authCookie, url);
+      if (!rawData) continue;
+
+      const parsed = parseSrmCalendar(rawData);
+      if (parsed.calendar?.length > 0) {
+        freshParsed = parsed;
+        break;
+      }
+    } catch (e) {
+      console.log('[Calendar Scraper Error]', url, e.message);
+    }
+  }
+
+  // 3. Sync to Shared Cache and Return
+  if (freshParsed) {
+    if (supabase) {
+      try {
+        await supabase.from('global_calendar').upsert({
+          id: 1,
+          data: freshParsed,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'id' });
+        console.log('[Calendar] Shared global cache updated');
+      } catch (saveErr) {
+        console.error('[Calendar DB Sync Error]', saveErr.message);
+      }
+    }
+    return res.json(freshParsed);
+  }
+
+  // 4. Fallback to stale cache if scraper failed
+  if (supabase) {
+    try {
+       const { data } = await supabase.from('global_calendar').select('*').eq('id', 1).maybeSingle();
+       if (data && data.data) {
+         console.log('[Calendar] Scraper failed, serving stale global data');
+         return res.json({ ...data.data, stale: true, fetchedAt: data.updated_at });
+       }
+    } catch (e) {}
+  }
+
   res.status(502).json({
     error: 'Calendar data unavailable',
-    detail: 'Session may have expired. Please re-login and try again.',
-    triedUrls: urls,
+    detail: 'Failed to fetch current academic calendar and no valid cache found.'
   });
 });
 
