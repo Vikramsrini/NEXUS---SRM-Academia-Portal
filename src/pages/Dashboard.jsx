@@ -420,17 +420,19 @@ export default function Dashboard({ children }) {
     let hidden = [];
     try { hidden = JSON.parse(localStorage.getItem('academia_hidden_classes') || '[]'); } catch { hidden = []; }
 
-    return timetable.filter(item => {
-      const isToday = item.dayOrder.replace(/\s+/g, '').toUpperCase() === currentDayOrder.toUpperCase();
-      const id = `${item.courseCode}_${item.time}_${item.dayOrder || item.day}`;
-      return isToday && !hidden.includes(id);
-    });
+    return timetable
+      .filter(item => item.dayOrder.replace(/\s+/g, '').toUpperCase() === currentDayOrder.toUpperCase())
+      .map(item => {
+        const id = `${item.courseCode}_${item.time}_${item.dayOrder || item.day}`;
+        return { ...item, isOptional: hidden.includes(id) };
+      });
   };
 
   const todaySchedule = getTodaySchedule();
   const sortedSchedule = [...todaySchedule].sort((a, b) =>
     parseTime(a.time.split(' - ')[0]) - parseTime(b.time.split(' - ')[0])
   );
+  const activeClasses = todaySchedule.filter(i => !i.isOptional);
 
   const resolveAttendanceType = (a) => {
     const code = normalizeCourseCode(a.courseCode);
@@ -577,7 +579,7 @@ export default function Dashboard({ children }) {
     const manualAdjs = getStoredJson('academia_attendance_adjs', {});
     
     // Minimal simplified Skip logic for Home page
-    const results = sortedSchedule.map(cls => {
+    const results = activeClasses.map(cls => {
       const clsCode = normalizeCourseCode(cls.courseCode);
       const clsType = normalizeSlot(cls.slotType).label;
       
@@ -629,6 +631,8 @@ export default function Dashboard({ children }) {
     if (!todaySchedule.length) return null;
 
     for (const item of todaySchedule) {
+      if (item.isOptional) continue;
+      
       const [startStr, endStr] = item.time.split(' - ');
       const start = parseTime(startStr);
       const end = parseTime(endStr);
@@ -649,6 +653,7 @@ export default function Dashboard({ children }) {
 
   const nextClass = (() => {
     for (const item of sortedSchedule) {
+      if (item.isOptional) continue;
       const start = parseTime(item.time.split(' - ')[0]);
       if (start > currentTime) return item;
     }
@@ -661,7 +666,7 @@ export default function Dashboard({ children }) {
   const mobileSheetOpen = isMobile && (profileOpen || mobileMoreOpen);
 
   const mobileHeaderMeta = isOverview
-    ? (currentDayOrder ? `${currentDayOrder} • ${todaySchedule.length} class${todaySchedule.length !== 1 ? 'es' : ''} today` : 'No classes scheduled today')
+    ? (currentDayOrder ? `${currentDayOrder} • ${activeClasses.length} class${activeClasses.length !== 1 ? 'es' : ''} today` : 'No classes scheduled today')
     : (student.regNumber || 'Student workspace');
 
   const renderProfileCard = () => (
@@ -931,7 +936,7 @@ export default function Dashboard({ children }) {
                   <div>
                     <h3>Today's Schedule</h3>
                     {currentDayOrder && (
-                      <p className="section-subhead">{currentDayOrder} • {todaySchedule.length} class{todaySchedule.length !== 1 ? 'es' : ''} scheduled</p>
+                      <p className="section-subhead">{currentDayOrder} • {activeClasses.length} class{activeClasses.length !== 1 ? 'es' : ''} scheduled</p>
                     )}
                   </div>
                   {currentDayOrder && <span className="day-order-badge">{currentDayOrder}</span>}
@@ -996,10 +1001,16 @@ export default function Dashboard({ children }) {
                       {sortedSchedule.map((item, idx) => {
                         const isActive = currentClass && currentClass.courseCode === item.courseCode && currentClass.time === item.time;
                         return (
-                          <div key={idx} className={`sched-row ${isActive ? 'sched-row-active' : ''}`}>
-                            <span className="sched-time">{item.time.split(' - ')[0]}</span>
+                          <div key={idx} className={`sched-row ${isActive ? 'sched-row-active' : ''}`} style={item.isOptional ? { opacity: 0.5 } : {}}>
+                            <div className="sched-time" style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: '70px' }}>
+                               <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{item.time.split(' - ')[0]}</span>
+                               <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>{item.time.split(' - ')[1]}</span>
+                            </div>
                             <div className="sched-info">
-                              <span className="sched-name">{item.subject}</span>
+                              <span className="sched-name" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                                {item.subject}
+                                {item.isOptional && <span style={{ fontSize: '0.65rem', padding: '2px 6px', background: 'var(--surface-tertiary)', borderRadius: '6px', color: 'var(--text-secondary)' }}>Optional</span>}
+                              </span>
                               <span className="sched-code">{item.courseCode.startsWith('21') ? item.courseCode : `21${item.courseCode}`} • {item.room}</span>
                             </div>
                             <span className="sched-type">{item.slotType}</span>
