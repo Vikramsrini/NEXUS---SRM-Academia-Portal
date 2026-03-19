@@ -297,7 +297,9 @@ export default function Dashboard({ children }) {
   }, [activePath, isMobile]);
 
   const handleLogout = () => {
+    const theme = localStorage.getItem('academia_theme');
     localStorage.clear();
+    if (theme) localStorage.setItem('academia_theme', theme);
     navigate('/');
   };
 
