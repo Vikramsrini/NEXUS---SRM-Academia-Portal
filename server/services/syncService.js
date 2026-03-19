@@ -89,7 +89,7 @@ export async function performFullSync(authCookie, sessionId, sendStatus = () => 
 
     // Final Default
     if (!result.userInfo.name || result.userInfo.name.trim().length <= 2) {
-      result.userInfo.name = 'SRM Student';
+      result.userInfo.name = '';
     }
 
     return result;
