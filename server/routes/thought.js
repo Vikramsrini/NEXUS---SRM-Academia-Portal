@@ -147,9 +147,9 @@ async function fetchThoughtFromMistral() {
     messages: [
       {
         role: 'system',
-        content: `You generate a daily quote. 
-- Topic: Varies daily (discipline, science, resilience, kindness, technology, or philosophy). 
-- Goal: Keep it diverse and avoid repetitive "sunrise" or "good morning" themes. 
+        content: `You generate a daily motivational quote for university students. 
+- Topic: Academic success, discipline, overcoming failure, consistency, time management, or focus. 
+- Goal: Empower students to keep pushing. Avoid generic "good morning" or "sunrise" themes.
 - Format: Under 160 characters. Provide strictly JSON: {"thought":"...","author":"..."}.`,
       },
       {
@@ -207,7 +207,7 @@ router.get('/thought-of-the-day', async (req, res) => {
           author: data.author || '',
           fetchedAt: data.fetched_at || null,
         };
-        await saveCacheToDisk().catch(() => {});
+        await saveCacheToDisk().catch(() => { });
         return res.json({
           ...dailyThoughtCache,
           fromCache: true,
@@ -247,7 +247,7 @@ router.get('/thought-of-the-day', async (req, res) => {
           }
         }
 
-        await saveCacheToDisk().catch(() => {});
+        await saveCacheToDisk().catch(() => { });
         return dailyThoughtCache;
       })().finally(() => {
         refreshInFlight = null;

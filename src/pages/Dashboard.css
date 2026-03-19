@@ -1376,6 +1376,19 @@
     letter-spacing: 0.02em;
   }
 
+  .mobile-day-order-pill {
+    display: inline-flex;
+    padding: 3px 10px;
+    background: var(--accent);
+    color: white;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 800;
+    width: fit-content;
+    box-shadow: 0 4px 10px var(--accent-glow);
+    margin-top: 2px;
+  }
+
   .top-bar-container.mobile-top-bar .top-bar-actions {
     gap: 8px;
     flex-shrink: 0;
@@ -1617,8 +1630,12 @@
   }
 
   .day-order-badge {
-    display: none;
-    /* Redundant in mobile section header */
+    display: flex;
+    padding: 3px 8px;
+    border-radius: 6px;
+    background: var(--accent);
+    color: white;
+    font-size: 10px;
   }
 
   .mobile-top-shell {
