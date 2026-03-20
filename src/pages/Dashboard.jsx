@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../ThemeContext';
@@ -188,6 +188,10 @@ export default function Dashboard({ children }) {
   }, [student.timetable]);
 
   useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+
     const handleResize = () => {
       const mobile = window.innerWidth <= 768;
       setIsMobile(mobile);
@@ -368,14 +372,17 @@ export default function Dashboard({ children }) {
   }, [isMobile, profileOpen, mobileMoreOpen]);
 
   // ── Tab Navigation Reset ──────────────────────────────────────────
-  useEffect(() => {
+  useLayoutEffect(() => {
+    // We use useLayoutEffect to ensure the scroll reset happens BEFORE the browser paints,
+    // avoiding the unpleasant visual of the page jumping or scrolling to the top.
     const el = mainContentRef.current;
     if (el) {
-      el.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      el.scrollTop = 0;
+      el.scrollLeft = 0;
     }
     
     if (isMobile) {
-      // Hide bars after path change
+      // Hide browser bars for immersive feel
       setTimeout(() => window.scrollTo(0, 1), 50);
     } else {
       window.scrollTo(0, 0);
