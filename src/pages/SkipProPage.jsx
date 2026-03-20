@@ -292,14 +292,6 @@ export default function SkipProPage() {
           <h1 className="subpage-title">Skip Now</h1>
           <p className="subpage-desc">Projection analysis through {lastWorkingDay}.</p>
         </div>
-        <div className="skippro-target-wrap">
-          <span className="target-label">Target</span>
-          <select value={targetPct} onChange={e => setTargetPct(Number(e.target.value))}>
-            {[65, 75, 80, 85, 90, 95].map(v => (
-              <option key={v} value={v}>{v}%</option>
-            ))}
-          </select>
-        </div>
       </div>
 
 
