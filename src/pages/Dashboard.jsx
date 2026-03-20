@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo } from 'react';
+import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../ThemeContext';
@@ -140,6 +140,8 @@ export default function Dashboard({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 768);
   const [profileOpen, setProfileOpen] = useState(false);
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
+  const [mobileNavPulseId, setMobileNavPulseId] = useState('');
+  const mobileNavAnimationRef = useRef(null);
   const [syncing, setSyncing] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [thoughtOfDay, setThoughtOfDay] = useState(null);
@@ -148,7 +150,7 @@ export default function Dashboard({ children }) {
   const [showUpdateModal, setShowUpdateModal] = useState(() => {
     return !localStorage.getItem('academia_update_v1_dismissed');
   });
-  const student = getStudentData();
+  const [student, setStudent] = useState(getStudentData);
   const displayName = student.name || 'User';
 
   useEffect(() => {
@@ -252,26 +254,101 @@ export default function Dashboard({ children }) {
     };
   }, []);
 
-  // ── Automatic Hourly Sync ──────────────────────────────────────────
+  const handleSync = useCallback(async () => {
+    if (syncing) return;
+    setSyncing(true);
+
+    const token = localStorage.getItem('academia_token');
+    const netid = localStorage.getItem('academia_netid');
+    const pwd = localStorage.getItem('academia_password') ? atob(localStorage.getItem('academia_password')) : null;
+
+    if (!token) {
+      setSyncError(true);
+      setSyncing(false);
+      return;
+    }
+
+    try {
+      const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000/api';
+      
+      // Try Fast Sync first
+      const res = await fetch(`${API_BASE}/auth/sync-fast`, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (!res.ok && netid && pwd) {
+        // Fallback to full re-auth sync if fast sync fails
+        const fullRes = await fetch(`${API_BASE}/auth/sync`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: netid, password: pwd }),
+        });
+        if (!fullRes.ok) throw new Error('Refresh failed');
+        const fullData = await fullRes.json();
+        localStorage.setItem('academia_token', fullData.token);
+        localStorage.setItem('academia_student', JSON.stringify(fullData.student_data));
+      } else if (res.ok) {
+        const data = await res.json();
+        localStorage.setItem('academia_student', JSON.stringify(data.student_data));
+      } else {
+        throw new Error('Session expired');
+      }
+
+      localStorage.setItem('academia_login_time', new Date().toISOString());
+      
+      // Update local state to trigger reactive updates in all components 
+      // without needing a full page reload (which would reset the view to home/top)
+      const updatedStudent = getStudentData();
+      setStudent(updatedStudent);
+      setSyncing(false);
+    } catch (err) {
+      console.error('Refresh error:', err);
+      setSyncError(true);
+      setSyncing(false);
+    }
+  }, [syncing]); // syncing check is internal, but we include it for completeness
+
+  // ── Automatic Sync (Hourly + Refresh) ──────────────────────────────
   useEffect(() => {
-    // Check if we already synced recently to avoid reload loops
+    // 1. Detect Browser Refresh
+    const navigationEntries = performance.getEntriesByType('navigation');
+    const isRefresh = navigationEntries.length > 0 && navigationEntries[0].type === 'reload';
+    
+    // We use a sessionStorage flag to ensure we only sync ONCE per refresh event
+    const hasSyncedThisRefresh = sessionStorage.getItem('academia_refresh_synced');
+
+    if (isRefresh && !hasSyncedThisRefresh) {
+      console.log('[Auto Sync] Browser refresh detected. Triggering data sync...');
+      sessionStorage.setItem('academia_refresh_synced', 'true');
+      handleSync();
+    } else if (!isRefresh) {
+      // Clear flag on normal navigation
+      sessionStorage.removeItem('academia_refresh_synced');
+    }
+
+    // 2. Check if we already synced recently (for non-refresh loads)
     const lastSyncStr = localStorage.getItem('academia_login_time');
     const lastSyncTime = lastSyncStr ? new Date(lastSyncStr).getTime() : 0;
     const timeSinceSync = Date.now() - lastSyncTime;
     const SYNC_THRESHOLD = 58 * 60 * 1000; // 58 minutes
 
-    if (timeSinceSync >= SYNC_THRESHOLD) {
-      console.log('[Auto Sync] Site just loaded and last sync was old. Fetching fresh data...');
+    if (!isRefresh && timeSinceSync >= SYNC_THRESHOLD) {
+      console.log('[Auto Sync] Site loaded and last sync was old. Fetching fresh data...');
       handleSync();
     }
 
+    // 3. Setup Hourly Interval
     const autoSyncInterval = setInterval(() => {
-      console.log('[Auto Sync] Interval heartbeat: Hourly update triggered.');
+      console.log('[Auto Sync] Hourly heartbeat triggered.');
       handleSync();
     }, 60 * 60 * 1000);
 
     return () => clearInterval(autoSyncInterval);
-  }, []);
+  }, [handleSync]);
 
   useEffect(() => {
     setProfileOpen(false);
@@ -317,67 +394,29 @@ export default function Dashboard({ children }) {
     navigate('/');
   };
 
-  const handleSync = async () => {
-    if (syncing) return;
-    setSyncing(true);
-
-    const token = localStorage.getItem('academia_token');
-    const netid = localStorage.getItem('academia_netid');
-    const pwd = localStorage.getItem('academia_password') ? atob(localStorage.getItem('academia_password')) : null;
-
-    if (!token) {
-      setSyncError(true);
-      return;
-    }
-
-    try {
-      const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000/api';
-      
-      // Try Fast Sync first
-      const res = await fetch(`${API_BASE}/auth/sync-fast`, {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (!res.ok && netid && pwd) {
-        // Fallback to full re-auth sync if fast sync fails
-        const fullRes = await fetch(`${API_BASE}/auth/sync`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username: netid, password: pwd }),
-        });
-        if (!fullRes.ok) throw new Error('Refresh failed');
-        const fullData = await fullRes.json();
-        localStorage.setItem('academia_token', fullData.token);
-        localStorage.setItem('academia_student', JSON.stringify(fullData.student_data));
-      } else if (res.ok) {
-        const data = await res.json();
-        localStorage.setItem('academia_student', JSON.stringify(data.student_data));
-      } else {
-        throw new Error('Session expired');
-      }
-
-      localStorage.setItem('academia_login_time', new Date().toISOString());
-      
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
-    } catch (err) {
-      console.error('Refresh error:', err);
-      setSyncError(true);
-      setSyncing(false);
-    }
-  };
 
   const closeMobilePanels = () => {
     setMobileMoreOpen(false);
     setProfileOpen(false);
   };
 
-  const handleNavClick = (path) => {
+  const triggerMobileNavPulse = (id) => {
+    if (!id) return;
+    window.clearTimeout(mobileNavAnimationRef.current);
+    setMobileNavPulseId(id);
+    mobileNavAnimationRef.current = window.setTimeout(() => {
+      setMobileNavPulseId('');
+    }, 460);
+  };
+
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(mobileNavAnimationRef.current);
+    };
+  }, []);
+
+  const handleNavClick = (path, navId = '') => {
+    if (isMobile && navId) triggerMobileNavPulse(navId);
     navigate(path);
     if (isMobile) closeMobilePanels();
   };
@@ -549,6 +588,11 @@ export default function Dashboard({ children }) {
         const codeMatch = !!lowCode && !!clsCode && lowCode === clsCode;
         const titleMatch = !!lowTitle && !!clsSubject && (lowTitle.includes(clsSubject) || clsSubject.includes(lowTitle));
         const typeMatch = lowType === clsType;
+
+        // Skip if this specific class instance has already ended
+        const endTime = parseTime(cls.time.split(' - ')[1]);
+        if (currentTime > endTime) return false;
+
         return typeMatch && (codeMatch || titleMatch);
       });
     });
@@ -864,8 +908,8 @@ export default function Dashboard({ children }) {
           {NAV_ITEMS.map(item => (
             <div
               key={item.id}
-              className={`sidebar-item ${activePath === item.path ? 'active' : ''}`}
-              onClick={() => handleNavClick(item.path)}
+              className={`sidebar-item ${activePath === item.path ? 'active' : ''} ${mobileNavPulseId === item.id ? 'tap-burst' : ''}`}
+              onClick={() => handleNavClick(item.path, item.id)}
             >
               <span className="sidebar-item-icon">{item.icon}</span>
               <span className="sidebar-item-label">{item.label}</span>
@@ -1061,8 +1105,8 @@ export default function Dashboard({ children }) {
               {mobileSecondaryNav.map(item => (
                 <button
                   key={item.id}
-                  className={`mobile-more-card ${activePath === item.path ? 'active' : ''}`}
-                  onClick={() => handleNavClick(item.path)}
+                  className={`mobile-more-card ${activePath === item.path ? 'active' : ''} ${mobileNavPulseId === item.id ? 'tap-burst' : ''}`}
+                  onClick={() => handleNavClick(item.path, item.id)}
                 >
                   <span className="mobile-more-card-icon">{item.icon}</span>
                   <span className="mobile-more-card-title">{item.label}</span>
@@ -1077,16 +1121,17 @@ export default function Dashboard({ children }) {
             {mobilePrimaryNav.map(item => (
               <button
                 key={item.id}
-                className={`mobile-tabbar-item ${activePath === item.path && !mobileMoreOpen ? 'active' : ''}`}
-                onClick={() => handleNavClick(item.path)}
+                className={`mobile-tabbar-item ${activePath === item.path && !mobileMoreOpen ? 'active' : ''} ${mobileNavPulseId === item.id ? 'tap-burst' : ''}`}
+                onClick={() => handleNavClick(item.path, item.id)}
               >
                 <span className="mobile-tabbar-icon">{item.icon}</span>
                 <span className="mobile-tabbar-label">{item.label}</span>
               </button>
             ))}
             <button
-              className={`mobile-tabbar-item ${mobileMoreActive || mobileMoreOpen ? 'active' : ''}`}
+              className={`mobile-tabbar-item ${mobileMoreActive || mobileMoreOpen ? 'active' : ''} ${mobileNavPulseId === 'more' ? 'tap-burst' : ''}`}
               onClick={() => {
+                triggerMobileNavPulse('more');
                 setProfileOpen(false);
                 setMobileMoreOpen(!mobileMoreOpen);
               }}
