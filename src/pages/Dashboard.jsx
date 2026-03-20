@@ -836,6 +836,17 @@ export default function Dashboard({ children }) {
     </div>
   );
 
+  const renderDeveloperInfo = (variant = '') => (
+    <div className={`dev-footer ${variant}`}>
+      <span className="dev-text">Developed by Vikram</span>
+      <div className="dev-links">
+        <a href="https://www.instagram.com/_vikram_srini_" target="_blank" rel="noreferrer" className="dev-link">{Icons.instagram}</a>
+        <a href="https://www.linkedin.com/in/vikram-srinivas-60a75b204" target="_blank" rel="noreferrer" className="dev-link">{Icons.linkedin}</a>
+        <a href="https://github.com/Vikramsrini" target="_blank" rel="noreferrer" className="dev-link">{Icons.github}</a>
+      </div>
+    </div>
+  );
+
   return (
     <div className={`dashboard-layout ${!isMobile && !sidebarOpen ? 'sidebar-collapsed' : ''} ${isMobile ? 'mobile-layout' : ''}`}>
       {showUpdateModal && createPortal(renderUpdateModal(), document.body)}
@@ -861,6 +872,8 @@ export default function Dashboard({ children }) {
             </div>
           ))}
         </nav>
+
+        {renderDeveloperInfo('sidebar-mode')}
       </aside>
 
       <main className="main-content" ref={mainContentRef}>
@@ -1025,40 +1038,7 @@ export default function Dashboard({ children }) {
                   </div>
                 )}
               </div>
-
-              <footer className="home-footer" aria-label="Developer links">
-                <p className="home-footer-text">Developed by Vikram S</p>
-                <div className="home-footer-links">
-                  <a
-                    className="home-footer-link"
-                    href="https://www.instagram.com/_vikram_srini_"
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label="Vikram S Instagram profile"
-                  >
-                    {Icons.instagram}
-                  </a>
-                  <a
-                    className="home-footer-link"
-                    href="https://www.linkedin.com/in/vikram-srinivas-60a75b204"
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label="Vikram S LinkedIn profile"
-                  >
-                    {Icons.linkedin}
-                  </a>
-                  <a
-                    className="home-footer-link"
-                    href="https://github.com/Vikramsrini"
-                    target="_blank"
-                    rel="noreferrer"
-                    aria-label="Vikram S GitHub profile"
-                  >
-                    {Icons.github}
-                  </a>
-                </div>
-
-              </footer>
+              {isMobile && renderDeveloperInfo('mobile-home-mode')}
             </div>
           ) : children}
         </div>
