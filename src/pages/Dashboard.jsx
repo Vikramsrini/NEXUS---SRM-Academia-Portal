@@ -143,6 +143,7 @@ export default function Dashboard({ children }) {
   const [mobileNavPulseId, setMobileNavPulseId] = useState('');
   const mobileNavAnimationRef = useRef(null);
   const [syncing, setSyncing] = useState(false);
+  const syncingRef = useRef(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [thoughtOfDay, setThoughtOfDay] = useState(null);
   const [thoughtLoading, setThoughtLoading] = useState(true);
@@ -255,7 +256,8 @@ export default function Dashboard({ children }) {
   }, []);
 
   const handleSync = useCallback(async () => {
-    if (syncing) return;
+    if (syncingRef.current) return;
+    syncingRef.current = true;
     setSyncing(true);
 
     const token = localStorage.getItem('academia_token');
@@ -265,6 +267,7 @@ export default function Dashboard({ children }) {
     if (!token) {
       setSyncError(true);
       setSyncing(false);
+      syncingRef.current = false;
       return;
     }
 
@@ -301,53 +304,47 @@ export default function Dashboard({ children }) {
       localStorage.setItem('academia_login_time', new Date().toISOString());
       
       // Update local state to trigger reactive updates in all components 
-      // without needing a full page reload (which would reset the view to home/top)
       const updatedStudent = getStudentData();
       setStudent(updatedStudent);
-      setSyncing(false);
     } catch (err) {
       console.error('Refresh error:', err);
       setSyncError(true);
+    } finally {
       setSyncing(false);
+      syncingRef.current = false;
     }
-  }, [syncing]); // syncing check is internal, but we include it for completeness
+  }, []); // Stable callback
 
-  // ── Automatic Sync (Hourly + Refresh) ──────────────────────────────
+  // ── Automatic Sync (On Load, Visibility & Periodic) ────────────────
   useEffect(() => {
-    // 1. Detect Browser Refresh
-    const navigationEntries = performance.getEntriesByType('navigation');
-    const isRefresh = navigationEntries.length > 0 && navigationEntries[0].type === 'reload';
-    
-    // We use a sessionStorage flag to ensure we only sync ONCE per refresh event
-    const hasSyncedThisRefresh = sessionStorage.getItem('academia_refresh_synced');
+    // 1. Sync immediately on mount (covers initial load and browser refresh)
+    console.log('[Auto Sync] Dashboard mounted. Triggering data sync...');
+    handleSync();
 
-    if (isRefresh && !hasSyncedThisRefresh) {
-      console.log('[Auto Sync] Browser refresh detected. Triggering data sync...');
-      sessionStorage.setItem('academia_refresh_synced', 'true');
-      handleSync();
-    } else if (!isRefresh) {
-      // Clear flag on normal navigation
-      sessionStorage.removeItem('academia_refresh_synced');
-    }
+    // 2. Sync whenever the app becomes visible again (e.g. switching back to tab)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // We sync if it's been more than 2 minutes since last sync to avoid over-syncing
+        const lastSyncStr = localStorage.getItem('academia_login_time');
+        const lastSyncTime = lastSyncStr ? new Date(lastSyncStr).getTime() : 0;
+        if (Date.now() - lastSyncTime > 2 * 60 * 1000) {
+          console.log('[Auto Sync] App resumed from background. Syncing data...');
+          handleSync();
+        }
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    // 2. Check if we already synced recently (for non-refresh loads)
-    const lastSyncStr = localStorage.getItem('academia_login_time');
-    const lastSyncTime = lastSyncStr ? new Date(lastSyncStr).getTime() : 0;
-    const timeSinceSync = Date.now() - lastSyncTime;
-    const SYNC_THRESHOLD = 58 * 60 * 1000; // 58 minutes
-
-    if (!isRefresh && timeSinceSync >= SYNC_THRESHOLD) {
-      console.log('[Auto Sync] Site loaded and last sync was old. Fetching fresh data...');
-      handleSync();
-    }
-
-    // 3. Setup Hourly Interval
+    // 3. Periodic heartbeat sync (every 30 minutes)
     const autoSyncInterval = setInterval(() => {
-      console.log('[Auto Sync] Hourly heartbeat triggered.');
+      console.log('[Auto Sync] Periodic heartbeat triggered.');
       handleSync();
-    }, 60 * 60 * 1000);
+    }, 30 * 60 * 1000);
 
-    return () => clearInterval(autoSyncInterval);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearInterval(autoSyncInterval);
+    };
   }, [handleSync]);
 
   useEffect(() => {
