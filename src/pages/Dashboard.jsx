@@ -328,13 +328,8 @@ export default function Dashboard({ children }) {
     // 2. Sync whenever the app becomes visible again (e.g. switching back to tab)
     const handleVisibilityChange = () => {
       if (document.visibilityState === 'visible') {
-        // We sync if it's been more than 2 minutes since last sync to avoid over-syncing
-        const lastSyncStr = localStorage.getItem('academia_login_time');
-        const lastSyncTime = lastSyncStr ? new Date(lastSyncStr).getTime() : 0;
-        if (Date.now() - lastSyncTime > 2 * 60 * 1000) {
-          console.log('[Auto Sync] App resumed from background. Syncing data...');
-          handleSync();
-        }
+        console.log('[Auto Sync] App resumed from background. Syncing data...');
+        handleSync();
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
