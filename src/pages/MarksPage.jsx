@@ -128,7 +128,7 @@ const GRADE_POINTS = { 'O': 10, 'A+': 9, 'A': 8, 'B+': 7, 'B': 6, 'C': 5, 'F': 0
 const PREDICT_GRADES = ['C', 'B', 'B+', 'A', 'A+', 'O'];
 const GRADE_THRESHOLDS = { 'O': 91, 'A+': 81, 'A': 71, 'B+': 61, 'B': 56, 'C': 50, 'F': 0 };
 
-function SgpaPredictor({ courses, onClose }) {
+function SgpaPredictor({ courses, nameByCode, onClose }) {
   const [internalMarks, setInternalMarks] = useState({});
   const [expectedRemaining, setExpectedRemaining] = useState({});
   const [targetGrades, setTargetGrades] = useState({});
@@ -253,7 +253,7 @@ function SgpaPredictor({ courses, onClose }) {
                     <span className="slider"></span>
                   </label>
                   <div className="course-info">
-                    <h3>{c.course || id}</h3>
+                    <h3>{getDisplayCourseName(c, nameByCode)}</h3>
                     <span className="code">{id}</span>
                   </div>
                 </div>
@@ -440,6 +440,7 @@ export default function MarksPage() {
       {isPredictorOpen ? (
         <SgpaPredictor 
           courses={FILTERED_MARKS} 
+          nameByCode={courseNameByCode}
           onClose={() => setIsPredictorOpen(false)} 
         />
       ) : FILTERED_MARKS.length > 0 ? (
