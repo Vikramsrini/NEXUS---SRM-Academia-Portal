@@ -29,10 +29,10 @@ router.get('/auth/login/status/:sessionId', (req, res) => {
     'Cache-Control': 'no-cache',
     'Connection': 'keep-alive',
   });
-  
+
   const { sessionId } = req.params;
   res.write(`data: {"step":"connected","message":"Connected to portal feedback..."}\n\n`);
-  
+
   activeStreams.set(sessionId, res);
   req.on('close', () => activeStreams.delete(sessionId));
 });
@@ -59,7 +59,7 @@ router.post('/login/password', async (req, res) => {
 
   try {
     const result = await srmVerifyPassword(digest, identifier, password);
-    
+
     if (!result.isAuthenticated && result.captcha?.required) {
       const captchaData = await srmGetCaptchaImage(result.captcha.digest);
       return res.json({
@@ -70,7 +70,7 @@ router.post('/login/password', async (req, res) => {
         },
       });
     }
-    
+
     res.json(result);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -134,7 +134,7 @@ router.post('/auth/login', async (req, res) => {
       sendStatus(safeSessionId, 'repairing', 'Completing portal landing handshake...');
       authCookie = await repairAcademiaSession(authCookie);
     }
-    
+
     if (!authCookie.includes('JSESSIONID')) {
       throw new Error('Authentication partially failed: JSESSIONID missing. Try again.');
     }
@@ -173,8 +173,8 @@ router.post('/auth/login', async (req, res) => {
  */
 router.post('/auth/sync-fast', async (req, res) => {
   const authHeader = req.headers.authorization;
-  const authCookie = authHeader?.startsWith('Bearer ') 
-    ? authHeader.slice(7) 
+  const authCookie = authHeader?.startsWith('Bearer ')
+    ? authHeader.slice(7)
     : (req.headers.token || null);
 
   if (!authCookie) return res.status(401).json({ error: 'No session token found' });
@@ -210,7 +210,7 @@ router.post('/auth/sync', async (req, res) => {
   try {
     const userResult = await srmVerifyUser(username);
     const passResult = await srmVerifyPassword(userResult.digest, userResult.identity, password, userResult._session);
-    
+
     const authCookie = passResult.cookies;
     const syncResult = await performFullSync(authCookie, null);
 
@@ -238,7 +238,7 @@ router.get('/logout', async (req, res) => {
   const authCookie = authHeader?.startsWith('Bearer ')
     ? authHeader.slice(7)
     : (req.headers.token || null);
-    
+
   if (!authCookie) return res.json({ message: 'Logged out local' });
 
   try {

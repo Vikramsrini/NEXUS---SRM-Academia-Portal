@@ -8,26 +8,26 @@ import './Dashboard.css';
 
 /* ── Inline SVG Icons ──────────────────────────────────────────────────── */
 const Icons = {
-  home: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 9v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9"/><path d="M9 22V12h6v10"/><path d="M2 10.6L12 2l10 8.6"/></svg>,
-  attendance: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>,
-  marks: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="14" y2="17"/></svg>,
-  timetable: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>,
-  courses: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>,
-  calendar: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>,
-  skippro: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 19 22 12 13 5 13 19"/><polygon points="2 19 11 12 2 5 2 19"/></svg>,
-  logout: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
-  sync: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/></svg>,
-  mortarboard: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"/></svg>,
-  sun: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>,
-  moon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>,
-  more: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>,
-  close: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.7" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>,
-  resources: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M12 7h4"/><path d="M12 11h4"/><path d="M12 15h4"/></svg>,
-  cgpa: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8"/><path d="M8 12h1M12 12h1M16 12h.01"/><path d="M8 16h1M12 16h1M16 16h.01"/></svg>,
-  warning: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
-  instagram: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37a4 4 0 1 1-7.75 1.25 4 4 0 0 1 7.75-1.25z"/><line x1="17.5" y1="6.5" x2="17.5" y2="6.5"/></svg>,
-  linkedin: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>,
-  github: <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.22c0 4.5 2.87 8.32 6.84 9.67.5.1.66-.22.66-.49 0-.24-.01-1.05-.01-1.91-2.78.62-3.37-1.21-3.37-1.21-.45-1.2-1.11-1.52-1.11-1.52-.91-.64.07-.62.07-.62 1 .08 1.53 1.06 1.53 1.06.9 1.57 2.35 1.12 2.92.86.09-.67.35-1.12.63-1.38-2.22-.26-4.55-1.14-4.55-5.05 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.27 2.75 1.05A9.3 9.3 0 0 1 12 6.84a9.3 9.3 0 0 1 2.5.35c1.9-1.32 2.74-1.05 2.74-1.05.55 1.41.2 2.46.1 2.72.64.71 1.03 1.62 1.03 2.74 0 3.92-2.34 4.79-4.57 5.04.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.8 0 .27.17.6.67.49A10.25 10.25 0 0 0 22 12.22C22 6.58 17.52 2 12 2Z"/></svg>,
+  home: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 9v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V9" /><path d="M9 22V12h6v10" /><path d="M2 10.6L12 2l10 8.6" /></svg>,
+  attendance: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m9 12 2 2 4-4" /></svg>,
+  marks: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><line x1="8" y1="13" x2="16" y2="13" /><line x1="8" y1="17" x2="14" y2="17" /></svg>,
+  timetable: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>,
+  courses: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" /></svg>,
+  calendar: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" /><path d="M3 10h18M8 2v4M16 2v4" /></svg>,
+  skippro: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 19 22 12 13 5 13 19" /><polygon points="2 19 11 12 2 5 2 19" /></svg>,
+  logout: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>,
+  sync: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3" /></svg>,
+  mortarboard: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5" /></svg>,
+  sun: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" /></svg>,
+  moon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>,
+  more: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></svg>,
+  close: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.7" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>,
+  resources: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" /><path d="M12 7h4" /><path d="M12 11h4" /><path d="M12 15h4" /></svg>,
+  cgpa: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" /><path d="M8 6h8" /><path d="M8 12h1M12 12h1M16 12h.01" /><path d="M8 16h1M12 16h1M16 16h.01" /></svg>,
+  warning: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>,
+  instagram: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5" /><path d="M16 11.37a4 4 0 1 1-7.75 1.25 4 4 0 0 1 7.75-1.25z" /><line x1="17.5" y1="6.5" x2="17.5" y2="6.5" /></svg>,
+  linkedin: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" /></svg>,
+  github: <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.22c0 4.5 2.87 8.32 6.84 9.67.5.1.66-.22.66-.49 0-.24-.01-1.05-.01-1.91-2.78.62-3.37-1.21-3.37-1.21-.45-1.2-1.11-1.52-1.11-1.52-.91-.64.07-.62.07-.62 1 .08 1.53 1.06 1.53 1.06.9 1.57 2.35 1.12 2.92.86.09-.67.35-1.12.63-1.38-2.22-.26-4.55-1.14-4.55-5.05 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.27 2.75 1.05A9.3 9.3 0 0 1 12 6.84a9.3 9.3 0 0 1 2.5.35c1.9-1.32 2.74-1.05 2.74-1.05.55 1.41.2 2.46.1 2.72.64.71 1.03 1.62 1.03 2.74 0 3.92-2.34 4.79-4.57 5.04.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.8 0 .27.17.6.67.49A10.25 10.25 0 0 0 22 12.22C22 6.58 17.52 2 12 2Z" /></svg>,
 };
 
 const NAV_ITEMS = [
@@ -148,27 +148,12 @@ export default function Dashboard({ children }) {
   const [thoughtOfDay, setThoughtOfDay] = useState(null);
   const [thoughtLoading, setThoughtLoading] = useState(true);
   const [syncError, setSyncError] = useState(false);
-  const [showUpdateModal, setShowUpdateModal] = useState(() => {
-    return !localStorage.getItem('academia_update_v1_dismissed');
-  });
   const [student, setStudent] = useState(getStudentData);
   const displayName = student.name || 'User';
 
   useEffect(() => {
     if (!student.name && !syncing) {
       setSyncError(true);
-    }
-    
-    // Check if modal was already dismissed on the backend
-    const regNumber = (student.regNumber || '').trim();
-    const token = localStorage.getItem('academia_token');
-    if (regNumber && token && !localStorage.getItem('academia_update_v1_dismissed')) {
-      fetchOdState(regNumber, token).then(remote => {
-        if (remote?.updateV1Dismissed) {
-          localStorage.setItem('academia_update_v1_dismissed', 'true');
-          setShowUpdateModal(false);
-        }
-      }).catch(() => {});
     }
   }, [student.name, student.regNumber, syncing]);
   const compactDisplayName = getShortDisplayName(displayName, 18);
@@ -277,11 +262,11 @@ export default function Dashboard({ children }) {
 
     try {
       const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000/api';
-      
+
       // Try Fast Sync first
       const res = await fetch(`${API_BASE}/auth/sync-fast`, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         }
@@ -306,7 +291,7 @@ export default function Dashboard({ children }) {
       }
 
       localStorage.setItem('academia_login_time', new Date().toISOString());
-      
+
       // Update local state to trigger reactive updates in all components 
       const updatedStudent = getStudentData();
       setStudent(updatedStudent);
@@ -343,14 +328,14 @@ export default function Dashboard({ children }) {
   useEffect(() => {
     const shouldLock = isMobile && (profileOpen || mobileMoreOpen);
     document.body.classList.toggle('mobile-sheet-open', shouldLock);
-    
+
     // When unlocking (closing panels), re-trigger immersion immediately
     if (isMobile && !shouldLock) {
       window.scrollTo(0, 1);
       const t = setTimeout(() => window.scrollTo(0, 1), 100);
       return () => clearTimeout(t);
     }
-    
+
     return () => document.body.classList.remove('mobile-sheet-open');
   }, [isMobile, profileOpen, mobileMoreOpen]);
 
@@ -363,7 +348,7 @@ export default function Dashboard({ children }) {
       el.scrollTop = 0;
       el.scrollLeft = 0;
     }
-    
+
     if (isMobile) {
       // Hide browser bars for immersive feel
       setTimeout(() => window.scrollTo(0, 1), 50);
@@ -442,7 +427,7 @@ export default function Dashboard({ children }) {
 
   const getTodaySchedule = () => {
     if (!timetable.length || !currentDayOrder) return [];
-    
+
     let hidden = [];
     try { hidden = JSON.parse(localStorage.getItem('academia_hidden_classes') || '[]'); } catch { hidden = []; }
 
@@ -530,14 +515,14 @@ export default function Dashboard({ children }) {
     const attendanceRows = (student.attendance || []).filter(a => {
       const title = normalizeText(a.courseTitle);
       if (!title || title.length <= 2) return false;
-      
+
       const conducted = parseInt(a.hoursConducted);
       if (isNaN(conducted) || conducted <= 0) return false;
-      
+
       if (['theory', 'practical', 'lab', 'clinical'].includes(title)) return false;
       if (title.startsWith('ft-') || title.includes('total')) return false;
       if (title.includes('llj-') || title.startsWith('ct-') || title.startsWith('cat-')) return false;
-      
+
       return true;
     });
 
@@ -608,26 +593,26 @@ export default function Dashboard({ children }) {
     if (!todaySchedule.length) return { canSkipCount: 0, total: 0 };
     const odDates = getStoredJson('academia_od_dates', []);
     const manualAdjs = getStoredJson('academia_attendance_adjs', {});
-    
+
     // Minimal simplified Skip logic for Home page
     const results = activeClasses.map(cls => {
       const clsCode = normalizeCourseCode(cls.courseCode);
       const clsType = normalizeSlot(cls.slotType).label;
-      
+
       const attRow = (student.attendance || []).find(a => {
         if (normalizeCourseCode(a.courseCode) !== clsCode) return false;
         // Verify type matches (Theory vs Lab) to avoid mapping to wrong attendance row
         return normalizeSlot(resolveAttendanceType(a)).label === clsType;
       });
-      
+
       if (!attRow) return false;
-      
+
       const conducted = parseInt(attRow.hoursConducted) || 0;
       const originalAbsent = parseInt(attRow.hoursAbsent) || 0;
-      
+
       // Calculate effective percentage for better skip prediction
       const pct = conducted > 0 ? ((conducted - originalAbsent) / conducted) * 100 : 100;
-      return pct > 75.5; 
+      return pct > 75.5;
     });
 
     return {
@@ -663,7 +648,7 @@ export default function Dashboard({ children }) {
 
     for (const item of todaySchedule) {
       if (item.isOptional) continue;
-      
+
       const [startStr, endStr] = item.time.split(' - ');
       const start = parseTime(startStr);
       const end = parseTime(endStr);
@@ -701,54 +686,54 @@ export default function Dashboard({ children }) {
     : (student.regNumber || 'Student workspace');
 
   const renderProfileCard = () => (
-    <div 
-      className={`profile-dropdown-card ${isMobile && profileOpen ? 'show' : ''}`} 
+    <div
+      className={`profile-dropdown-card ${isMobile && profileOpen ? 'show' : ''}`}
       onClick={(e) => e.stopPropagation()}
       style={(!isMobile && !profileOpen) ? { display: 'none' } : {}}
     >
-        <div className="dropdown-user-info">
-          <div className="user-avatar-large">{getInitials(student.name)}</div>
-          <h3>{student.name}</h3>
-          <p className="dropdown-reg">{student.regNumber}</p>
-        </div>
-        <div className="dropdown-divider" />
-        <div className="dropdown-details">
-          {student.department && (
-            <div className="dropdown-detail-row">
-              <span className="dropdown-detail-label">Department</span>
-              <span className="dropdown-detail-value">{student.department}</span>
-            </div>
-          )}
-          {student.program && (
-            <div className="dropdown-detail-row">
-              <span className="dropdown-detail-label">Program</span>
-              <span className="dropdown-detail-value">{student.program}</span>
-            </div>
-          )}
-          {student.batch && (
-            <div className="dropdown-detail-row">
-              <span className="dropdown-detail-label">Batch</span>
-              <span className="dropdown-detail-value">{student.batch}</span>
-            </div>
-          )}
-          {student.section && (
-            <div className="dropdown-detail-row">
-              <span className="dropdown-detail-label">Section</span>
-              <span className="dropdown-detail-value">{student.section}</span>
-            </div>
-          )}
-          {student.semester && (
-            <div className="dropdown-detail-row">
-              <span className="dropdown-detail-label">Semester</span>
-              <span className="dropdown-detail-value">{student.semester}</span>
-            </div>
-          )}
-        </div>
-        <div className="dropdown-divider" />
-        <button className="logout-button" onClick={handleLogout}>
-          {Icons.logout} Sign Out
-        </button>
+      <div className="dropdown-user-info">
+        <div className="user-avatar-large">{getInitials(student.name)}</div>
+        <h3>{student.name}</h3>
+        <p className="dropdown-reg">{student.regNumber}</p>
       </div>
+      <div className="dropdown-divider" />
+      <div className="dropdown-details">
+        {student.department && (
+          <div className="dropdown-detail-row">
+            <span className="dropdown-detail-label">Department</span>
+            <span className="dropdown-detail-value">{student.department}</span>
+          </div>
+        )}
+        {student.program && (
+          <div className="dropdown-detail-row">
+            <span className="dropdown-detail-label">Program</span>
+            <span className="dropdown-detail-value">{student.program}</span>
+          </div>
+        )}
+        {student.batch && (
+          <div className="dropdown-detail-row">
+            <span className="dropdown-detail-label">Batch</span>
+            <span className="dropdown-detail-value">{student.batch}</span>
+          </div>
+        )}
+        {student.section && (
+          <div className="dropdown-detail-row">
+            <span className="dropdown-detail-label">Section</span>
+            <span className="dropdown-detail-value">{student.section}</span>
+          </div>
+        )}
+        {student.semester && (
+          <div className="dropdown-detail-row">
+            <span className="dropdown-detail-label">Semester</span>
+            <span className="dropdown-detail-value">{student.semester}</span>
+          </div>
+        )}
+      </div>
+      <div className="dropdown-divider" />
+      <button className="logout-button" onClick={handleLogout}>
+        {Icons.logout} Sign Out
+      </button>
+    </div>
   );
 
   const renderTopBarActions = () => (
@@ -793,79 +778,7 @@ export default function Dashboard({ children }) {
     </div>
   );
 
-  const handleDismissUpdate = async () => {
-    localStorage.setItem('academia_update_v1_dismissed', 'true');
-    setShowUpdateModal(false);
-    
-    // Sync dismissal to backend
-    const regNumber = (student.regNumber || '').trim();
-    const token = localStorage.getItem('academia_token');
-    if (regNumber && token) {
-      try {
-        // We fetch current state to avoid overwriting OD dates
-        const current = await fetchOdState(regNumber, token);
-        await saveOdState({
-          regNumber,
-          token,
-          odDates: current?.odDates || [],
-          manualAdjs: current?.manualAdjs || {},
-          updateV1Dismissed: true
-        });
-      } catch (e) {
-        console.warn('Failed to sync modal dismissal to backend', e);
-      }
-    }
-  };
 
-  const renderUpdateModal = () => (
-    <div className="apple-modal-overlay show" style={{ zIndex: 9999 }}>
-      <div className="apple-modal-card compact" style={{ maxWidth: '440px' }}>
-        <header className="apple-modal-header" style={{ alignItems: 'flex-start', borderBottom: '1px solid var(--border-secondary)', paddingBottom: '16px', marginBottom: '16px' }}>
-          <div className="icon-wrapper" style={{ background: 'var(--accent-subtle)', color: 'var(--accent)', padding: '10px', borderRadius: '12px', marginBottom: '16px' }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="7.5 4.21 12 6.81 16.5 4.21"/><polyline points="7.5 19.79 7.5 14.6 3 12"/><polyline points="21 12 16.5 14.6 16.5 19.79"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-          </div>
-          <h2 style={{ fontSize: '1.35rem', fontWeight: '800', letterSpacing: '-0.02em', margin: '0 0 8px 0' }}>What's New in NEXUS</h2>
-          <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>Version 1.2 is here! We've added some highly requested features and fixed a few bugs.</p>
-        </header>
-        <div className="apple-modal-body" style={{ padding: '0 24px 24px' }}>
-          
-          <div className="update-feature" style={{ display: 'flex', gap: '14px', marginBottom: '22px' }}>
-             <div style={{ color: 'var(--badge-green-text)', background: 'var(--badge-green-bg)', padding: '8px', borderRadius: '10px', height: 'fit-content' }}>
-               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-             </div>
-             <div>
-               <h4 style={{ fontSize: '0.95rem', fontWeight: '700', marginBottom: '4px', color: 'var(--text-primary)' }}>Edit Optional Hours</h4>
-               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>You can now manually edit optional/lab hours in your timetable. Perfect for adjusting those flexible schedules.</p>
-             </div>
-          </div>
-
-          <div className="update-feature" style={{ display: 'flex', gap: '14px', marginBottom: '22px' }}>
-             <div style={{ color: 'var(--badge-blue-text)', background: 'var(--badge-blue-bg)', padding: '8px', borderRadius: '10px', height: 'fit-content' }}>
-               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2v0a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12v0a2 2 0 0 1-2-2V7"/></svg>
-             </div>
-             <div>
-               <h4 style={{ fontSize: '0.95rem', fontWeight: '700', marginBottom: '4px', color: 'var(--text-primary)' }}>Smooth Frosted Glass UI</h4>
-               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>The entire interface has been upgraded with a sleek, cross-platform glassmorphism effect.</p>
-             </div>
-          </div>
-          
-          <div className="update-feature" style={{ display: 'flex', gap: '14px' }}>
-             <div style={{ color: 'var(--badge-amber-text)', background: 'var(--badge-amber-bg)', padding: '8px', borderRadius: '10px', height: 'fit-content' }}>
-               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-             </div>
-             <div>
-               <h4 style={{ fontSize: '0.95rem', fontWeight: '700', marginBottom: '4px', color: 'var(--text-primary)' }}>Bug Fixes & Polish</h4>
-               <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.5, margin: 0 }}>Squashed UI bugs on mobile, fixed the marks card bleed issue, and improved sync reliability.</p>
-             </div>
-          </div>
-
-        </div>
-        <footer className="apple-modal-footer" style={{ borderTop: 'none', padding: '0 24px 24px', justifyContent: 'center' }}>
-          <button className="apple-btn primary full-width" onClick={handleDismissUpdate} style={{ padding: '14px', borderRadius: '12px', fontSize: '1rem', fontWeight: '700' }}>Awesome, got it!</button>
-        </footer>
-      </div>
-    </div>
-  );
 
   const renderDeveloperInfo = (variant = '') => (
     <div className={`dev-footer ${variant}`}>
@@ -880,7 +793,6 @@ export default function Dashboard({ children }) {
 
   return (
     <div className={`dashboard-layout ${!isMobile && !sidebarOpen ? 'sidebar-collapsed' : ''} ${isMobile ? 'mobile-layout' : ''}`}>
-      {showUpdateModal && createPortal(renderUpdateModal(), document.body)}
       {syncError && createPortal(renderSessionModal(), document.body)}
       <div className={`sidebar-overlay ${sidebarOpen ? 'show' : ''}`} onClick={() => setSidebarOpen(false)} />
       {isMobile && <div className={`mobile-sheet-overlay ${mobileSheetOpen ? 'show' : ''}`} onClick={closeMobilePanels} />}
@@ -1047,8 +959,8 @@ export default function Dashboard({ children }) {
                         return (
                           <div key={idx} className={`sched-row ${isActive ? 'sched-row-active' : ''}`} style={item.isOptional ? { opacity: 0.5 } : {}}>
                             <div className="sched-time" style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: '70px' }}>
-                               <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{item.time.split(' - ')[0]}</span>
-                               <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>{item.time.split(' - ')[1]}</span>
+                              <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>{item.time.split(' - ')[0]}</span>
+                              <span style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>{item.time.split(' - ')[1]}</span>
                             </div>
                             <div className="sched-info">
                               <span className="sched-name" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>

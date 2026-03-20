@@ -83,7 +83,9 @@ export function parseCourses(html) {
 
   const codeIdx = getColumnIndex(headers, ['course code', 'code'], 1);
   const titleIdx = getColumnIndex(headers, ['course title', 'title', 'subject'], 2);
+  const creditIdx = getColumnIndex(headers, ['credit', 'credits'], 3);
   const courseTypeIdx = getColumnIndex(headers, ['course type', 'type'], 6);
+  const facultyIdx = getColumnIndex(headers, ['faculty name', 'faculty'], 7);
   const slotIdx = getColumnIndex(headers, ['slot'], 8);
   const roomIdx = getColumnIndex(headers, ['room no', 'room', 'venue'], 10);
   const altRoomIdx = roomIdx === 10 ? 9 : Math.max(roomIdx - 1, 0);
@@ -97,7 +99,9 @@ export function parseCourses(html) {
 
     const code = cleanCourseCode(getText(codeIdx) || findCourseCodeCandidate(values));
     const title = cleanCourseTitle(getText(titleIdx) || findCourseTitleCandidate(values, [code]));
+    const credit = getText(creditIdx) || '0';
     const courseType = getText(courseTypeIdx) || 'N/A';
+    const faculty = getText(facultyIdx) || 'N/A';
     const slotCodes = extractSlotCodes(getText(slotIdx));
     const slot = slotCodes.join('+');
 
@@ -109,7 +113,12 @@ export function parseCourses(html) {
     const slotType = detectSlotType(slotCodes, code, title);
 
     if (looksLikeCourseCode(code) && title && slotCodes.length > 0) {
-      courses.push({ code, title, slot, room: normalizeRoom(room), slotType, courseType });
+      courses.push({ 
+        code, title, slot, 
+        room: normalizeRoom(room), 
+        slotType, courseType, 
+        credit, faculty 
+      });
     }
   });
 
@@ -164,6 +173,8 @@ export function buildTimetable(courses, batch) {
           courseCode: course.code,
           slotType: currentSlotType,
           courseType: course.courseType,
+          credit: course.credit,
+          faculty: course.faculty,
         });
         lastCode = course.code;
         lastSlotType = currentSlotType;

@@ -16,7 +16,7 @@ import { getCalendarUrls, parseSrmCalendar } from '../scrapers/calendar.js';
 /**
  * Orchestrates a full academic record sync.
  */
-export async function performFullSync(authCookie, sessionId, sendStatus = () => {}) {
+export async function performFullSync(authCookie, sessionId, sendStatus = () => { }) {
   const result = {
     attendance: [],
     marks: [],
@@ -105,14 +105,14 @@ export async function performFullSync(authCookie, sessionId, sendStatus = () => 
 export async function repairAcademiaSession(authCookies) {
   console.log('[Sync Service] Attempting HTTP session repair...');
   const repairUrl = 'https://academia.srmist.edu.in/portal/academia-academic-services/redirectFromLogin';
-  
+
   try {
     const resp = await axios.get(repairUrl, {
       headers: { cookie: authCookies },
       maxRedirects: 5,
       validateStatus: () => true
     });
-    
+
     const setCookie = resp.headers['set-cookie'];
     if (setCookie) {
       const newCookies = setCookie.map(c => c.split(';')[0]).join('; ');

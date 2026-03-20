@@ -27,6 +27,7 @@ router.get('/timetable', requireAuth, async (req, res) => {
 
     res.json({
       timetable,
+      coursesMetadata: courses,
       regNumber,
       batch,
       name: studentName,
