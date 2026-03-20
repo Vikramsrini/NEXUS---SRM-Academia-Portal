@@ -1586,9 +1586,17 @@
   }
 
   .ov-stat-card {
-    min-width: min(78vw, 280px);
-    padding: 18px;
+    min-width: min(82vw, 290px);
+    padding: 16px;
     scroll-snap-align: start;
+    border-radius: 20px;
+  }
+  
+  @media (max-width: 430px) {
+    .ov-stat-card {
+      min-width: min(88vw, 260px);
+      padding: 14px;
+    }
   }
 
   .home-alerts-row {
@@ -1622,12 +1630,23 @@
 
   .today-schedule-section {
     margin-top: 4px;
-    padding: 20px;
-    border-radius: 28px;
+    padding: 18px 16px; /* Tightened from 20px */
+    border-radius: 24px;
   }
 
   .today-schedule-section .section-header {
-    margin-bottom: 20px;
+    margin-bottom: 16px;
+  }
+
+  @media (max-width: 430px) {
+    .today-schedule-section {
+      padding: 16px 14px;
+      border-radius: 20px;
+    }
+    
+    .schedule-header h3 {
+      font-size: 1.1rem;
+    }
   }
 
   .day-order-badge {

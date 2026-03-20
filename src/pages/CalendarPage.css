@@ -213,6 +213,12 @@
   text-transform: uppercase;
   letter-spacing: 0.8px;
   user-select: none;
+  border-right: 1px solid var(--border-secondary);
+  box-sizing: border-box;
+}
+
+.weekday:last-child {
+  border-right: none;
 }
 
 .weekday.weekend-header {
@@ -601,8 +607,9 @@
 
   .cal-weekday-row,
   .cal-grid {
-    min-width: 0 !important; /* Force fit to screen */
+    min-width: 0 !important;
     width: 100%;
+    box-sizing: border-box;
   }
 
   .cal-grid {
@@ -716,11 +723,111 @@
     grid-auto-rows: minmax(48px, auto);
   }
   .cal-day-cell {
-    min-height: 50px;
+    min-height: 52px;
+    padding: 4px 0px;
   }
   .date-num {
     width: 22px;
     height: 22px;
-    font-size: 12px;
+    font-size: 11px;
   }
+  .do-label {
+    font-size: 7px;
+    padding: 1px 3px;
+  }
+  .event-text {
+    font-size: 7px;
+    margin-top: 1px;
+  }
+  .weekday {
+    font-size: 8.5px;
+    padding: 10px 0;
+    letter-spacing: 0.1px;
+  }
+}
+
+/* Specific optimization for 360px-430px viewports (Most Common Mobile Range) */
+@media (max-width: 430px) {
+  .apple-page-container.cal-page-apple {
+    padding: 12px 6px 32px !important;
+  }
+  
+  .cal-main-card {
+    border-radius: 12px;
+  }
+
+  .cal-nav-apple {
+    gap: 1px;
+    padding: 1px;
+    border-radius: 10px;
+  }
+
+  .nav-btn {
+    width: 34px;
+    height: 34px;
+  }
+
+  .cal-pill {
+    font-size: 9.5px;
+    height: 28px;
+  }
+
+  .cal-today-btn {
+    padding: 0 6px;
+    font-size: 10.5px;
+    height: 28px;
+  }
+
+  .weekday {
+    font-size: 8px;
+    padding: 8px 0;
+    letter-spacing: 0;
+  }
+
+  .cal-day-cell {
+    min-height: 54px;
+    padding: 2px 0px;
+  }
+
+  .date-num {
+    width: 20px;
+    height: 20px;
+    font-size: 10px;
+    margin-bottom: 1px;
+  }
+
+  .do-label {
+    font-size: 6.5px;
+    padding: 0.5px 2px;
+    border-radius: 3px;
+  }
+
+  .event-text {
+    font-size: 6.5px;
+    line-height: 1;
+    margin-top: 1px;
+    -webkit-line-clamp: 2;
+  }
+
+  .cal-events-sidebar {
+    padding: 12px;
+    border-radius: 16px;
+    margin-top: 16px;
+  }
+
+  .cal-events-sidebar h3 {
+    font-size: 15px;
+  }
+
+  .event-item-apple {
+    padding: 8px;
+  }
+
+  .date-badge {
+    width: 36px;
+    height: 36px;
+  }
+
+  .date-badge .day { font-size: 13px; }
+  .info h4 { font-size: 12px; }
 }
