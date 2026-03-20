@@ -1519,6 +1519,7 @@
 
   .content-viewport {
     width: 100%;
+    padding-bottom: 4px; /* Reduced from 40px */
   }
 
   .overview-hero {
@@ -2095,10 +2096,10 @@
 }
 
 .dev-footer.mobile-home-mode {
-  padding: 48px 24px;
+  padding: 24px 24px 0px;
   background: transparent;
   border-top: 1px solid var(--border-secondary);
-  margin-top: 40px;
+  margin-top: 18px;
 }
 
 [data-theme="dark"] .dev-footer.mobile-home-mode {
