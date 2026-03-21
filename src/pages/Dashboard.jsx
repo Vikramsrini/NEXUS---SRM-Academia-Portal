@@ -983,7 +983,11 @@ export default function Dashboard({ children }) {
               </div>
               {isMobile && renderDeveloperInfo('mobile-home-mode')}
             </div>
-          ) : children}
+          ) : (
+            <div key={student.timestamp || 'root'} className="subpage-viewport">
+              {children}
+            </div>
+          )}
         </div>
       </main>
 

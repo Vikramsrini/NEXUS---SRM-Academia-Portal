@@ -157,6 +157,7 @@ router.post('/auth/login', async (req, res) => {
         marks: syncData.marks,
         calendar: syncData.calendar,
         currentDayOrder: syncData.currentDayOrder,
+        timestamp: syncData.timestamp,
         data_source: 'live',
       },
     });
@@ -192,6 +193,7 @@ router.post('/auth/sync-fast', async (req, res) => {
         marks: syncResult.marks,
         calendar: syncResult.calendar,
         currentDayOrder: syncResult.currentDayOrder,
+        timestamp: syncResult.timestamp,
       },
     });
   } catch (err) {
@@ -223,6 +225,7 @@ router.post('/auth/sync', async (req, res) => {
         marks: syncResult.marks,
         calendar: syncResult.calendar,
         currentDayOrder: syncResult.currentDayOrder,
+        timestamp: syncResult.timestamp,
       },
     });
   } catch (err) {
