@@ -5,7 +5,7 @@ import { getCalendarUrls, parseSrmCalendar } from '../scrapers/calendar.js';
 import { getSupabaseAdmin } from '../lib/supabase.js';
 
 const router = Router();
-const SYNC_THRESHOLD_MS = 1000 * 60 * 60 * 24 * 30; // Monthly refresh
+const SYNC_THRESHOLD_MS = 1000 * 60 * 60 * 24 * 1; // Monthly refresh
 
 /**
  * Fetch calendar with multiple strategies
