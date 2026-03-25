@@ -9,9 +9,9 @@ import { getSrmSession, setSrmSession } from '../lib/srmSession.js';
 dotenv.config();
 
 // Always fetch latest session from Supabase
-async function getCurrentSession() {
+async function getCurrentSession(userId = 'generic') {
   try {
-    return await getSrmSession();
+    return await getSrmSession(userId);
   } catch {
     return { csrf_token: '', cookies: '' };
   }
@@ -58,10 +58,16 @@ export async function getFreshSrmSession() {
  * Step 1: Verify username against SRM login API.
  */
 export async function srmVerifyUser(username) {
+  const userId = username.split('@')[0].toLowerCase();
+  
   if (!username.includes('@')) {
     username = `${username}@srmist.edu.in`;
   }
-  let session = await getCurrentSession();
+  let session = await getCurrentSession(userId);
+  // If no session for this user, try generic session
+  if (!session.cookies) {
+    session = await getCurrentSession('generic');
+  }
   let response;
   try {
     response = await axios(
@@ -213,11 +219,11 @@ export async function srmVerifyPassword(digest, identifier, password, session) {
     } else {
       // IF JSESSIONID is STILL missing, we likely have a "Successful Zoho login" but "Failed Academia landing"
       // We'll return a specific state to let the controller know we need to repair it.
-      return { 
-        isAuthenticated: true, 
-        cookies: allCookies, 
+      return {
+        isAuthenticated: true,
+        cookies: allCookies,
         needsRepair: true,
-        message: 'Zoho login successful but Academia session pending.' 
+        message: 'Zoho login successful but Academia session pending.'
       };
     }
   }
@@ -251,7 +257,7 @@ export async function srmGetCaptchaImage(captchaDigest) {
         'sec-fetch-dest': 'empty',
         'sec-fetch-mode': 'cors',
         'sec-fetch-site': 'same-origin',
-        'cookie': (await getCurrentSession()).cookies,
+        'cookie': (await getCurrentSession('generic')).cookies,
       },
     }
   );
@@ -270,8 +276,8 @@ export async function srmVerifyWithCaptcha(identifier, digest, captcha, cdigest,
     headers: {
       ...SRM_LOGIN_HEADERS,
       'content-type': 'application/x-www-form-urlencoded;charset=UTF-8',
-      'x-zcsrf-token': (await getCurrentSession()).csrf_token,
-      'cookie': (await getCurrentSession()).cookies,
+      'x-zcsrf-token': (await getCurrentSession('generic')).csrf_token,
+      'cookie': (await getCurrentSession('generic')).cookies,
     },
     body: JSON.stringify({ passwordauth: { password } }),
   });

@@ -9,6 +9,7 @@ import {
   srmGetCaptchaImage, srmVerifyWithCaptcha,
 } from '../scrapers/auth.js';
 import { performFullSync, repairAcademiaSession } from '../services/syncService.js';
+import { setSrmSession } from '../lib/srmSession.js';
 
 const router = Router();
 
@@ -137,6 +138,19 @@ router.post('/auth/login', async (req, res) => {
 
     if (!authCookie.includes('JSESSIONID')) {
       throw new Error('Authentication partially failed: JSESSIONID missing. Try again.');
+    }
+
+    // ── PERSIST SESSION ──
+    const userId = username.split('@')[0].toLowerCase();
+    const iamcsrMatch = authCookie.match(/iamcsr=([^;]+)/);
+    const csrfToken = iamcsrMatch ? `iamcsrcoo=${iamcsrMatch[1]}` : '';
+    
+    try {
+      await setSrmSession(csrfToken, authCookie, userId);
+      console.log(`[Auth] Session persisted for user: ${userId}`);
+    } catch (saveErr) {
+      console.warn(`[Auth] Failed to persist session for ${userId}:`, saveErr.message);
+      // Don't fail the entire login if DB save fails
     }
 
     // ── SYNC ──
