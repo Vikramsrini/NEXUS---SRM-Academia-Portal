@@ -56,17 +56,20 @@ export async function fetchRawAcademicPage(authCookie, url) {
  */
 export function getTimetableUrls() {
   const base = 'https://academia.srmist.edu.in/srm_university/academia-academic-services/page/My_Time_Table_';
+  const urls = [`${base}2023_24`]; // Prioritize user-provided working URL
   const now = new Date();
   const month = now.getMonth() + 1;
   const year = now.getFullYear();
-  const urls = [];
 
   if (month >= 7) {
-    urls.push(`${base}${year}_${String(year + 1).slice(-2)}`);
+    const primary = `${base}${year}_${String(year + 1).slice(-2)}`;
+    if (!urls.includes(primary)) urls.push(primary);
   } else {
-    urls.push(`${base}${year - 1}_${String(year).slice(-2)}`);
+    const primary = `${base}${year - 1}_${String(year).slice(-2)}`;
+    if (!urls.includes(primary)) urls.push(primary);
   }
-  for (let y = year - 1; y >= year - 5; y--) {
+
+  for (let y = year; y >= year - 5; y--) {
     const url = `${base}${y}_${String(y + 1).slice(-2)}`;
     if (!urls.includes(url)) urls.push(url);
   }
@@ -91,17 +94,29 @@ export function getCourseDynamicUrl() {
  */
 export async function fetchTimetablePage(authCookie) {
   const urls = getTimetableUrls();
+  let firstValidHtml = null;
+
   for (const url of urls) {
     try {
       const html = await fetchAcademicPage(authCookie, url);
-      if (html && html.length > 500 && !html.includes('Page not found')) {
-        console.log('[SRM] Timetable loaded from:', url);
-        return html;
+      const isLoginPage = html.includes('Web Services Login') || html.includes('signInIframe');
+      const hasCourses = html.includes('course_tbl') || html.includes('Course Code');
+      const isNotFound = html.includes('Page not found') || html.length < 1000;
+
+      if (html && !isLoginPage && !isNotFound) {
+        if (hasCourses) {
+          console.log('[SRM] Active timetable found at:', url);
+          return html;
+        } else if (!firstValidHtml) {
+          firstValidHtml = html;
+        }
       }
-    } catch {
-      // try next URL
-    }
+    } catch { /* skip */ }
   }
-  console.log('[SRM] No timetable page found');
+
+  if (firstValidHtml) {
+    return firstValidHtml;
+  }
+  console.log('[SRM] No valid timetable page found');
   return null;
 }

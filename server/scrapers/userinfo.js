@@ -3,27 +3,25 @@
 // ═══════════════════════════════════════════════════════════════════════
 
 import * as cheerio from 'cheerio';
-import { normalizeText, normalizeKey } from '../utils/html.js';
+import { normalizeText, normalizeKey, decodeAcademicPayload } from '../utils/html.js';
 import { deriveAcademicBranch } from '../utils/courses.js';
-import { fetchRawAcademicPage, getCourseDynamicUrl, getTimetableUrls } from './fetcher.js';
+import { fetchAcademicPage, getCourseDynamicUrl, getTimetableUrls } from './fetcher.js';
 
 /**
- * Parses student profile info from the raw pageSanitizer response.
+ * Parses student profile info from the decoded HTML.
  */
-export function parseSrmUserInfo(rawResponse) {
-  const match = rawResponse.match(/pageSanitizer\.sanitize\('(.*)'\);/s);
-  if (!match || !match[1]) return { error: 'Failed to extract user details', status: 500 };
+export function parseSrmUserInfo(decodedHtml) {
+  if (!decodedHtml || decodedHtml.length < 100) return { error: 'Invalid HTML payload', status: 500 };
 
-  const decodedHtml = match[1]
-    .replace(/\\x([0-9A-Fa-f]{2})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
-    .replace(/\\\\/g, '')
-    .replace(/\\'/g, "'");
+  // HTML is already decoded by the fetcher
+
+  // HTML is already decoded by the fetcher
 
   const $ = cheerio.load(decodedHtml, { decodeEntities: true, lowerCaseTags: true, xmlMode: false });
   const getText = (sel) => $(sel).text().trim();
 
   // Robust Name Detection: Look for "Welcome NAME (REG)" pattern
-  const welcomeMatch = decodedHtml.match(/Welcome\s+([^(\n<]+)\s+\(/i);
+  const welcomeMatch = decodedHtml.match(/Welcome\s+([^(<]+)\s+\(/i);
   const detectedName = welcomeMatch ? welcomeMatch[1].trim() : '';
 
   const infoMap = {};
@@ -65,21 +63,27 @@ export function parseSrmUserInfo(rawResponse) {
  */
 export async function fetchRealUserInfo(authCookie) {
   const urls = getTimetableUrls();
+  console.log('[SRM] Fetching user profile from URLs:', urls.length);
   
+  let fallback = null;
   for (const url of urls) {
     try {
-      const rawData = await fetchRawAcademicPage(authCookie, url);
-      if (rawData && typeof rawData === 'string' && rawData.includes('pageSanitizer.sanitize')) {
-        const parsed = parseSrmUserInfo(rawData);
+      const decodedHtml = await fetchAcademicPage(authCookie, url);
+      if (decodedHtml && decodedHtml.length > 500) {
+        const parsed = parseSrmUserInfo(decodedHtml);
+        const hasCourses = decodedHtml.includes('course_tbl') || decodedHtml.includes('Course Code');
         if (parsed.userInfo && parsed.userInfo.regNumber) {
-          console.log('[SRM] Profile loaded from:', url);
-          return parsed.userInfo;
+          if (hasCourses) {
+            console.log('[SRM] Profile successfully loaded from:', url);
+            return parsed.userInfo;
+          } else if (!fallback) {
+            fallback = parsed.userInfo;
+          }
         }
       }
-    } catch {
-      // try next URL
-    }
+    } catch { /* skip */ }
   }
 
+  if (fallback) return fallback;
   throw new Error('Could not find SRM profile on any academic year page.');
 }

@@ -19,10 +19,16 @@ export function convertHexToHTML(hexString) {
 export function decodeAcademicPayload(payload) {
   if (typeof payload !== 'string') return '';
   const sanitizeMatch = payload.match(/pageSanitizer\.sanitize\('(.*)'\);/s);
-  if (!sanitizeMatch?.[1]) return payload;
-  return convertHexToHTML(sanitizeMatch[1])
+  let html = sanitizeMatch?.[1] ? convertHexToHTML(sanitizeMatch[1]) : payload;
+
+  return html
     .replace(/\\\\/g, '')
-    .replace(/\\'/g, "'");
+    .replace(/\\'/g, "'")
+    .replace(/\\\//g, '/')
+    .replace(/\\-/g, '-')
+    .replace(/\\n/g, '\n')
+    .replace(/\\t/g, '\t')
+    .replace(/\\r/g, '\r');
 }
 
 /**

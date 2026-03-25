@@ -27,7 +27,7 @@ export function parseCourses(html) {
   const regNumber = regNumberMatch ? regNumberMatch[0] : '';
 
   // Robust Name Detection: Look for "Welcome NAME (REG)" in the header
-  const welcomeMatch = html.match(/Welcome\s+([^(\n<]+)\s+\(/i);
+  const welcomeMatch = html.match(/Welcome\s+([^(<]+)\s+\(/i);
   const detectedName = welcomeMatch ? welcomeMatch[1].trim() : '';
 
   let batch = '1';
