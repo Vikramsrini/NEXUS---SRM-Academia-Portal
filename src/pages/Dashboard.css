@@ -1382,9 +1382,9 @@
   .mobile-top-shell {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 6px 6px 6px 12px;
+    justify-content: center;
+    gap: 16px;
+    padding: 6px 10px;
     border-radius: 32px;
     background: var(--glass-bg-elevated);
     backdrop-filter: blur(24px) saturate(200%);
@@ -1392,8 +1392,8 @@
     border: 1px solid var(--glass-border);
     margin: 10px auto;
     width: fit-content;
-    min-width: min(280px, 90vw);
-    max-width: 94%;
+    min-width: 0;
+    max-width: 96%;
     box-shadow: var(--glass-shadow, 0 8px 24px rgba(0, 0, 0, 0.12));
     isolation: isolate;
     transform: translateZ(0);
@@ -1409,9 +1409,9 @@
   .mobile-brand-block {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     min-width: 0;
-    flex: 1;
+    flex: 0 1 auto;
   }
 
   .mobile-brand-logo {
