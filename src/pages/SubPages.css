@@ -1791,13 +1791,10 @@
 /* -- Day Selector -- */
 .day-selector-scroller {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
-  padding: 16px 4px;
+  padding: 16px 0;
   margin-bottom: 20px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  -webkit-overflow-scrolling: touch;
 }
 
 .day-selector-scroller::-webkit-scrollbar {
@@ -1815,6 +1812,21 @@
   white-space: nowrap;
   cursor: pointer;
   transition: all var(--transition-fast);
+  flex: 0 0 auto;
+}
+
+@media (max-width: 480px) {
+  .day-selector-scroller {
+    gap: 8px;
+  }
+  .day-tab {
+    padding: 7px 12px;
+    font-size: 0.75rem;
+    border-radius: 10px;
+    flex: 1 0 auto;
+    min-width: 45px;
+    text-align: center;
+  }
 }
 
 .day-tab.active {
