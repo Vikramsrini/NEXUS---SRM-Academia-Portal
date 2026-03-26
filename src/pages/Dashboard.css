@@ -5,9 +5,10 @@
 
 .dashboard-layout {
   --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
-  --ease-emphasized: cubic-bezier(0.3, 1.5, 0.5, 1); /* Authentic Apple Spring */
+  --ease-emphasized: cubic-bezier(0.3, 1.5, 0.5, 1);
+  /* Authentic Apple Spring */
   --ease-in-out-quint: cubic-bezier(0.83, 0, 0.17, 1);
-  
+
   display: flex;
   min-height: 100vh;
   min-height: 100dvh;
@@ -18,10 +19,21 @@
 
 /* ── Apple Liquid Pop Keyframes (Shared) ─────────────────────────── */
 @keyframes apple-pop-press {
-  0% { transform: scale(1); }
-  25% { transform: scale(0.88); }
-  60% { transform: scale(1.08); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+
+  25% {
+    transform: scale(0.88);
+  }
+
+  60% {
+    transform: scale(1.08);
+  }
+
+  100% {
+    transform: scale(1);
+  }
 }
 
 @keyframes apple-pop-ripple {
@@ -29,9 +41,11 @@
     opacity: 0.4;
     transform: translate(-50%, -50%) scale(0.2);
   }
+
   40% {
     opacity: 0.2;
   }
+
   100% {
     opacity: 0;
     transform: translate(-50%, -50%) scale(5.5);
@@ -40,10 +54,21 @@
 }
 
 @keyframes apple-pop-icon-hop {
-  0% { transform: translateY(0) scale(1); }
-  35% { transform: translateY(-7px) scale(1.2) rotate(-3deg); }
-  65% { transform: translateY(1.5px) scale(0.96) rotate(1.5deg); }
-  100% { transform: translateY(0) scale(1) rotate(0deg); }
+  0% {
+    transform: translateY(0) scale(1);
+  }
+
+  35% {
+    transform: translateY(-7px) scale(1.2) rotate(-3deg);
+  }
+
+  65% {
+    transform: translateY(1.5px) scale(0.96) rotate(1.5deg);
+  }
+
+  100% {
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
 }
 
 /* ── Sidebar ──────────────────────────────────────────────────────── */
@@ -85,7 +110,7 @@
   width: 40px;
   height: 40px;
   background: var(--accent);
-  border-radius: 12px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -876,7 +901,7 @@
 
 [data-theme="dark"] .tod-quote {
   color: #f5f5f7;
-   font-style: italic;
+  font-style: italic;
 }
 
 [data-theme="dark"] .tod-author,
@@ -1391,7 +1416,7 @@
   .mobile-brand-logo {
     width: 36px;
     height: 36px;
-    border-radius: 10px;
+    border-radius: 50%;
     background: var(--accent);
     color: white;
     display: flex;
@@ -1584,7 +1609,8 @@
 
   .content-viewport {
     width: 100%;
-    padding-bottom: 4px; /* Reduced from 40px */
+    padding-bottom: 4px;
+    /* Reduced from 40px */
   }
 
   .overview-hero {
@@ -1656,7 +1682,7 @@
     scroll-snap-align: start;
     border-radius: 20px;
   }
-  
+
   @media (max-width: 430px) {
     .ov-stat-card {
       min-width: min(88vw, 260px);
@@ -1695,7 +1721,8 @@
 
   .today-schedule-section {
     margin-top: 4px;
-    padding: 18px 16px; /* Tightened from 20px */
+    padding: 18px 16px;
+    /* Tightened from 20px */
     border-radius: 24px;
   }
 
@@ -1708,7 +1735,7 @@
       padding: 16px 14px;
       border-radius: 20px;
     }
-    
+
     .schedule-header h3 {
       font-size: 1.1rem;
     }
@@ -1727,7 +1754,7 @@
     background: rgba(255, 255, 255, 0.75);
     border: 1px solid var(--glass-border, rgba(222, 226, 234, 0.6));
     box-shadow: var(--glass-shadow, 0 8px 32px rgba(0, 0, 0, 0.06));
-    padding: 6px 6px 6px 14px;
+    padding: 6px 6px 6px 10px;
     border-radius: 22px;
   }
 
@@ -2030,7 +2057,8 @@
   @media (display-mode: standalone) {
     .mobile-tabbar {
       bottom: calc(8px + env(safe-area-inset-bottom, 0px));
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); /* Slightly softer shadow for lower dock */
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      /* Slightly softer shadow for lower dock */
     }
   }
 
@@ -2124,25 +2152,26 @@
     animation: apple-pop-icon-hop 420ms var(--ease-emphasized);
   }
 }
-  .mobile-tabbar-icon {
-    position: relative;
-    z-index: 1;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 280ms var(--ease-emphasized);
-  }
 
-  .mobile-tabbar-label {
-    position: relative;
-    z-index: 1;
-    font-size: 10px;
-    font-weight: 700;
-    white-space: nowrap;
-    letter-spacing: 0.02em;
-  }
+.mobile-tabbar-icon {
+  position: relative;
+  z-index: 1;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 280ms var(--ease-emphasized);
+}
+
+.mobile-tabbar-label {
+  position: relative;
+  z-index: 1;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
 
 @media (max-width: 400px) {
   .overview-grid {
@@ -2150,7 +2179,7 @@
   }
 
   .mobile-top-shell {
-    padding: 14px;
+    padding: 8px 12px;
   }
 
   .mobile-brand-title {
@@ -2186,7 +2215,8 @@
 }
 
 .dev-footer.sheet-mode {
-  padding: 24px 24px 40px; /* Extra bottom padding for mobile safe area */
+  padding: 24px 24px 40px;
+  /* Extra bottom padding for mobile safe area */
   background: var(--surface-secondary);
   border-top: 1px solid var(--border-secondary);
   margin-top: 12px;

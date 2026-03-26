@@ -31,7 +31,7 @@
    ══════════════════════════════════════════════════════════════════════ */
 @media (max-width: 430px) {
   .apple-page-container {
-    padding: 16px 8px 100px !important; /* Maximizes grid space and handles tabbar overlap */
+    padding: 16px 12px 100px !important; /* Maximizes grid space and handles tabbar overlap */
     gap: 16px;
   }
 }
@@ -322,7 +322,7 @@
 
 .attendance-grid-apple {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
   gap: 18px;
 }
 
@@ -680,7 +680,7 @@
 
 .marks-grid-apple {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
   gap: 18px;
 }
 
