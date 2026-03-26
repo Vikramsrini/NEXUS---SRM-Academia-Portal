@@ -75,6 +75,93 @@ function getAttendanceStatus(conducted, absent) {
   }
 }
 
+function MiniCalendar({ startDate, endDate, onRangeSelect }) {
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const daysInMonth = (month, year) => new Date(year, month + 1, 0).getDate();
+  const firstDayOfMonth = (month, year) => new Date(year, month, 1).getDay();
+
+  const handlePrevMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
+  };
+  const handleNextMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
+  };
+
+  const monthIdx = currentMonth.getMonth();
+  const year = currentMonth.getFullYear();
+  const startDay = firstDayOfMonth(monthIdx, year);
+  const totalDays = daysInMonth(monthIdx, year);
+
+  const days = [];
+  for (let i = 0; i < startDay; i++) days.push(null);
+  for (let i = 1; i <= totalDays; i++) days.push(new Date(year, monthIdx, i));
+
+  const isSelected = (date) => {
+    if (!date) return false;
+    return (startDate && date.getTime() === new Date(startDate).setHours(0,0,0,0)) ||
+           (endDate && date.getTime() === new Date(endDate).setHours(0,0,0,0));
+  };
+
+  const isInRange = (date) => {
+    if (!date || !startDate || !endDate) return false;
+    const time = date.getTime();
+    const s = new Date(startDate).setHours(0,0,0,0);
+    const e = new Date(endDate).setHours(0,0,0,0);
+    return time > s && time < e;
+  };
+
+  const isToday = (date) => {
+    if (!date) return false;
+    return date.getTime() === today.getTime();
+  };
+
+  const handleDayClick = (date) => {
+    if (!date) return;
+    const isoDate = date.toISOString().split('T')[0];
+    if (!startDate || (startDate && endDate)) {
+      onRangeSelect(isoDate, '');
+    } else {
+      const s = new Date(startDate);
+      if (date < s) {
+        onRangeSelect(isoDate, startDate);
+      } else {
+        onRangeSelect(startDate, isoDate);
+      }
+    }
+  };
+
+  return (
+    <div className="apple-mini-calendar">
+      <div className="mini-cal-header">
+        <button onClick={handlePrevMonth} className="nav-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <h3>{MONTH_NAMES[monthIdx]} {year}</h3>
+        <button onClick={handleNextMonth} className="nav-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+      <div className="mini-cal-weekdays">
+        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => <span key={i}>{d}</span>)}
+      </div>
+      <div className="mini-cal-grid">
+        {days.map((date, i) => (
+          <div
+            key={i}
+            className={`mini-cal-day ${!date ? 'empty' : ''} ${isSelected(date) ? 'selected' : ''} ${isInRange(date) ? 'in-range' : ''} ${isToday(date) ? 'today' : ''}`}
+            onClick={() => handleDayClick(date)}
+          >
+            {date ? date.getDate() : ''}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function AttendancePage() {
   const student = getStudentData();
   const token = localStorage.getItem('academia_token') || '';
@@ -440,16 +527,12 @@ export default function AttendancePage() {
               <p className="secondary-text">Select a future range to see how leaves will impact your percentages.</p>
 
               <div className="apple-form-group">
-                <div className="date-row">
-                  <div className="input-field">
-                    <label>Start Date</label>
-                    <input type="date" value={predictFrom} onChange={e => setPredictFrom(e.target.value)} />
-                  </div>
-                  <div className="input-field">
-                    <label>End Date</label>
-                    <input type="date" value={predictTo} onChange={e => setPredictTo(e.target.value)} min={predictFrom} />
-                  </div>
-                </div>
+                <MiniCalendar 
+                  startDate={predictFrom} 
+                  endDate={predictTo} 
+                  onRangeSelect={(s, e) => { setPredictFrom(s); setPredictTo(e); }} 
+                />
+                
                 <button
                   className="apple-btn primary full-width"
                   onClick={() => {
@@ -507,16 +590,12 @@ export default function AttendancePage() {
               <p className="secondary-text">Select dates to preview updated attendance.</p>
 
               <div className="apple-form-group">
-                <div className="date-row">
-                  <div className="input-field">
-                    <label>From</label>
-                    <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} />
-                  </div>
-                  <div className="input-field">
-                    <label>To</label>
-                    <input type="date" value={toDate} onChange={e => setToDate(e.target.value)} min={fromDate} />
-                  </div>
-                </div>
+                <MiniCalendar 
+                  startDate={fromDate} 
+                  endDate={toDate} 
+                  onRangeSelect={(s, e) => { setFromDate(s); setToDate(e); }} 
+                />
+                
                 <button
                   className="apple-btn primary full-width"
                   onClick={handleAddOdDateRange}

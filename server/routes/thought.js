@@ -147,9 +147,10 @@ async function fetchThoughtFromMistral() {
     messages: [
       {
         role: 'system',
-        content: `You generate a daily motivational quote for university students. 
-- Topic: Academic success, discipline, overcoming failure, consistency, time management, or focus. 
-- Goal: Empower students to keep pushing. Avoid generic "good morning" or "sunrise" themes.
+        content: `You generate a "savage" thought of the day for university students. 
+- Tone: Brutally honest, raw, witty, and savage. No sugarcoating.
+- Topic: Life, discipline, the harsh reality of laziness, fake friends, growing up, or the grind. Not just academics.
+- Goal: A wake-up call that hit hard and motivates through truth. Avoid generic positivity.
 - Format: Under 160 characters. Provide strictly JSON: {"thought":"...","author":"..."}.`,
       },
       {

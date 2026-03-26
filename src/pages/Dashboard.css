@@ -1945,15 +1945,18 @@
   }
 
   .mobile-sheet-close {
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    background: var(--surface-secondary);
+    border: 1px solid var(--border-secondary);
+    color: var(--text-secondary);
   }
 
   [data-theme="dark"] .mobile-sheet-close {
-    background: rgba(28, 31, 39, 0.9);
-    border-color: rgba(255, 255, 255, 0.1);
-    color: #d0d3da;
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.08);
+    color: #e2e4e9;
   }
 
   .mobile-more-grid {
@@ -1964,17 +1967,16 @@
 
   .mobile-more-card {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-    min-height: 96px;
-    padding: 16px;
-    border-radius: 22px;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    padding: 18px;
+    border-radius: 24px;
     text-align: left;
     background: var(--surface-primary);
     border: 1px solid var(--border-secondary);
-    box-shadow: var(--shadow-sm);
-    transition: transform var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    transition: all var(--transition-fast);
     position: relative;
     overflow: hidden;
     isolation: isolate;
@@ -2023,15 +2025,24 @@
     justify-content: center;
   }
 
+  .mobile-more-card-content {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+  }
+
   .mobile-more-card-title {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
     color: var(--text-primary);
+    letter-spacing: -0.01em;
   }
 
   .mobile-more-card-subtitle {
-    font-size: 12px;
-    color: var(--text-secondary);
+    font-size: 13px;
+    color: var(--text-tertiary);
   }
 
   .mobile-tabbar {
@@ -2150,6 +2161,31 @@
 
   .mobile-tabbar-item.tap-burst .mobile-tabbar-icon {
     animation: apple-pop-icon-hop 420ms var(--ease-emphasized);
+  }
+}
+
+@media (max-width: 430px) {
+  .mobile-tabbar {
+    left: 8px;
+    right: 8px;
+    padding: 8px 6px 10px;
+    gap: 4px;
+    border-radius: 32px;
+  }
+
+  .mobile-tabbar-item {
+    gap: 4px;
+    padding: 10px 2px;
+  }
+
+  .mobile-tabbar-label {
+    font-size: 9px;
+    font-weight: 600;
+  }
+
+  .mobile-tabbar-icon svg {
+    width: 20px;
+    height: 20px;
   }
 }
 

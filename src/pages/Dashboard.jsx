@@ -1012,8 +1012,10 @@ export default function Dashboard({ children }) {
                   onClick={() => handleNavClick(item.path, item.id)}
                 >
                   <span className="mobile-more-card-icon">{item.icon}</span>
-                  <span className="mobile-more-card-title">{item.label}</span>
-                  <span className="mobile-more-card-subtitle">Open {item.label}</span>
+                  <div className="mobile-more-card-content">
+                    <span className="mobile-more-card-title">{item.label}</span>
+                    <span className="mobile-more-card-subtitle">Open {item.label}</span>
+                  </div>
                 </button>
               ))}
             </div>

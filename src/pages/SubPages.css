@@ -622,7 +622,14 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 430px) {
+  .marks-insights-row {
+    gap: 8px;
+    margin-bottom: 16px;
+  }
 }
 
 .marks-insight-card {
@@ -723,8 +730,9 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 16px;
-  padding: 20px 20px 16px;
+  gap: 12px;
+  padding: 20px;
+  border-bottom: 1px solid var(--border-secondary);
 }
 
 .marks-card-apple .title-group {
@@ -780,18 +788,34 @@
   font-weight: 700;
   letter-spacing: 0.01em;
   color: var(--text-primary);
+  opacity: 0.9;
+}
+
+@media (max-width: 430px) {
+  .marks-card-apple .card-header {
+    padding: 16px;
+    gap: 8px;
+  }
+
+  .marks-card-apple .big-score .fraction {
+    font-size: 1.15rem;
+  }
+
+  .marks-card-apple .title-group h3 {
+    font-size: 0.88rem;
+  }
 }
 
 .marks-card-apple .marks-graph-apple {
-  margin-top: 16px;
-  padding: 8px 0 16px;
+  margin-top: 0;
+  padding: 16px 0;
   min-height: 120px;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   gap: 12px;
   /* Removed heavy background for cleaner Apple look */
-  border-top: 1px solid var(--border-secondary);
+  border-bottom: 1px solid var(--border-secondary);
 }
 
 .marks-graph-legend {
@@ -3702,4 +3726,132 @@
   border-right: 2px solid white;
   transform: rotate(45deg);
   margin-top: -2px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   13. MINI CALENDAR (Apple Range Picker style)
+   ══════════════════════════════════════════════════════════════════════ */
+
+.apple-mini-calendar {
+  background: var(--surface-secondary);
+  border-radius: 18px;
+  padding: 16px;
+  border: 1px solid var(--border-secondary);
+  user-select: none;
+  margin-bottom: 8px;
+}
+
+.mini-cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.mini-cal-header h3 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.mini-cal-header .nav-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: var(--surface-tertiary);
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mini-cal-header .nav-btn:hover {
+  background: var(--accent-subtle);
+  color: var(--accent);
+}
+
+.mini-cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 8px;
+}
+
+.mini-cal-weekdays span {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: var(--text-tertiary);
+  text-align: center;
+}
+
+.mini-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.mini-cal-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  z-index: 1;
+}
+
+.mini-cal-day.empty {
+  cursor: default;
+}
+
+.mini-cal-day:not(.empty):hover {
+  background: var(--surface-tertiary);
+}
+
+.mini-cal-day.today {
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.mini-cal-day.today::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.mini-cal-day.selected {
+  background: var(--accent) !important;
+  color: #fff !important;
+  border-radius: 50%;
+  box-shadow: 0 2px 8px var(--accent-glow);
+}
+
+.mini-cal-day.in-range {
+  background: var(--accent-subtle) !important;
+  color: var(--accent) !important;
+  border-radius: 0;
+}
+
+/* Rounded corners for range edges */
+.mini-cal-day.in-range:nth-child(7n+1) { border-top-left-radius: 50%; border-bottom-left-radius: 50%; }
+.mini-cal-day.in-range:nth-child(7n) { border-top-right-radius: 50%; border-bottom-right-radius: 50%; }
+
+[data-theme="dark"] .apple-mini-calendar {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+[data-theme="dark"] .mini-cal-day.in-range {
+  background: rgba(220, 20, 60, 0.15) !important;
 }

@@ -18,8 +18,9 @@ export async function fetchTimetable() {
   return res.json();
 }
 
-export async function fetchThoughtOfDay() {
-  const res = await fetch(apiUrl('/thought-of-the-day'));
+export async function fetchThoughtOfDay(refresh = false) {
+  const q = refresh ? '?refresh=1' : '';
+  const res = await fetch(apiUrl(`/thought-of-the-day${q}`));
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.detail || err.error || 'Failed to fetch thought of the day');
