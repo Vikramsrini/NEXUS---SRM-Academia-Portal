@@ -1014,7 +1014,6 @@ export default function Dashboard({ children }) {
                   <span className="mobile-more-card-icon">{item.icon}</span>
                   <div className="mobile-more-card-content">
                     <span className="mobile-more-card-title">{item.label}</span>
-                    <span className="mobile-more-card-subtitle">Open {item.label}</span>
                   </div>
                 </button>
               ))}
