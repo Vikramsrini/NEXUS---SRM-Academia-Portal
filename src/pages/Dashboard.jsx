@@ -828,7 +828,7 @@ export default function Dashboard({ children }) {
                   {Icons.mortarboard}
                 </div>
                 <div className="mobile-brand-copy">
-                  <span className="mobile-brand-title" title={displayName}>{isOverview ? `Hi, ${compactDisplayName}` : 'NEXUS'}</span>
+                  <span className="mobile-brand-title" title={displayName}>NEXUS</span>
                 </div>
               </div>
               {renderTopBarActions()}
