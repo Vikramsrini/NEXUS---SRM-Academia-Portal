@@ -32,8 +32,8 @@ const Icons = {
 
 const NAV_ITEMS = [
   { id: 'home', label: 'Home', icon: Icons.home, path: '/dashboard' },
-  { id: 'attendance', label: 'Attendance', icon: Icons.attendance, path: '/dashboard/attendance' },
   { id: 'timetable', label: 'Timetable', icon: Icons.timetable, path: '/dashboard/timetable' },
+  { id: 'attendance', label: 'Attendance', icon: Icons.attendance, path: '/dashboard/attendance' },
   { id: 'marks', label: 'Marks', icon: Icons.marks, path: '/dashboard/marks' },
   { id: 'courses', label: 'Courses', icon: Icons.courses, path: '/dashboard/courses' },
   { id: 'calendar', label: 'Calendar', icon: Icons.calendar, path: '/dashboard/calendar' },
@@ -42,7 +42,7 @@ const NAV_ITEMS = [
   { id: 'resources', label: 'Resources', icon: Icons.resources, path: '/dashboard/resources' },
 ];
 
-const MOBILE_PRIMARY_NAV_IDS = ['home', 'attendance', 'marks', 'calendar'];
+const MOBILE_PRIMARY_NAV_IDS = ['home', 'timetable', 'attendance', 'marks'];
 
 function getStudentData() {
   try { return JSON.parse(localStorage.getItem('academia_student') || '{}'); } catch { return {}; }

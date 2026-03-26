@@ -87,39 +87,38 @@ function buildTrendChart(exams) {
   const labels = ['Start', ...validExams.map((r) => r.label)];
   const values = [0, ...validExams.map((r) => r.pct)];
 
-  const width = 100;
   const top = 10;
   const bottom = 50;
   const height = bottom - top;
-  const step = values.length > 1 ? width / (values.length - 1) : width;
+  const chartLeft = 8;
+  const chartRight = 96;
+  const chartWidth = chartRight - chartLeft;
+  const step = values.length > 1 ? chartWidth / (values.length - 1) : chartWidth;
 
   const points = values.map((v, idx) => {
-    const x = Number((idx * step).toFixed(2));
+    const x = Number((chartLeft + idx * step).toFixed(2));
     const y = Number((bottom - (v / 100) * height).toFixed(2));
     return { x, y, v, label: labels[idx] };
   });
 
-  const getSmoothPath = (pts) => {
-    if (pts.length < 2) return pts.length === 1 ? `M ${pts[0].x} ${pts[0].y}` : '';
+  const getStraightPath = (pts) => {
+    if (pts.length < 1) return '';
     let d = `M ${pts[0].x} ${pts[0].y}`;
-    for (let i = 0; i < pts.length - 1; i++) {
-        const curr = pts[i];
-        const next = pts[i + 1];
-        const mx = (curr.x + next.x) / 2;
-        d += ` C ${mx} ${curr.y}, ${mx} ${next.y}, ${next.x} ${next.y}`;
+    for (let i = 1; i < pts.length; i++) {
+      d += ` L ${pts[i].x} ${pts[i].y}`;
     }
     return d;
   };
 
-  const dataPoints = points.slice(1); 
-  const mainPath = getSmoothPath(dataPoints);
+  const dataPoints = points; 
+  const mainPath = getStraightPath(dataPoints);
 
   let fillPath = '';
   if (dataPoints.length >= 2) {
     fillPath = `${mainPath} L ${dataPoints[dataPoints.length - 1].x} ${bottom} L ${dataPoints[0].x} ${bottom} Z`;
   }
 
-  const dashedPath = dataPoints.length > 0 ? `M ${points[0].x} ${points[0].y} L ${dataPoints[0].x} ${dataPoints[0].y}` : '';
+  const dashedPath = '';
 
   return { points, labels, dashedPath, mainPath, fillPath, bottom };
 }

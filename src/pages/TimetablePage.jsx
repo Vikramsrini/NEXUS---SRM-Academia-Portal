@@ -122,7 +122,34 @@ function downloadTimetableImage(timetable, studentName) {
 export default function TimetablePage() {
   const student = getStudentData();
   const rawTimetable = useMemo(() => student.timetable || [], [student.timetable]);
-  const [activeDay, setActiveDay] = useState('all');
+  
+  const [activeDay, setActiveDay] = useState(() => {
+    const calendar = student.calendar || [];
+    const today = new Date();
+    const todayDate = String(today.getDate());
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December'];
+    const todayMonth = `${monthNames[today.getMonth()]} ${today.getFullYear()}`;
+
+    let currentDO = null;
+    for (const monthEntry of calendar) {
+      if (monthEntry.month === todayMonth) {
+        const found = (monthEntry.days || []).find(d => d.date === todayDate);
+        if (found?.dayOrder) currentDO = found.dayOrder;
+        break;
+      }
+    }
+
+    if (!currentDO) currentDO = student.currentDayOrder;
+    if (currentDO) {
+      const normalized = String(currentDO).replace(/\s+/g, '').replace('DO', '').toUpperCase();
+      // Ensure the day order actually exists in the timetable
+      const exists = rawTimetable.some(cls => (cls.dayOrder || '').replace('DO', '') === normalized);
+      if (exists) return normalized;
+    }
+    return 'all';
+  });
+
   const [isEditing, setIsEditing] = useState(false);
   const [hiddenClasses, setHiddenClasses] = useState(() => {
     try {

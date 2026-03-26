@@ -865,7 +865,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 4px 2px;
+  padding: 8px 6% 2px;
   gap: 4px;
   flex-wrap: wrap;
 }

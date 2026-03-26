@@ -86,6 +86,7 @@ export function cleanCourseTitle(value = '') {
     .split('\u2013')[0]
     .split(' \u2013')[0]
     .split(' -')[0]
+    .split('/')[0]
     .trim();
 }
 
