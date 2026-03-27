@@ -107,6 +107,15 @@
   }
 }
 
+@media (max-width: 380px) {
+  .subpage-title {
+    font-size: 1.25rem;
+  }
+  .subpage-desc {
+    font-size: 0.75rem;
+  }
+}
+
 
 /* ══════════════════════════════════════════════════════════════════════
    3. BUTTONS — apple-btn & apple-btn-secondary
@@ -277,6 +286,7 @@
     grid-template-columns: 1fr 1fr;
     width: 100%;
     margin-top: 4px;
+    gap: 12px;
   }
 
   .subpage-actions .apple-btn-secondary {
@@ -285,6 +295,16 @@
     justify-content: center;
     text-align: center;
     height: 100%;
+    white-space: normal;
+    line-height: 1.2;
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 380px) {
+  .subpage-actions {
+    grid-template-columns: 1fr;
+    gap: 10px;
   }
 }
 
@@ -480,6 +500,18 @@
   padding: 16px 20px;
 }
 
+@media (max-width: 430px) {
+  .attendance-card-apple .card-metrics {
+    padding: 14px 12px;
+  }
+}
+
+@media (max-width: 350px) {
+  .attendance-card-apple .card-metrics {
+    padding: 12px 8px;
+  }
+}
+
 .attendance-card-apple .card-metrics .metric {
   flex: 1;
   display: flex;
@@ -506,6 +538,15 @@
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--text-primary);
+}
+
+@media (max-width: 380px) {
+  .attendance-card-apple .card-metrics .metric .label {
+    font-size: 0.62rem;
+  }
+  .attendance-card-apple .card-metrics .metric .value {
+    font-size: 0.85rem;
+  }
 }
 
 /* -- Status Pill -- */
@@ -828,6 +869,15 @@
   }
 }
 
+@media (max-width: 350px) {
+  .marks-card-apple .card-header {
+    padding: 14px 12px;
+  }
+  .marks-card-apple .big-score .fraction {
+    font-size: 1rem;
+  }
+}
+
 .marks-card-apple .marks-graph-apple {
   margin-top: 0;
   padding: 16px 0;
@@ -911,7 +961,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 8px 6% 2px;
+  padding: 8px 8% 2px;
   gap: 4px;
   flex-wrap: wrap;
 }
@@ -986,17 +1036,17 @@
 
 .marks-card-apple .exam-row .exam-name {
   font-size: 0.65rem;
-  font-weight: 700;
-  color: var(--text-tertiary);
-  letter-spacing: 0.04em;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   text-align: center;
 }
 
 .marks-card-apple .exam-row .exam-val {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 800;
-  color: var(--accent);
+  color: var(--text-primary);
   font-variant-numeric: tabular-nums;
   padding: 0;
   text-align: center;
