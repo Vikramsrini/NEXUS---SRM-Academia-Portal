@@ -66,32 +66,51 @@ function getDisplayCourseName(markRow, nameByCode) {
   return raw;
 }
 
+function getExamWeight(name) {
+  const s = String(name || '').toLowerCase().trim();
+  if (s === '0' || s === 'start') return -1;
+  let weight = 50;
+  if (s.includes('ft')) weight = 10;
+  if (s.includes('cat') || s.includes('at') || s.includes('ct')) weight = 20;
+  if (s.includes('sem')) weight = 90;
+  
+  const numMatch = s.match(/\d+/);
+  if (numMatch) {
+    weight += parseInt(numMatch[0]);
+  } else {
+    if (s.includes('iii')) weight += 3;
+    else if (s.includes('ii')) weight += 2;
+    else if (s.includes('i')) weight += 1;
+  }
+  return weight;
+}
+
 function buildTrendChart(exams) {
-  const validExams = (Array.isArray(exams) ? exams : [])
-    .map((exam) => {
-      const name = String(exam?.exam || '').trim();
-      const obtained = parseFloat(exam?.obtained);
-      const max = parseFloat(exam?.maxMark);
-      const pct = max > 0 && Number.isFinite(obtained) ? (obtained / max) * 100 : 0;
-      return {
-        label: name || 'Test',
-        pct: Math.max(0, Math.min(100, pct)),
-      };
-    })
-    .filter((r) => r.label);
+  const sortedExams = (Array.isArray(exams) ? exams : [])
+    .filter((exam) => String(exam?.exam || '').trim())
+    .sort((a, b) => getExamWeight(a.exam) - getExamWeight(b.exam));
+
+  const validExams = sortedExams.map((exam) => {
+    const name = String(exam?.exam || '').trim();
+    const obtained = parseFloat(exam?.obtained);
+    const max = parseFloat(exam?.maxMark);
+    const pct = max > 0 && Number.isFinite(obtained) ? (obtained / max) * 100 : 0;
+    return {
+      label: name || 'Test',
+      pct: Math.max(0, Math.min(100, pct)),
+    };
+  });
 
   if (!validExams.length) return null;
 
-  // If there's only one test, we shouldn't show a "trend", but we should show the point
-  // To handle the chart logic, we use a 'Start' point at 0%
-  const labels = ['Start', ...validExams.map((r) => r.label)];
+  const labels = ['0', ...validExams.map((r) => r.label)];
   const values = [0, ...validExams.map((r) => r.pct)];
 
   const top = 10;
   const bottom = 50;
   const height = bottom - top;
   const chartLeft = 8;
-  const chartRight = 96;
+  const chartRight = 92;
   const chartWidth = chartRight - chartLeft;
   const step = values.length > 1 ? chartWidth / (values.length - 1) : chartWidth;
 
@@ -110,17 +129,13 @@ function buildTrendChart(exams) {
     return d;
   };
 
-  const dataPoints = points; 
-  const mainPath = getStraightPath(dataPoints);
-
+  const mainPath = getStraightPath(points);
   let fillPath = '';
-  if (dataPoints.length >= 2) {
-    fillPath = `${mainPath} L ${dataPoints[dataPoints.length - 1].x} ${bottom} L ${dataPoints[0].x} ${bottom} Z`;
+  if (points.length >= 2) {
+    fillPath = `${mainPath} L ${points[points.length - 1].x} ${bottom} L ${points[0].x} ${bottom} Z`;
   }
 
-  const dashedPath = '';
-
-  return { points, labels, dashedPath, mainPath, fillPath, bottom };
+  return { points, labels, mainPath, fillPath, bottom };
 }
 
 const GRADE_POINTS = { 'O': 10, 'A+': 9, 'A': 8, 'B+': 7, 'B': 6, 'C': 5, 'F': 0 };
@@ -408,7 +423,7 @@ export default function MarksPage() {
     <div className="apple-page-container">
       <div className="subpage-header">
         <div className="subpage-title-group">
-          <h1 className="subpage-title">Marks & Grades</h1>
+          <h1 className="subpage-title">Marks</h1>
           <p className="subpage-desc">Track performance and predict your semester SGPA.</p>
         </div>
         <button className="apple-btn primary" onClick={() => setIsPredictorOpen(!isPredictorOpen)}>
@@ -448,7 +463,9 @@ export default function MarksPage() {
             const displayName = getDisplayCourseName(m, courseNameByCode);
             const pctValue = m.total?.maxMark > 0 ? (m.total.obtained / m.total.maxMark) * 100 : 0;
             const pct = Math.max(0, Math.min(100, pctValue));
-            const individualMarks = (m.marks || []).filter(exam => !isSystemNoise(exam.exam, true));
+            const individualMarks = (m.marks || [])
+              .filter(exam => !isSystemNoise(exam.exam, true))
+              .sort((a, b) => getExamWeight(a.exam) - getExamWeight(b.exam));
             const trendChart = buildTrendChart(individualMarks);
             return (
               <div key={i} className="marks-card-apple">
@@ -482,12 +499,12 @@ export default function MarksPage() {
                         </defs>
                         
                         {/* Shorter Grid lines */}
-                        {[0, 25, 50, 75, 100].map((v) => {
+                        {[0, 20, 40, 60, 80, 100].map((v) => {
                           const y = 50 - (v / 100) * 40;
                           return (
                             <g key={`h-${v}`}>
-                              <line className="marks-grid-line" x1="0" y1={y} x2="100" y2={y} strokeDasharray="2,2" />
-                              <text className="marks-axis-label" x="0.5" y={y - 1.2}>{v}%</text>
+                              <line className="marks-grid-line" x1="0" y1={y} x2="100" y2={y} strokeDasharray="1,2" />
+                              <text className="marks-axis-label" x="0.5" y={y - 1}>{v}</text>
                             </g>
                           );
                         })}
