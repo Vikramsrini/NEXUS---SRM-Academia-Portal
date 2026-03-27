@@ -801,8 +801,8 @@
 
 .marks-card-apple .big-score .fraction span {
   font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text-tertiary);
+  font-weight: 800;
+  color: var(--text-secondary);
 }
 
 .marks-card-apple .big-score .percentage {
@@ -952,51 +952,63 @@
   font-weight: 500;
 }
 
-/* -- Exams List -- */
+/* -- Exams List — Compact Box Layout -- */
 .marks-card-apple .exams-list {
   display: flex;
-  flex-direction: column;
-  padding: 0 16px 16px;
-  gap: 6px;
+  flex-wrap: wrap;
+  padding: 18px 20px 24px;
+  gap: 10px;
+  justify-content: center;
 }
 
 .marks-card-apple .exam-row {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  padding: 10px 14px;
-  border-radius: var(--radius-sm);
+  justify-content: center;
+  padding: 10px 8px;
+  border-radius: var(--radius-md);
   background: var(--surface-secondary);
   border: 1px solid var(--border-secondary);
-  gap: 12px;
-  transition: background var(--transition-fast);
+  gap: 6px;
+  transition: all var(--transition-fast);
+  flex: 1 1 100px;
+  max-width: 140px;
+  min-width: 90px;
+  border-bottom: 1px solid var(--border-secondary) !important;
 }
 
 .marks-card-apple .exam-row:hover {
   background: var(--surface-tertiary);
-}
-
-.marks-card-apple .exam-row:last-child {
-  border-bottom: 1px solid var(--border-secondary);
+  border-color: var(--accent);
+  transform: translateY(-1px);
 }
 
 .marks-card-apple .exam-row .exam-name {
-  font-size: 0.78rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  letter-spacing: 0.01em;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-align: center;
 }
 
 .marks-card-apple .exam-row .exam-val {
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 800;
   color: var(--accent);
   font-variant-numeric: tabular-nums;
-  background: var(--accent-subtle);
-  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
-  padding: 3px 10px;
-  border-radius: var(--radius-full);
-  white-space: nowrap;
+  padding: 0;
+  text-align: center;
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+}
+
+.marks-card-apple .exam-row .exam-val span {
+  font-size: 0.65rem;
+  opacity: 1;
+  font-weight: 800;
 }
 
 
