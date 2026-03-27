@@ -528,7 +528,7 @@ export default function MarksPage() {
                   {individualMarks.map((exam, j) => (
                     <div key={j} className="exam-row">
                       <span className="exam-name">{exam.exam}</span>
-                      <span className="exam-val">{exam.obtained} / {exam.maxMark}</span>
+                      <span className="exam-val">{exam.obtained} <span>/ {exam.maxMark}</span></span>
                     </div>
                   ))}
                 </div>
