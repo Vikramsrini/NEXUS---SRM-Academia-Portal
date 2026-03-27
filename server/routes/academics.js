@@ -9,6 +9,7 @@ import { parseAttendance } from '../scrapers/attendance.js';
 import { parseMarks } from '../scrapers/marks.js';
 import { parseCourses, buildTimetable } from '../scrapers/timetable.js';
 import { fetchCurrentDayOrder } from '../scrapers/dayorder.js';
+import { saveAttendanceSnapshot, getPresenceForCourse } from '../services/attendanceService.js';
 import * as cheerio from 'cheerio';
 
 const router = Router();
@@ -52,6 +53,10 @@ router.get('/attendance', requireAuth, async (req, res) => {
       'https://academia.srmist.edu.in/srm_university/academia-academic-services/page/My_Attendance');
     const result = parseAttendance(html);
     res.json({ attendance: result.attendance, regNumber: result.regNumber, source: 'live' });
+
+    if (result.regNumber && result.attendance) {
+      saveAttendanceSnapshot(result.regNumber, result.attendance).catch(() => {});
+    }
   } catch (e) {
     console.error('Attendance API error:', e.message);
     res.status(502).json({ error: 'Failed to fetch attendance from Academia', detail: e.message });
@@ -86,6 +91,13 @@ router.get('/academics', requireAuth, async (req, res) => {
       regNumber: attResult.regNumber,
       source: 'live',
     });
+
+    // Fire & forget: snapshot in background
+    if (attResult.regNumber && attResult.attendance) {
+      saveAttendanceSnapshot(attResult.regNumber, attResult.attendance).catch(err => {
+        console.error('Snapshot error:', err.message);
+      });
+    }
   } catch (e) {
     console.error('Academics API error:', e.message);
     res.status(502).json({ error: 'Failed to fetch academic data from Academia', detail: e.message });
@@ -134,6 +146,26 @@ router.get('/course', requireAuth, async (req, res) => {
   } catch (e) {
     console.error('Course API error:', e.message);
     res.status(502).json({ error: 'Failed to fetch course details', detail: e.message });
+  }
+});
+
+// ── Real-time Presence Detection ──────────────────────────────────────
+router.get('/attendance/presence', requireAuth, async (req, res) => {
+  try {
+    const { regNumber, courses } = req.query; // courses is comma-separated list of courseCodes
+    if (!regNumber || !courses) return res.status(400).json({ error: 'Missing regNumber or courses query' });
+
+    const courseCodes = courses.split(',');
+    const results = {};
+    for (const code of courseCodes) {
+      const status = await getPresenceForCourse(regNumber, code);
+      results[code] = status;
+    }
+
+    res.json({ presence: results });
+  } catch (e) {
+    console.error('Presence API error:', e.message);
+    res.status(500).json({ error: 'Failed to calculate presence' });
   }
 });
 

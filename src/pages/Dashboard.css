@@ -2344,3 +2344,23 @@
 [data-theme="dark"] .dev-footer.mobile-home-mode {
   border-top-color: rgba(255, 255, 255, 0.08);
 }
+.presence-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.presence-tag.present {
+  background: var(--badge-green-bg);
+  color: var(--badge-green-text);
+  border: 1px solid var(--badge-green-border);
+}
+
+.presence-tag.absent {
+  background: var(--badge-red-bg);
+  color: var(--badge-red-text);
+  border: 1px solid var(--badge-red-border);
+}

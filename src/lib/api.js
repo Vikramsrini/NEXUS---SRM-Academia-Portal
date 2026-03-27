@@ -182,5 +182,17 @@ export async function saveTimetableState({ regNumber, token, hiddenClasses }) {
   return res.json();
 }
 
+export async function fetchPresence(regNumber, courses) {
+  const token = localStorage.getItem('academia_token');
+  if (!regNumber || !courses || !token) return { presence: {} };
+
+  const q = new URLSearchParams({ regNumber, courses: courses.join(',') }).toString();
+  const res = await fetch(apiUrl(`/attendance/presence?${q}`), {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) return { presence: {} };
+  return res.json();
+}
+
 export { API_BASE };
 

@@ -49,3 +49,16 @@ create table if not exists public.global_calendar (
 
 -- Ensure there is only one row for the global calendar
 create unique index if not exists global_calendar_single_row_idx on public.global_calendar (id);
+
+-- Attendance History snapshots for tracking presence
+create table if not exists public.attendance_snapshots (
+  id uuid primary key default gen_random_uuid(),
+  reg_number text not null,
+  course_code text not null,
+  hours_conducted int not null,
+  hours_absent int not null,
+  synced_at timestamptz not null default (now() at time zone 'utc' at time zone 'Asia/Kolkata')
+);
+
+create index if not exists attendance_snapshots_reg_number_course_code_idx
+  on public.attendance_snapshots (reg_number, course_code);

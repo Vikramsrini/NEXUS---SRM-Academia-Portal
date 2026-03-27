@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState, useMemo, useCallback } fr
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../ThemeContext';
-import { fetchThoughtOfDay, fetchOdState, saveOdState } from '../lib/api';
+import { fetchThoughtOfDay, fetchOdState, saveOdState, fetchPresence } from '../lib/api';
 import { normalizeCourseCode } from '../lib/slotTypes';
 import './Dashboard.css';
 
@@ -149,6 +149,7 @@ export default function Dashboard({ children }) {
   const [thoughtLoading, setThoughtLoading] = useState(true);
   const [syncError, setSyncError] = useState(false);
   const [student, setStudent] = useState(getStudentData);
+  const [presenceData, setPresenceData] = useState({});
   const displayName = student.name || 'User';
 
   useEffect(() => {
@@ -234,6 +235,8 @@ export default function Dashboard({ children }) {
       }, delay);
     };
 
+    window.__loadThought = loadThought;
+
     loadThought();
     scheduleDailyRefreshAtMidnight();
 
@@ -295,6 +298,11 @@ export default function Dashboard({ children }) {
       // Update local state to trigger reactive updates in all components 
       const updatedStudent = getStudentData();
       setStudent(updatedStudent);
+      
+      // Refresh thought of the day too
+      if (typeof window.__loadThought === 'function') {
+        window.__loadThought().catch(() => {});
+      }
     } catch (err) {
       console.error('Refresh error:', err);
       setSyncError(true);
@@ -440,6 +448,15 @@ export default function Dashboard({ children }) {
   };
 
   const todaySchedule = getTodaySchedule();
+
+  useEffect(() => {
+    if (isOverview && student.regNumber && todaySchedule.length > 0) {
+      const courseCodes = Array.from(new Set(todaySchedule.map(c => c.courseCode)));
+      fetchPresence(student.regNumber, courseCodes).then(data => {
+        if (data && data.presence) setPresenceData(data.presence);
+      });
+    }
+  }, [isOverview, student.regNumber, todaySchedule.length, student.timestamp]);
   const sortedSchedule = [...todaySchedule].sort((a, b) =>
     parseTime(a.time.split(' - ')[0]) - parseTime(b.time.split(' - ')[0])
   );
@@ -956,6 +973,10 @@ export default function Dashboard({ children }) {
                       <h4>Full Day Schedule</h4>
                       {sortedSchedule.map((item, idx) => {
                         const isActive = currentClass && currentClass.courseCode === item.courseCode && currentClass.time === item.time;
+                        const endTime = parseTime(item.time.split(' - ')[1]);
+                        const isOver = currentTime > endTime;
+                        const pState = presenceData[item.courseCode] || 'pending';
+
                         return (
                           <div key={idx} className={`sched-row ${isActive ? 'sched-row-active' : ''}`} style={item.isOptional ? { opacity: 0.5 } : {}}>
                             <div className="sched-time" style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: '70px' }}>
@@ -966,6 +987,11 @@ export default function Dashboard({ children }) {
                               <span className="sched-name" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                                 {item.subject}
                                 {item.isOptional && <span style={{ fontSize: '0.65rem', padding: '2px 6px', background: 'var(--surface-tertiary)', borderRadius: '6px', color: 'var(--text-secondary)' }}>Optional</span>}
+                                {isOver && pState && pState !== 'pending' && (
+                                  <span className={`presence-tag ${pState}`}>
+                                    {pState === 'present' ? 'Attended' : 'Missed'}
+                                  </span>
+                                )}
                               </span>
                               <span className="sched-code">{item.courseCode.startsWith('21') ? item.courseCode : `21${item.courseCode}`} • {item.room}</span>
                             </div>
