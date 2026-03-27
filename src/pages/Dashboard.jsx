@@ -506,7 +506,7 @@ export default function Dashboard({ children }) {
         if (!order.startsWith('DO') && /^\d+$/.test(order)) {
           order = `DO${order}`;
         }
-        sum += (odDayOrders[order] || 0);
+        sum += (odDayOrders[order] || 0) * (cls.hours || 1);
       });
 
       return sum;
