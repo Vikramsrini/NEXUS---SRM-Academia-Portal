@@ -101,16 +101,20 @@ function MiniCalendar({ startDate, endDate, onRangeSelect }) {
 
   const isSelected = (date) => {
     if (!date) return false;
-    return (startDate && date.getTime() === new Date(startDate).setHours(0,0,0,0)) ||
-           (endDate && date.getTime() === new Date(endDate).setHours(0,0,0,0));
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    const iso = `${y}-${m}-${d}`;
+    return iso === startDate || iso === endDate;
   };
 
   const isInRange = (date) => {
     if (!date || !startDate || !endDate) return false;
-    const time = date.getTime();
-    const s = new Date(startDate).setHours(0,0,0,0);
-    const e = new Date(endDate).setHours(0,0,0,0);
-    return time > s && time < e;
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    const iso = `${y}-${m}-${d}`;
+    return iso > startDate && iso < endDate;
   };
 
   const isToday = (date) => {
@@ -120,11 +124,16 @@ function MiniCalendar({ startDate, endDate, onRangeSelect }) {
 
   const handleDayClick = (date) => {
     if (!date) return;
-    const isoDate = date.toISOString().split('T')[0];
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    const isoDate = `${y}-${m}-${d}`;
+
     if (!startDate || (startDate && endDate)) {
       onRangeSelect(isoDate, '');
     } else {
-      const s = new Date(startDate);
+      const [sy, sm, sd] = startDate.split('-').map(Number);
+      const s = new Date(sy, sm-1, sd);
       if (date < s) {
         onRangeSelect(isoDate, startDate);
       } else {
@@ -346,9 +355,9 @@ export default function AttendancePage() {
   const [toDate, setToDate] = useState('');
 
   const handleAddOdDateRange = () => {
-    if (fromDate && toDate) {
+    if (fromDate) {
       const start = new Date(fromDate);
-      const end = new Date(toDate);
+      const end = toDate ? new Date(toDate) : new Date(fromDate);
       if (start <= end) {
         const newDates = [];
         let current = new Date(start);
@@ -418,21 +427,39 @@ export default function AttendancePage() {
 
   const calculateHoursFromDayOrders = (courseCode, slotType, tallies) => {
     const norm = normalizeSlot(slotType);
-    if (!timetable.length) return 0;
+    if (!timetable.length) return { hours: 0, optionalHours: 0 };
     let sum = 0;
+    let optionalSum = 0;
+
+    let hidden = [];
+    try {
+      hidden = JSON.parse(localStorage.getItem('academia_hidden_classes') || '[]');
+    } catch {
+      hidden = [];
+    }
+
     timetable.forEach(cls => {
       const clsNorm = normalizeSlot(cls.slotType);
       if (cls.courseCode === courseCode && clsNorm.label === norm.label) {
         let order = cls.dayOrder;
         if (!order) return;
         if (!order.startsWith('DO') && order.match(/^\d+$/)) order = `DO${order}`;
-        sum += (tallies[order] || 0);
+
+        const id = `${cls.courseCode}_${cls.time}_${cls.dayOrder || cls.day}`;
+        const isOptional = hidden.includes(id);
+        const count = (tallies[order] || 0) * (cls.hours || 1);
+
+        if (isOptional) {
+          optionalSum += count;
+        } else {
+          sum += count;
+        }
       }
     });
-    return sum;
+    return { hours: sum, optionalHours: optionalSum };
   };
 
-  const getOdBonus = (courseCode, slotType) => calculateHoursFromDayOrders(courseCode, slotType, odDayOrders);
+  const getOdBonus = (courseCode, slotType) => calculateHoursFromDayOrders(courseCode, slotType, odDayOrders).hours;
   const getPredictHours = (courseCode, slotType) => calculateHoursFromDayOrders(courseCode, slotType, predictDayOrders);
 
   const attendanceInsights = useMemo(() => {
@@ -496,6 +523,7 @@ export default function AttendancePage() {
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
               </div>
               <h2>Use with Caution</h2>
+              <button className="apple-modal-close" onClick={handleCancelDisclaimer}>{Icons.close}</button>
             </header>
             <div className="apple-modal-body">
               <p className="primary-text">This tool allows manual attendance editing and OD/ML predictions for your local tracking.</p>
@@ -522,6 +550,7 @@ export default function AttendancePage() {
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
               </div>
               <h2>Predict Absences</h2>
+              <button className="apple-modal-close" onClick={() => setShowPredictModal(false)}>{Icons.close}</button>
             </header>
             <div className="apple-modal-body">
               <p className="secondary-text">Select a future range to see how leaves will impact your percentages.</p>
@@ -536,9 +565,9 @@ export default function AttendancePage() {
                 <button
                   className="apple-btn primary full-width"
                   onClick={() => {
-                    if (predictFrom && predictTo) {
+                    if (predictFrom) {
                       const start = new Date(predictFrom);
-                      const end = new Date(predictTo);
+                      const end = predictTo ? new Date(predictTo) : new Date(predictFrom);
                       const newDates = [];
                       let current = new Date(start);
                       while (current <= end) {
@@ -551,7 +580,7 @@ export default function AttendancePage() {
                       setPredictFrom(''); setPredictTo('');
                     }
                   }}
-                  disabled={!predictFrom || !predictTo}
+                  disabled={!predictFrom}
                 >
                   Apply Leave Range
                 </button>
@@ -585,6 +614,7 @@ export default function AttendancePage() {
           <div className="apple-modal-card compact">
             <header className="apple-modal-header">
               <h2>Apply OD / ML</h2>
+              <button className="apple-modal-close" onClick={() => setShowOdModal(false)}>{Icons.close}</button>
             </header>
             <div className="apple-modal-body">
               <p className="secondary-text">Select dates to preview updated attendance.</p>
@@ -599,7 +629,7 @@ export default function AttendancePage() {
                 <button
                   className="apple-btn primary full-width"
                   onClick={handleAddOdDateRange}
-                  disabled={!fromDate || !toDate}
+                  disabled={!fromDate}
                 >
                   Add Date Range
                 </button>
@@ -671,8 +701,10 @@ export default function AttendancePage() {
                   const A = Math.max(0, originalA - finalAppliedOd);
                   const P = Math.max(0, C - A);
                   
-                  // Prediction logic
-                  const predictHrs = getPredictHours(a.courseCode, type);
+                   // Prediction logic
+                  const predStats = getPredictHours(a.courseCode, type);
+                  const predictHrs = predStats.hours;
+                  const optionalHrs = predStats.optionalHours;
                   const predC = C + predictHrs;
                   const predA = A + predictHrs;
                   const predP = P; // Present hours don't change if you skip
@@ -741,9 +773,10 @@ export default function AttendancePage() {
                         </div>
                       </div>
 
-                      {isPredicting && (
+                       {isPredicting && (
                         <div className="prediction-overlay-hint">
-                          PREDICTION ACTIVE: {predictHrs} hrs missed in range
+                          PREDICTION ACTIVE: {predictHrs} hrs missed
+                          {optionalHrs > 0 && <span> (excl. {optionalHrs} optional)</span>}
                         </div>
                       )}
 
