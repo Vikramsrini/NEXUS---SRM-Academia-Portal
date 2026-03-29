@@ -1486,9 +1486,18 @@
 
 .cgpa-select-row {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: 100px 1fr;
+  gap: 12px;
+  align-items: flex-end;
 }
+
+@media (max-width: 480px) {
+  .cgpa-select-row {
+    grid-template-columns: 85px 1fr;
+    gap: 8px;
+  }
+}
+
 
 .cgpa-semester-grid {
   display: grid;
@@ -1513,9 +1522,6 @@
 }
 
 @media (max-width: 768px) {
-  .cgpa-select-row {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 768px) {
@@ -3575,8 +3581,10 @@
 .cgpa-rows {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 16px;
+  margin-top: 24px;
 }
+
 
 .cgpa-row {
   display: grid;
