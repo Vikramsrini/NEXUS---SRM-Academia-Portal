@@ -31,7 +31,8 @@
    ══════════════════════════════════════════════════════════════════════ */
 @media (max-width: 430px) {
   .apple-page-container {
-    padding: 16px 12px 100px !important; /* Maximizes grid space and handles tabbar overlap */
+    padding: 16px 12px 100px !important;
+    /* Maximizes grid space and handles tabbar overlap */
     gap: 16px;
   }
 }
@@ -96,12 +97,12 @@
     font-size: 1.35rem;
     letter-spacing: -0.02em;
   }
-  
+
   .subpage-desc {
     font-size: 0.78rem;
     line-height: 1.3;
   }
-  
+
   .subpage-header {
     gap: 14px;
   }
@@ -111,6 +112,7 @@
   .subpage-title {
     font-size: 1.25rem;
   }
+
   .subpage-desc {
     font-size: 0.75rem;
   }
@@ -240,6 +242,7 @@
   border-color: var(--border-active);
   color: var(--accent);
 }
+
 .prediction-overlay-hint {
   background: var(--accent-subtle);
   color: var(--accent);
@@ -347,6 +350,7 @@
 }
 
 @media (max-width: 430px) {
+
   .attendance-grid-apple,
   .marks-grid-apple {
     gap: 12px;
@@ -372,6 +376,7 @@
   background: var(--glass-bg-card);
   backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  justify-content: flex-end;
 }
 
 .attendance-card-apple:hover {
@@ -381,16 +386,17 @@
 }
 
 @media (max-width: 430px) {
+
   .attendance-card-apple .card-top,
   .marks-card-apple .card-header {
     padding: 16px 16px 12px;
   }
-  
+
   .attendance-card-apple .card-metrics,
   .marks-card-apple .card-body {
     padding: 12px 16px;
   }
-  
+
   .attendance-card-apple .card-actions,
   .marks-card-apple .card-footer {
     padding: 10px 16px;
@@ -544,6 +550,7 @@
   .attendance-card-apple .card-metrics .metric .label {
     font-size: 0.62rem;
   }
+
   .attendance-card-apple .card-metrics .metric .value {
     font-size: 0.85rem;
   }
@@ -592,6 +599,7 @@
   justify-content: space-between;
   padding: 12px 20px;
   border-top: 1px solid var(--border-secondary);
+  margin-top: auto;
   background: var(--surface-secondary);
 }
 
@@ -729,12 +737,12 @@
     gap: 10px;
     width: 100%;
   }
-  
+
   .marks-insight-card {
     padding: 12px 14px;
     min-width: 0;
   }
-  
+
   .marks-insight-card .value {
     font-size: 1.2rem;
   }
@@ -873,6 +881,7 @@
   .marks-card-apple .card-header {
     padding: 14px 12px;
   }
+
   .marks-card-apple .big-score .fraction {
     font-size: 1rem;
   }
@@ -1314,8 +1323,15 @@
 }
 
 @keyframes slideDownIn {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media (max-width: 768px) {
@@ -1323,18 +1339,21 @@
     padding: 24px 16px;
     margin-bottom: 32px;
   }
+
   .sgpa-inline-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 20px;
   }
+
   .sgpa-inline-header .header-actions {
     width: 100%;
     flex-direction: column-reverse;
     align-items: stretch;
     gap: 12px;
   }
-  .target-all-dropdown, 
+
+  .target-all-dropdown,
   .sgpa-summary-badge {
     width: 100%;
     min-width: 0;
@@ -1346,11 +1365,13 @@
   .sgpa-inline-header h2 {
     font-size: 1.4rem;
   }
+
   .sgpa-inline-container {
     padding: 20px 12px;
     gap: 24px;
     border-radius: var(--radius-md);
   }
+
   .target-all-dropdown {
     padding: 10px 14px;
   }
@@ -1373,7 +1394,7 @@
 
 .sgpa-big-badge:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 @media (max-width: 640px) {
@@ -1382,11 +1403,13 @@
     align-items: flex-start;
     text-align: left;
   }
+
   .sgpa-big-badge {
     width: 100%;
     padding: 18px;
   }
 }
+
 .marks-graph-legend {
   display: inline-flex;
   align-items: center;
@@ -1397,6 +1420,7 @@
   font-weight: 600;
   color: var(--text-secondary);
 }
+
 .marks-graph-legend .dot {
   width: 8px;
   height: 8px;
@@ -1881,6 +1905,7 @@
   .day-selector-scroller {
     gap: 8px;
   }
+
   .day-tab {
     padding: 7px 12px;
     font-size: 0.75rem;
@@ -1958,7 +1983,7 @@
     padding: 14px 16px;
     border-radius: 16px;
   }
-  
+
   .course-name {
     font-size: 0.88rem;
     line-height: 1.3;
@@ -2054,9 +2079,9 @@
   .class-card-v2 {
     padding: 16px;
   }
-  
+
   .card-main-info {
-    flex-direction: row; 
+    flex-direction: row;
   }
 
   .course-name {
@@ -2389,6 +2414,7 @@
   .date-row {
     gap: 8px;
   }
+
   .input-field input {
     padding: 8px 6px;
     font-size: 0.78rem;
@@ -2748,7 +2774,8 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
-  height: 110px; /* Fixed height for top section to align stats below */
+  height: 110px;
+  /* Fixed height for top section to align stats below */
   padding: 18px 20px 14px;
 }
 
@@ -2828,7 +2855,8 @@
   flex: 1;
   gap: 0;
   padding: 0 20px;
-  justify-content: flex-end; /* Push content to bottom to align with highlighed row */
+  justify-content: flex-end;
+  /* Push content to bottom to align with highlighed row */
 }
 
 .stat-row {
@@ -2836,7 +2864,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 0;
-  min-height: 44px; /* Consistent height for stat rows */
+  min-height: 44px;
+  /* Consistent height for stat rows */
   border-bottom: 1px solid var(--border-secondary);
 }
 
@@ -3941,8 +3970,15 @@
 }
 
 /* Rounded corners for range edges */
-.mini-cal-day.in-range:nth-child(7n+1) { border-top-left-radius: 50%; border-bottom-left-radius: 50%; }
-.mini-cal-day.in-range:nth-child(7n) { border-top-right-radius: 50%; border-bottom-right-radius: 50%; }
+.mini-cal-day.in-range:nth-child(7n+1) {
+  border-top-left-radius: 50%;
+  border-bottom-left-radius: 50%;
+}
+
+.mini-cal-day.in-range:nth-child(7n) {
+  border-top-right-radius: 50%;
+  border-bottom-right-radius: 50%;
+}
 
 [data-theme="dark"] .apple-mini-calendar {
   background: rgba(255, 255, 255, 0.03);

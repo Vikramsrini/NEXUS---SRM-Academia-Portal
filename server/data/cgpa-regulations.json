@@ -1,0 +1,548 @@
+{
+  "2021": {
+    "Aerospace Engineering": {
+      "1": 18,
+      "2": 22,
+      "3": 24,
+      "4": 21,
+      "5": 24,
+      "6": 21,
+      "7": 15,
+      "8": 15
+    },
+    "Artificial Intelligence": {
+      "1": 22,
+      "2": 21,
+      "3": 22,
+      "4": 23,
+      "5": 22,
+      "6": 23,
+      "7": 18,
+      "8": 15
+    },
+    "Automobile Engineering": {
+      "1": 19,
+      "2": 26,
+      "3": 23,
+      "4": 20,
+      "5": 21,
+      "6": 24,
+      "7": 18,
+      "8": 15
+    },
+    "Automobile Engineering with Specialization in Automotive Electronics": {
+      "1": 19,
+      "2": 26,
+      "3": 23,
+      "4": 20,
+      "5": 21,
+      "6": 24,
+      "7": 18,
+      "8": 30
+    },
+    "Automobile Engineering with Specialization in Vehicles Testing GARC": {
+      "1": 19,
+      "2": 23,
+      "3": 23,
+      "4": 20,
+      "5": 21,
+      "6": 24,
+      "7": 18,
+      "8": 30
+    },
+    "Automotive Engineering ARAI": {
+      "1": 19,
+      "2": 26,
+      "3": 23,
+      "4": 20,
+      "5": 21,
+      "6": 24,
+      "7": 18,
+      "8": 30
+    },
+    "Biomedical Engineering": {
+      "1": 21,
+      "2": 22,
+      "3": 22,
+      "4": 23,
+      "5": 22,
+      "6": 22,
+      "7": 18,
+      "8": 30
+    },
+    "Biomedical Engineering with specialisation in Machine Intelligence": {
+      "1": 21,
+      "2": 19,
+      "3": 22,
+      "4": 23,
+      "5": 21,
+      "6": 24,
+      "7": 18,
+      "8": 15
+    },
+    "Biotechnology Computational Biology": {
+      "1": 18,
+      "2": 25,
+      "3": 23,
+      "4": 23,
+      "5": 24,
+      "6": 20,
+      "7": 19,
+      "8": 30
+    },
+    "Biotechnology with specialization in Food Technology": {
+      "1": 18,
+      "2": 25,
+      "3": 23,
+      "4": 23,
+      "5": 22,
+      "6": 22,
+      "7": 18,
+      "8": 30
+    },
+    "Biotechnology with specialization in Regenerative Medicine": {
+      "1": 18,
+      "2": 22,
+      "3": 23,
+      "4": 23,
+      "5": 22,
+      "6": 19,
+      "7": 18,
+      "8": 15
+    },
+    "Chemical Engineering": {
+      "1": 18,
+      "2": 25,
+      "3": 22,
+      "4": 20,
+      "5": 22,
+      "6": 23,
+      "7": 21,
+      "8": 30
+    },
+    "Civil Engineering": {
+      "1": 18,
+      "2": 25,
+      "3": 24,
+      "4": 24,
+      "5": 22,
+      "6": 17,
+      "7": 21,
+      "8": 15
+    },
+    "Civil Engineering with Computer Applications": {
+      "1": 18,
+      "2": 25,
+      "3": 24,
+      "4": 24,
+      "5": 22,
+      "6": 20,
+      "7": 18,
+      "8": 30
+    },
+    "Computer Science And Engineering Data Science": {
+      "1": 22,
+      "2": 21,
+      "3": 23,
+      "4": 23,
+      "5": 21,
+      "6": 20,
+      "7": 18,
+      "8": 30
+    },
+    "Computer Science And Engineering with Specialization in Artificial Intelligence and Machine Learning": {
+      "1": 22,
+      "2": 21,
+      "3": 23,
+      "4": 23,
+      "5": 21,
+      "6": 20,
+      "7": 18,
+      "8": 15
+    },
+    "Computer Science And Engineering with Specialization in Big Data Analytics": {
+      "1": 22,
+      "2": 21,
+      "3": 23,
+      "4": 23,
+      "5": 21,
+      "6": 20,
+      "7": 18,
+      "8": 30
+    },
+    "Computer Science And Engineering with Specialization in Blockchain Technology": {
+      "1": 22,
+      "2": 18,
+      "3": 23,
+      "4": 23,
+      "5": 21,
+      "6": 23,
+      "7": 18,
+      "8": 30
+    },
+    "Computer Science And Engineering with Specialization in Cloud Computing": {
+      "1": 22,
+      "2": 21,
+      "3": 23,
+      "4": 23,
+      "5": 21,
+      "6": 20,
+      "7": 18,
+      "8": 15
+    },
+    "Computer Science And Engineering with Specialization in Computer Networking": {
+      "1": 22,
+      "2": 21,
+      "3": 23,
+      "4": 23,
+      "5": 21,
+      "6": 20,
+      "7": 18,
+      "8": 15
+    },
+    "Computer Science And Engineering with Specialization in Gaming Technology": {
+      "1": 22,
+      "2": 21,
+      "3": 23,
+      "4": 23,
+      "5": 21,
+      "6": 20,
+      "7": 18,
+      "8": 30
+    },
+    "Computer Science And Engineering with Specialization in Information Technology": {
+      "1": 22,
+      "2": 21,
+      "3": 23,
+      "4": 23,
+      "5": 24,
+      "6": 20,
+      "7": 18,
+      "8": 30
+    },
+    "Computer Science And Engineering with Specialization in Internet of Things": {
+      "1": 22,
+      "2": 21,
+      "3": 23,
+      "4": 23,
+      "5": 21,
+      "6": 20,
+      "7": 18,
+      "8": 30
+    },
+    "Computer Science And Engineering with Specialization in Software Engineering": {
+      "1": 22,
+      "2": 21,
+      "3": 23,
+      "4": 23,
+      "5": 21,
+      "6": 23,
+      "7": 18,
+      "8": 15
+    },
+    "Computer Science and Business Systems": {
+      "1": 21,
+      "2": 17,
+      "3": 23,
+      "4": 26,
+      "5": 20,
+      "6": 20,
+      "7": 18,
+      "8": 30
+    },
+    "Computer Science and Engineering": {
+      "1": 22,
+      "2": 18,
+      "3": 23,
+      "4": 20,
+      "5": 18,
+      "6": 20,
+      "7": 18,
+      "8": 15
+    },
+    "Electric Vehicle Technology": {
+      "1": 18,
+      "2": 26,
+      "3": 22,
+      "4": 23,
+      "5": 20,
+      "6": 24,
+      "7": 18,
+      "8": 30
+    },
+    "Electrical Electronics Engineering": {
+      "1": 18,
+      "2": 25,
+      "3": 22,
+      "4": 23,
+      "5": 21,
+      "6": 21,
+      "7": 18,
+      "8": 30
+    },
+    "Electronics And Communication And Engineering with Specialization in Data Sciences": {
+      "1": 18,
+      "2": 25,
+      "3": 24,
+      "4": 21,
+      "5": 20,
+      "6": 22,
+      "7": 18,
+      "8": 15
+    },
+    "Electronics And Communication Engineering with Specialization in Cyber-Physical Systems": {
+      "1": 18,
+      "2": 25,
+      "3": 24,
+      "4": 21,
+      "5": 19,
+      "6": 23,
+      "7": 18,
+      "8": 30
+    },
+    "Electronics And Computer Engineering": {
+      "1": 18,
+      "2": 23,
+      "3": 24,
+      "4": 21,
+      "5": 21,
+      "6": 20,
+      "7": 18,
+      "8": 30
+    },
+    "Electronics And Instrumentation Engineering": {
+      "1": 18,
+      "2": 26,
+      "3": 23,
+      "4": 21,
+      "5": 21,
+      "6": 21,
+      "7": 18,
+      "8": 30
+    },
+    "Electronics Communication Engineering": {
+      "1": 18,
+      "2": 25,
+      "3": 24,
+      "4": 21,
+      "5": 20,
+      "6": 22,
+      "7": 18,
+      "8": 30
+    },
+    "Integrated MTech Computer Science And Engineering with Specialization in Cyber Security and Digital Forensics": {
+      "1": 22,
+      "2": 21,
+      "3": 23,
+      "4": 23,
+      "5": 21,
+      "6": 23,
+      "7": 18,
+      "8": 42
+    },
+    "Integrated MTech Computer Science And Engineering with Specialization in Data Science": {
+      "1": 22,
+      "2": 21,
+      "3": 23,
+      "4": 23,
+      "5": 21,
+      "6": 23,
+      "7": 18,
+      "8": 42
+    },
+    "Integrated MTech Electronics And Communication Engineering with Specialization in Micro Electronics System Design": {
+      "1": 18,
+      "2": 25,
+      "3": 24,
+      "4": 21,
+      "5": 20,
+      "6": 25,
+      "7": 18,
+      "8": 27,
+      "9": 18,
+      "10": 20
+    },
+    "Integrated MTech in Artificial Intelligence": {
+      "1": 22,
+      "2": 21,
+      "3": 23,
+      "4": 23,
+      "5": 21,
+      "6": 20,
+      "7": 18,
+      "8": 42
+    },
+    "Integrated MTech in Computer Science And Engineering with Specialization in Cognitive Computing": {
+      "1": 22,
+      "2": 21,
+      "3": 23,
+      "4": 23,
+      "5": 21,
+      "6": 23,
+      "7": 18,
+      "8": 42
+    },
+    "Integrated MTech in Computer Science and Engineering": {
+      "1": 22,
+      "2": 21,
+      "3": 23,
+      "4": 23,
+      "5": 21,
+      "6": 20,
+      "7": 18,
+      "8": 42
+    },
+    "Integrated MTech in Material Science and Engineering": {
+      "1": 22,
+      "2": 18,
+      "3": 22,
+      "4": 24,
+      "5": 21,
+      "6": 23,
+      "7": 18,
+      "8": 42,
+      "9": 18,
+      "10": 40
+    },
+    "Integrated MTech in Mechanical Engineering": {
+      "1": 18,
+      "2": 26,
+      "3": 24,
+      "4": 23,
+      "5": 23,
+      "6": 22,
+      "7": 12,
+      "8": 26
+    },
+    "Mechanical Engineering": {
+      "1": 18,
+      "2": 26,
+      "3": 24,
+      "4": 23,
+      "5": 23,
+      "6": 22,
+      "7": 12,
+      "8": 30
+    },
+    "Mechanical Engineering with specialization in Artificial Intelligence and Machine Learning": {
+      "1": 18,
+      "2": 26,
+      "3": 24,
+      "4": 23,
+      "5": 23,
+      "6": 22,
+      "7": 12,
+      "8": 30
+    },
+    "Mechanical Engineering with specialization in Automation and Robotics": {
+      "1": 18,
+      "2": 26,
+      "3": 24,
+      "4": 23,
+      "5": 23,
+      "6": 25,
+      "7": 12,
+      "8": 30
+    },
+    "Mechatronics Engineering": {
+      "1": 18,
+      "2": 25,
+      "3": 22,
+      "4": 21,
+      "5": 24,
+      "6": 23,
+      "7": 18,
+      "8": 30
+    },
+    "Mechatronics Engineering with Specialization in Robotics": {
+      "1": 18,
+      "2": 25,
+      "3": 22,
+      "4": 21,
+      "5": 21,
+      "6": 23,
+      "7": 18,
+      "8": 15
+    },
+    "Mechatronics Engineering with specialization in Autonomous Driving Technology": {
+      "1": 18,
+      "2": 25,
+      "3": 22,
+      "4": 24,
+      "5": 21,
+      "6": 20,
+      "7": 21,
+      "8": 15
+    },
+    "Mechatronics Engineering with specialization in Immersive Technologies": {
+      "1": 18,
+      "2": 25,
+      "3": 22,
+      "4": 24,
+      "5": 21,
+      "6": 20,
+      "7": 18,
+      "8": 30
+    },
+    "Mechatronics Engineering with specialization in Industrial IoT and Systems Engineering": {
+      "1": 18,
+      "2": 25,
+      "3": 22,
+      "4": 21,
+      "5": 24,
+      "6": 20,
+      "7": 18,
+      "8": 30
+    },
+    "Nanotechnology": {
+      "1": 22,
+      "2": 21,
+      "3": 22,
+      "4": 24,
+      "5": 21,
+      "6": 20,
+      "7": 18,
+      "8": 30
+    },
+    "Biotechnology": {
+      "1": 18,
+      "2": 25,
+      "3": 23,
+      "4": 23,
+      "5": 22,
+      "6": 22,
+      "7": 18,
+      "8": 30
+    },
+    "Computer Science And Engineering with Specialization in Cyber Security": {
+      "1": 22,
+      "2": 21,
+      "3": 23,
+      "4": 23,
+      "5": 21,
+      "6": 20,
+      "7": 18,
+      "8": 30
+    },
+    "Electronics Engineering VLSI Design and Technology": {
+      "1": 18,
+      "2": 27,
+      "3": 22,
+      "4": 18,
+      "5": 20,
+      "6": 22,
+      "7": 18,
+      "8": 30
+    },
+    "Biotechnology with Genetic Engineering specialization": {
+      "1": 18,
+      "2": 25,
+      "3": 23,
+      "4": 23,
+      "5": 22,
+      "6": 22,
+      "7": 18,
+      "8": 30
+    }
+  }
+}

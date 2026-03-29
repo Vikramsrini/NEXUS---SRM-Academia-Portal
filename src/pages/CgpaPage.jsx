@@ -8,14 +8,42 @@ function clampGpa(value) {
   return Math.max(0, Math.min(10, numeric));
 }
 
+function formatCourseName(name) {
+  if (!name) return name;
+  return name
+    .replace(/Computer Science (and\s+|And\s+)*Engineering/gi, 'CSE')
+    .replace(/Electronics (and\s+|And\s+)*Communication (and\s+|And\s+)*Engineering/gi, 'ECE')
+    .replace(/Electrical (and\s+|And\s+)*Electronics (and\s+|And\s+)*Engineering/gi, 'EEE')
+    .replace(/Mechanical Engineering/gi, 'MECH')
+    .replace(/Civil Engineering/gi, 'CIVIL')
+    .replace(/Information Technology/gi, 'IT')
+    .replace(/Artificial Intelligence (and|And) Machine Learning/gi, 'AIML')
+    .replace(/Artificial Intelligence/gi, 'AI')
+    .replace(/Machine Learning/gi, 'ML')
+    .replace(/Data Science/gi, 'DS')
+    .replace(/with Specialization in /gi, '— ');
+}
+
+
+
 export default function CgpaPage() {
   const token = localStorage.getItem('academia_token') || '';
-  const regNumber = (() => {
+  const { regNumber, profileBranch, profileDept, profileRegulation } = (() => {
     try {
       const student = JSON.parse(localStorage.getItem('academia_student') || '{}');
-      return String(student.regNumber || '').trim();
+      const branch = String(student.branch || '').trim();
+      const department = String(student.department || '').trim();
+      const batch = String(student.batch || '').trim();
+      // Derive regulation from batch (e.g., "2021-2025" -> "2021")
+      const regMatch = batch.match(/^(\d{4})/);
+      return {
+        regNumber: String(student.regNumber || '').trim(),
+        profileBranch: branch,
+        profileDept: department,
+        profileRegulation: regMatch ? regMatch[1] : ''
+      };
     } catch {
-      return '';
+      return { regNumber: '', profileBranch: '', profileDept: '', profileRegulation: '' };
     }
   })();
 
@@ -30,6 +58,7 @@ export default function CgpaPage() {
   const [semesterInputs, setSemesterInputs] = useState({});
   const [creditInputs, setCreditInputs] = useState({});
   const [loadedRemoteState, setLoadedRemoteState] = useState(false);
+  const [autoSelected, setAutoSelected] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -61,27 +90,62 @@ export default function CgpaPage() {
     [cgpaRef, selectedRegulation]
   );
 
+  // Auto-select regulation and branch based on profile
   useEffect(() => {
-    if (!regulationOptions.length) return;
+    if (!cgpaRef || autoSelected || !regulationOptions.length) return;
+
+    let targetReg = profileRegulation;
+    let targetBranch = profileBranch;
+    let targetDept = profileDept;
+
+    if (targetReg && regulationOptions.includes(targetReg)) {
+      setSelectedRegulation(targetReg);
+      
+      const coursesForReg = Object.keys(cgpaRef.regulations[targetReg] || {});
+      
+      // Robust matching: Try exact match first, then case-insensitive
+      const match = (val) => {
+        if (!val) return null;
+        const exact = coursesForReg.find(c => c === val);
+        if (exact) return exact;
+        const low = val.toLowerCase();
+        return coursesForReg.find(c => c.toLowerCase() === low || c.toLowerCase().includes(low) || low.includes(c.toLowerCase()));
+      };
+
+      const found = match(targetDept) || match(targetBranch);
+      if (found) {
+        setSelectedCourse(found);
+      }
+    } else {
+      // Fallback to latest regulation if profile reg not found or invalid
+      setSelectedRegulation(regulationOptions[0]);
+    }
+
+    setAutoSelected(true);
+  }, [cgpaRef, regulationOptions, profileRegulation, profileBranch, profileDept, autoSelected]);
+
+  useEffect(() => {
+    if (!regulationOptions.length || autoSelected) return;
     if (!selectedRegulation || !cgpaRef?.regulations?.[selectedRegulation]) {
       setSelectedRegulation(regulationOptions[0]);
     }
-  }, [regulationOptions, selectedRegulation, cgpaRef]);
+  }, [regulationOptions, selectedRegulation, cgpaRef, autoSelected]);
 
   useEffect(() => {
-    if (!courseOptions.length) {
-      setSelectedCourse('');
+    if (!courseOptions.length || autoSelected) {
+      if (!courseOptions.length && !autoSelected) setSelectedCourse('');
       return;
     }
     if (!selectedCourse || !cgpaRef?.regulations?.[selectedRegulation]?.[selectedCourse]) {
       setSelectedCourse(courseOptions[0]);
     }
-  }, [courseOptions, selectedCourse, selectedRegulation, cgpaRef]);
+  }, [courseOptions, selectedCourse, selectedRegulation, cgpaRef, autoSelected]);
 
   useEffect(() => {
     let cancelled = false;
 
     const loadSavedState = async () => {
+      // Don't override if we haven't loaded reference or already loaded state
       if (!cgpaRef || loading || loadedRemoteState || !token || !regNumber) return;
 
       try {
@@ -117,6 +181,8 @@ export default function CgpaPage() {
     loadSavedState();
     return () => { cancelled = true; };
   }, [cgpaRef, loading, loadedRemoteState, regNumber, token]);
+
+
 
   const semesterCreditsMap = useMemo(
     () => cgpaRef?.regulations?.[selectedRegulation]?.[selectedCourse] || {},
@@ -241,7 +307,7 @@ export default function CgpaPage() {
           </div>
           <div className="cgpa-mini-stat">
             <span>Branch</span>
-            <strong>{selectedCourse || '—'}</strong>
+            <strong>{formatCourseName(selectedCourse) || '—'}</strong>
           </div>
         </div>
       </section>
@@ -270,7 +336,7 @@ export default function CgpaPage() {
                 <label>Branch / Course</label>
                 <select value={selectedCourse} onChange={(e) => setSelectedCourse(e.target.value)}>
                   {courseOptions.map((course) => (
-                    <option key={course} value={course}>{course}</option>
+                    <option key={course} value={course}>{formatCourseName(course)}</option>
                   ))}
                 </select>
               </div>

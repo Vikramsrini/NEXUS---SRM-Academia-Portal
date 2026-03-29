@@ -28,3 +28,10 @@ dist-ssr
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Temporary and cache files
+*.thought-cache.json
+.gemini/
+.antigravity/
+tmp/
+*.tmp

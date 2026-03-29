@@ -298,10 +298,10 @@ export default function Dashboard({ children }) {
       // Update local state to trigger reactive updates in all components 
       const updatedStudent = getStudentData();
       setStudent(updatedStudent);
-      
+
       // Refresh thought of the day too
       if (typeof window.__loadThought === 'function') {
-        window.__loadThought().catch(() => {});
+        window.__loadThought().catch(() => { });
       }
     } catch (err) {
       console.error('Refresh error:', err);
