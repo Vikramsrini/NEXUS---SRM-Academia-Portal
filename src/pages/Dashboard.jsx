@@ -969,7 +969,6 @@ export default function Dashboard({ children }) {
                             </div>
                             <div className="now-subject">
                               {currentClass.subject}
-                              {currentClass.isSplit && <span className="hour-badge" style={{ marginLeft: '10px' }}>Hour {currentClass.hourIndex + 1}</span>}
                             </div>
                             <div className="now-meta">{currentClass.courseCode} • {currentClass.room}</div>
                             <div className="now-time-str">{currentClass.time}</div>
@@ -985,7 +984,6 @@ export default function Dashboard({ children }) {
                             </div>
                             <div className="now-subject">
                               {nextClass.subject}
-                              {nextClass.isSplit && <span className="hour-badge" style={{ marginLeft: '10px' }}>Hour {nextClass.hourIndex + 1}</span>}
                             </div>
                             <div className="now-meta">{nextClass.courseCode} • {nextClass.room}</div>
                             <div className="now-time-str">{nextClass.time}</div>
@@ -1011,7 +1009,6 @@ export default function Dashboard({ children }) {
                             <div className="sched-info">
                               <span className="sched-name" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                                 {item.subject}
-                                {item.isSplit && <span className="hour-badge">Hour {item.hourIndex + 1}</span>}
                                 {item.isOptional && <span style={{ fontSize: '0.65rem', padding: '2px 6px', background: 'var(--surface-tertiary)', borderRadius: '6px', color: 'var(--text-secondary)' }}>Optional</span>}
                               </span>
                               <span className="sched-code">{item.courseCode.startsWith('21') ? item.courseCode : `21${item.courseCode}`} • {item.room}</span>
