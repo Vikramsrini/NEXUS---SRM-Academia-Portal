@@ -449,25 +449,7 @@ export default function Dashboard({ children }) {
       .forEach(item => {
         const id = `${item.courseCode}_${item.time}_${item.dayOrder || item.day}`;
         const isOptional = hidden.includes(id);
-
-        if (item.hours > 1) {
-          const startTime = item.time.split(' - ')[0];
-          let slotIdx = SLOT_TIMES.findIndex(s => s.startsWith(startTime));
-          if (slotIdx === -1) slotIdx = 0; // Fallback
-
-          for (let h = 0; h < item.hours; h++) {
-            const currentSlotTime = SLOT_TIMES[slotIdx + h] || item.time;
-            expanded.push({
-              ...item,
-              time: currentSlotTime,
-              isOptional,
-              hourIndex: h,
-              isSplit: true
-            });
-          }
-        } else {
-          expanded.push({ ...item, isOptional, hourIndex: 0, isSplit: false });
-        }
+        expanded.push({ ...item, isOptional, hourIndex: 0, isSplit: false });
       });
 
     return expanded;
