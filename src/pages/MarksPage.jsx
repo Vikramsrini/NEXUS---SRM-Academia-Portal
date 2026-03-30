@@ -2,7 +2,7 @@ import { useMemo, useState, useEffect } from 'react';
 import './SubPages.css';
 
 const Icons = {
-  marks: <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
+  marks: <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>,
   calculator: (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <rect x="4" y="2" width="16" height="20" rx="2" />
@@ -31,7 +31,7 @@ function normalizeCourseCode(value) {
 const isSystemNoise = (str, isExam = false) => {
   if (!str) return false;
   const s = String(str).toLowerCase().trim();
-  
+
   if (isExam) {
     // For marks, almost everything with a score is valid. 
     // We only filter out obvious system placeholders if any.
@@ -39,13 +39,13 @@ const isSystemNoise = (str, isExam = false) => {
   }
 
   return (
-    s.includes('llj') || 
-    s.includes('ft-') || 
-    s.startsWith('ft') || 
-    s.includes('fj-') || 
-    s.includes('total') || 
+    s.includes('llj') ||
+    s.includes('ft-') ||
+    s.startsWith('ft') ||
+    s.includes('fj-') ||
+    s.includes('total') ||
     s.includes('faculty') ||
-    s.startsWith('ct-') || 
+    s.startsWith('ct-') ||
     s.startsWith('cat-') ||
     s === 'theory' || s === 'practical' || s === 'lab' || s === 'clinical'
   );
@@ -73,7 +73,7 @@ function getExamWeight(name) {
   if (s.includes('ft')) weight = 10;
   if (s.includes('cat') || s.includes('at') || s.includes('ct')) weight = 20;
   if (s.includes('sem')) weight = 90;
-  
+
   const numMatch = s.match(/\d+/);
   if (numMatch) {
     weight += parseInt(numMatch[0]);
@@ -153,19 +153,19 @@ function SgpaPredictor({ courses, nameByCode, onClose }) {
     const initialRemaining = {};
     const initialTargets = {};
     const initialEnabled = {};
-    
+
     courses.forEach(c => {
       const id = c.courseCode;
       const currentMax = c.total?.maxMark || 0;
       const currentObtained = c.total?.obtained || 0;
       const remaining = Math.max(0, 60 - currentMax);
-      
+
       initialInternals[id] = internalMarks[id] || currentObtained;
       initialRemaining[id] = expectedRemaining[id] || remaining;
       initialTargets[id] = targetGrades[id] || 'O';
       initialEnabled[id] = enabledCourses[id] ?? true;
     });
-    
+
     setInternalMarks(prev => ({ ...initialInternals, ...prev }));
     setExpectedRemaining(prev => ({ ...initialRemaining, ...prev }));
     setTargetGrades(prev => ({ ...initialTargets, ...prev }));
@@ -175,19 +175,19 @@ function SgpaPredictor({ courses, nameByCode, onClose }) {
   const stats = useMemo(() => {
     let totalPoints = 0;
     let totalCredits = 0;
-    
+
     courses.forEach(c => {
       const id = c.courseCode;
       if (!enabledCourses[id]) return;
-      
+
       const grade = targetGrades[id] || 'O';
       const points = GRADE_POINTS[grade];
       const credit = c.course?.toLowerCase().includes('lab') ? 1.5 : 4;
-      
+
       totalPoints += points * credit;
       totalCredits += credit;
     });
-    
+
     return {
       sgpa: totalCredits > 0 ? (totalPoints / totalCredits).toFixed(2) : '0.00'
     };
@@ -200,7 +200,7 @@ function SgpaPredictor({ courses, nameByCode, onClose }) {
     const projectedInternals = current + expected;
     const threshold = GRADE_THRESHOLDS[targetGrade];
     if (threshold === 0) return 0;
-    
+
     // threshold = projectedInternals + (needed / 75) * 40
     const needed = (threshold - projectedInternals) * 75 / 40;
     return Math.max(0, Math.ceil(needed));
@@ -214,30 +214,30 @@ function SgpaPredictor({ courses, nameByCode, onClose }) {
         <div className="header-left">
           <div className="title-row">
             <button className="back-btn" onClick={onClose}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
             </button>
             <h2>SGPA Calculator</h2>
           </div>
           <p>Adjust your expected marks to simulate your semester results.</p>
         </div>
         <div className="header-actions">
-           <div className="target-all-dropdown">
-             <span>Target All</span>
-             <select onChange={(e) => {
-               const grade = e.target.value;
-               const fresh = {};
-               courses.forEach(c => fresh[c.courseCode] = grade);
-               setTargetGrades(fresh);
-             }}>
-               {PREDICT_GRADES.slice().reverse().map(g => (
-                 <option key={g} value={g}>{g}</option>
-               ))}
-             </select>
-           </div>
-           <div className={`sgpa-summary-badge ${parseFloat(stats.sgpa) >= 9 ? 'excellent' : ''}`}>
-             <span className="lbl">Estimated SGPA</span>
-             <span className="val">{stats.sgpa}</span>
-           </div>
+          <div className="target-all-dropdown">
+            <span>Target All</span>
+            <select onChange={(e) => {
+              const grade = e.target.value;
+              const fresh = {};
+              courses.forEach(c => fresh[c.courseCode] = grade);
+              setTargetGrades(fresh);
+            }}>
+              {PREDICT_GRADES.slice().reverse().map(g => (
+                <option key={g} value={g}>{g}</option>
+              ))}
+            </select>
+          </div>
+          <div className={`sgpa-summary-badge ${parseFloat(stats.sgpa) >= 9 ? 'excellent' : ''}`}>
+            <span className="lbl">Estimated SGPA</span>
+            <span className="val">{stats.sgpa}</span>
+          </div>
         </div>
       </header>
 
@@ -259,10 +259,10 @@ function SgpaPredictor({ courses, nameByCode, onClose }) {
               <header>
                 <div className="header-main">
                   <label className="apple-switch">
-                    <input 
-                      type="checkbox" 
-                      checked={isEnabled} 
-                      onChange={() => setEnabledCourses(p => ({ ...p, [id]: !p[id] }))} 
+                    <input
+                      type="checkbox"
+                      checked={isEnabled}
+                      onChange={() => setEnabledCourses(p => ({ ...p, [id]: !p[id] }))}
                     />
                     <span className="slider"></span>
                   </label>
@@ -277,9 +277,9 @@ function SgpaPredictor({ courses, nameByCode, onClose }) {
                 <div className="apple-input-group">
                   <label>Current Internals</label>
                   <div className="input-wrap">
-                    <input 
-                      type="number" 
-                      value={current} 
+                    <input
+                      type="number"
+                      value={current}
                       onChange={(e) => setInternalMarks(p => ({ ...p, [id]: e.target.value }))}
                     />
                     <span className="denom">/ {c.total?.maxMark || 0}</span>
@@ -288,10 +288,10 @@ function SgpaPredictor({ courses, nameByCode, onClose }) {
                 <div className="apple-input-group">
                   <label>Expected Remaining</label>
                   <div className="input-wrap">
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       max={remainingMax}
-                      value={expected} 
+                      value={expected}
                       onChange={(e) => setExpectedRemaining(p => ({ ...p, [id]: e.target.value }))}
                     />
                     <span className="denom">/ {remainingMax}</span>
@@ -304,11 +304,11 @@ function SgpaPredictor({ courses, nameByCode, onClose }) {
                   <span>Target Grade</span>
                   <strong>{target}</strong>
                 </div>
-                <input 
-                  type="range" 
-                  className="apple-range" 
-                  min="0" 
-                  max={PREDICT_GRADES.length - 1} 
+                <input
+                  type="range"
+                  className="apple-range"
+                  min="0"
+                  max={PREDICT_GRADES.length - 1}
                   value={PREDICT_GRADES.indexOf(target)}
                   onChange={(e) => setTargetGrades(p => ({ ...p, [id]: PREDICT_GRADES[parseInt(e.target.value)] }))}
                   style={{ backgroundSize: `${(PREDICT_GRADES.indexOf(target) / (PREDICT_GRADES.length - 1)) * 100}% 100%` }}
@@ -328,12 +328,12 @@ function SgpaPredictor({ courses, nameByCode, onClose }) {
                   </span>
                 </div>
                 <div className="footer-right">
-                   {isEnabled && !isImpossible && (
-                     <span className={`diff-tag ${isHard ? 'red' : 'green'}`}>
-                       {isHard ? 'Hard' : 'Easy'}
-                     </span>
-                   )}
-                   <span className="pct-info">{projectedInternals.toFixed(1)} / 60 Internals</span>
+                  {isEnabled && !isImpossible && (
+                    <span className={`diff-tag ${isHard ? 'red' : 'green'}`}>
+                      {isHard ? 'Hard' : 'Easy'}
+                    </span>
+                  )}
+                  <span className="pct-info">{projectedInternals.toFixed(1)} / 60 Internals</span>
                 </div>
               </div>
             </div>
@@ -452,10 +452,10 @@ export default function MarksPage() {
       )}
 
       {isPredictorOpen ? (
-        <SgpaPredictor 
-          courses={FILTERED_MARKS} 
+        <SgpaPredictor
+          courses={FILTERED_MARKS}
           nameByCode={courseNameByCode}
-          onClose={() => setIsPredictorOpen(false)} 
+          onClose={() => setIsPredictorOpen(false)}
         />
       ) : FILTERED_MARKS.length > 0 ? (
         <div className="marks-grid-apple stagger-children">
@@ -470,14 +470,14 @@ export default function MarksPage() {
             return (
               <div key={i} className="marks-card-apple">
                 <div className="card-header">
-                   <div className="title-group">
-                      <h3>{displayName}</h3>
-                      <span className="meta">{m.courseCode.startsWith('21') ? m.courseCode : `21${m.courseCode}`} • {m.category}</span>
-                   </div>
-                   <div className="big-score">
-                      <div className="fraction">{m.total?.obtained}<span>/{m.total?.maxMark}</span></div>
-                      <div className="percentage">{pct.toFixed(0)}%</div>
-                   </div>
+                  <div className="title-group">
+                    <h3>{displayName}</h3>
+                    <span className="meta">{m.courseCode.startsWith('21') ? m.courseCode : `21${m.courseCode}`} • {m.category}</span>
+                  </div>
+                  <div className="big-score">
+                    <div className="fraction">{m.total?.obtained}<span>/{m.total?.maxMark}</span></div>
+                    <div className="percentage">{pct.toFixed(0)}%</div>
+                  </div>
                 </div>
 
                 <div className="marks-graph-apple" aria-hidden="true">
@@ -497,7 +497,7 @@ export default function MarksPage() {
                             <feComposite in="SourceGraphic" in2="blur" operator="over" />
                           </filter>
                         </defs>
-                        
+
                         {/* Shorter Grid lines */}
                         {[0, 20, 40, 60, 80, 100].map((v) => {
                           const y = 50 - (v / 100) * 40;
@@ -515,9 +515,9 @@ export default function MarksPage() {
 
                         {trendChart.dashedPath && <path className="marks-trend-line-dashed" d={trendChart.dashedPath} />}
                         {trendChart.mainPath && (
-                          <path 
-                            className="marks-trend-line" 
-                            d={trendChart.mainPath} 
+                          <path
+                            className="marks-trend-line"
+                            d={trendChart.mainPath}
                             filter={`url(#glow-${i})`}
                           />
                         )}
@@ -540,7 +540,7 @@ export default function MarksPage() {
                     <div className="marks-trend-empty">No assessments yet</div>
                   )}
                 </div>
-                
+
                 <div className="exams-list">
                   {individualMarks.map((exam, j) => (
                     <div key={j} className="exam-row">

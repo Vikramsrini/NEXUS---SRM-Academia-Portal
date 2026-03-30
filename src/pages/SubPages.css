@@ -1521,8 +1521,7 @@
   color: var(--badge-red-text);
 }
 
-@media (max-width: 768px) {
-}
+@media (max-width: 768px) {}
 
 @media (max-width: 768px) {
   .sgpa-grid-apple {

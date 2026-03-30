@@ -2344,23 +2344,15 @@
 [data-theme="dark"] .dev-footer.mobile-home-mode {
   border-top-color: rgba(255, 255, 255, 0.08);
 }
-.presence-tag {
+.hour-badge {
   font-size: 0.65rem;
-  font-weight: 700;
-  padding: 2px 7px;
+  padding: 2px 6px;
+  background: var(--accent-subtle);
   border-radius: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+  color: var(--accent);
+  font-weight: 700;
+  border: 1px solid var(--accent-glow);
+  line-height: 1;
 }
 
-.presence-tag.present {
-  background: var(--badge-green-bg);
-  color: var(--badge-green-text);
-  border: 1px solid var(--badge-green-border);
-}
 
-.presence-tag.absent {
-  background: var(--badge-red-bg);
-  color: var(--badge-red-text);
-  border: 1px solid var(--badge-red-border);
-}

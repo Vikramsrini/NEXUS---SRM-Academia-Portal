@@ -10,7 +10,6 @@ import {
 } from '../scrapers/auth.js';
 import { performFullSync, repairAcademiaSession } from '../services/syncService.js';
 import { setSrmSession } from '../lib/srmSession.js';
-import { saveAttendanceSnapshot } from '../services/attendanceService.js';
 
 const router = Router();
 
@@ -177,14 +176,6 @@ router.post('/auth/login', async (req, res) => {
       },
     });
 
-    // Save initial snapshot
-    if (syncData.userInfo?.regNumber && syncData.attendance) {
-      console.log(`[Auth] Triggering snapshot for ${syncData.userInfo.regNumber} (length: ${syncData.attendance.length})`);
-      saveAttendanceSnapshot(syncData.userInfo.regNumber, syncData.attendance).catch(err => {
-        console.error('[Auth] Snapshot error:', err.message);
-      });
-    }
-
   } catch (err) {
     console.error('[Auth Route] Login Error:', err.message);
     sendStatus(safeSessionId, 'error', err.message);
@@ -219,14 +210,6 @@ router.post('/auth/sync-fast', async (req, res) => {
         timestamp: syncResult.timestamp,
       },
     });
-
-    // Save snapshot on fast sync
-    if (syncResult.userInfo?.regNumber && syncResult.attendance) {
-      console.log(`[Auth Fast] Triggering snapshot for ${syncResult.userInfo.regNumber}`);
-      saveAttendanceSnapshot(syncResult.userInfo.regNumber, syncResult.attendance).catch(err => {
-        console.error('[Auth Fast] Snapshot error:', err.message);
-      });
-    }
   } catch (err) {
     console.error('[Auth Route] Fast sync failed:', err.message);
     res.status(401).json({ error: 'Session expired or invalid. Please log in again.' });
@@ -259,11 +242,6 @@ router.post('/auth/sync', async (req, res) => {
         timestamp: syncResult.timestamp,
       },
     });
-
-    // Save snapshot on full sync
-    if (syncResult.userInfo?.regNumber && syncResult.attendance) {
-      saveAttendanceSnapshot(syncResult.userInfo.regNumber, syncResult.attendance).catch(() => {});
-    }
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

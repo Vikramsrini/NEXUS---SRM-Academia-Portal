@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState, useMemo, useCallback } fr
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '../ThemeContext';
-import { fetchThoughtOfDay, fetchOdState, saveOdState, fetchPresence } from '../lib/api';
+import { fetchThoughtOfDay, fetchOdState, saveOdState } from '../lib/api';
 import { normalizeCourseCode } from '../lib/slotTypes';
 import './Dashboard.css';
 
@@ -29,6 +29,11 @@ const Icons = {
   linkedin: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" /></svg>,
   github: <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.22c0 4.5 2.87 8.32 6.84 9.67.5.1.66-.22.66-.49 0-.24-.01-1.05-.01-1.91-2.78.62-3.37-1.21-3.37-1.21-.45-1.2-1.11-1.52-1.11-1.52-.91-.64.07-.62.07-.62 1 .08 1.53 1.06 1.53 1.06.9 1.57 2.35 1.12 2.92.86.09-.67.35-1.12.63-1.38-2.22-.26-4.55-1.14-4.55-5.05 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.27 2.75 1.05A9.3 9.3 0 0 1 12 6.84a9.3 9.3 0 0 1 2.5.35c1.9-1.32 2.74-1.05 2.74-1.05.55 1.41.2 2.46.1 2.72.64.71 1.03 1.62 1.03 2.74 0 3.92-2.34 4.79-4.57 5.04.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.8 0 .27.17.6.67.49A10.25 10.25 0 0 0 22 12.22C22 6.58 17.52 2 12 2Z" /></svg>,
 };
+
+const SLOT_TIMES = [
+  '08:00 - 08:50', '08:50 - 09:40', '09:45 - 10:35', '10:40 - 11:30', '11:35 - 12:25',
+  '12:30 - 01:20', '01:25 - 02:15', '02:20 - 03:10', '03:10 - 04:00', '04:00 - 04:50',
+];
 
 const NAV_ITEMS = [
   { id: 'home', label: 'Home', icon: Icons.home, path: '/dashboard' },
@@ -149,7 +154,6 @@ export default function Dashboard({ children }) {
   const [thoughtLoading, setThoughtLoading] = useState(true);
   const [syncError, setSyncError] = useState(false);
   const [student, setStudent] = useState(getStudentData);
-  const [presenceData, setPresenceData] = useState({});
   const displayName = student.name || 'User';
 
   useEffect(() => {
@@ -439,24 +443,39 @@ export default function Dashboard({ children }) {
     let hidden = [];
     try { hidden = JSON.parse(localStorage.getItem('academia_hidden_classes') || '[]'); } catch { hidden = []; }
 
-    return timetable
+    const expanded = [];
+    timetable
       .filter(item => item.dayOrder.replace(/\s+/g, '').toUpperCase() === currentDayOrder.toUpperCase())
-      .map(item => {
+      .forEach(item => {
         const id = `${item.courseCode}_${item.time}_${item.dayOrder || item.day}`;
-        return { ...item, isOptional: hidden.includes(id) };
+        const isOptional = hidden.includes(id);
+
+        if (item.hours > 1) {
+          const startTime = item.time.split(' - ')[0];
+          let slotIdx = SLOT_TIMES.findIndex(s => s.startsWith(startTime));
+          if (slotIdx === -1) slotIdx = 0; // Fallback
+
+          for (let h = 0; h < item.hours; h++) {
+            const currentSlotTime = SLOT_TIMES[slotIdx + h] || item.time;
+            expanded.push({
+              ...item,
+              time: currentSlotTime,
+              isOptional,
+              hourIndex: h,
+              isSplit: true
+            });
+          }
+        } else {
+          expanded.push({ ...item, isOptional, hourIndex: 0, isSplit: false });
+        }
       });
+
+    return expanded;
   };
 
   const todaySchedule = getTodaySchedule();
 
-  useEffect(() => {
-    if (isOverview && student.regNumber && todaySchedule.length > 0) {
-      const courseCodes = Array.from(new Set(todaySchedule.map(c => c.courseCode)));
-      fetchPresence(student.regNumber, courseCodes).then(data => {
-        if (data && data.presence) setPresenceData(data.presence);
-      });
-    }
-  }, [isOverview, student.regNumber, todaySchedule.length, student.timestamp]);
+
   const sortedSchedule = [...todaySchedule].sort((a, b) =>
     parseTime(a.time.split(' - ')[0]) - parseTime(b.time.split(' - ')[0])
   );
@@ -948,7 +967,10 @@ export default function Dashboard({ children }) {
                               <span className="now-pill now-pill-current">Now</span>
                               <span className="now-mins-left">{currentClass.minsRemaining} min remaining</span>
                             </div>
-                            <div className="now-subject">{currentClass.subject}</div>
+                            <div className="now-subject">
+                              {currentClass.subject}
+                              {currentClass.isSplit && <span className="hour-badge" style={{ marginLeft: '10px' }}>Hour {currentClass.hourIndex + 1}</span>}
+                            </div>
                             <div className="now-meta">{currentClass.courseCode} • {currentClass.room}</div>
                             <div className="now-time-str">{currentClass.time}</div>
                             <div className="now-progress-track">
@@ -961,11 +983,15 @@ export default function Dashboard({ children }) {
                             <div className="now-card-top">
                               <span className="now-pill now-pill-next">Next</span>
                             </div>
-                            <div className="now-subject">{nextClass.subject}</div>
+                            <div className="now-subject">
+                              {nextClass.subject}
+                              {nextClass.isSplit && <span className="hour-badge" style={{ marginLeft: '10px' }}>Hour {nextClass.hourIndex + 1}</span>}
+                            </div>
                             <div className="now-meta">{nextClass.courseCode} • {nextClass.room}</div>
                             <div className="now-time-str">{nextClass.time}</div>
                           </div>
                         )}
+
                       </div>
                     )}
 
@@ -975,7 +1001,6 @@ export default function Dashboard({ children }) {
                         const isActive = currentClass && currentClass.courseCode === item.courseCode && currentClass.time === item.time;
                         const endTime = parseTime(item.time.split(' - ')[1]);
                         const isOver = currentTime > endTime;
-                        const pState = presenceData[item.courseCode] || 'pending';
 
                         return (
                           <div key={idx} className={`sched-row ${isActive ? 'sched-row-active' : ''}`} style={item.isOptional ? { opacity: 0.5 } : {}}>
@@ -986,12 +1011,8 @@ export default function Dashboard({ children }) {
                             <div className="sched-info">
                               <span className="sched-name" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
                                 {item.subject}
+                                {item.isSplit && <span className="hour-badge">Hour {item.hourIndex + 1}</span>}
                                 {item.isOptional && <span style={{ fontSize: '0.65rem', padding: '2px 6px', background: 'var(--surface-tertiary)', borderRadius: '6px', color: 'var(--text-secondary)' }}>Optional</span>}
-                                {isOver && pState && pState !== 'pending' && (
-                                  <span className={`presence-tag ${pState}`}>
-                                    {pState === 'present' ? 'Attended' : 'Missed'}
-                                  </span>
-                                )}
                               </span>
                               <span className="sched-code">{item.courseCode.startsWith('21') ? item.courseCode : `21${item.courseCode}`} • {item.room}</span>
                             </div>

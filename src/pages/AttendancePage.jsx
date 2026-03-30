@@ -133,7 +133,7 @@ function MiniCalendar({ startDate, endDate, onRangeSelect }) {
       onRangeSelect(isoDate, '');
     } else {
       const [sy, sm, sd] = startDate.split('-').map(Number);
-      const s = new Date(sy, sm-1, sd);
+      const s = new Date(sy, sm - 1, sd);
       if (date < s) {
         onRangeSelect(isoDate, startDate);
       } else {
@@ -146,11 +146,11 @@ function MiniCalendar({ startDate, endDate, onRangeSelect }) {
     <div className="apple-mini-calendar">
       <div className="mini-cal-header">
         <button onClick={handlePrevMonth} className="nav-btn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="15 18 9 12 15 6" /></svg>
         </button>
         <h3>{MONTH_NAMES[monthIdx]} {year}</h3>
         <button onClick={handleNextMonth} className="nav-btn">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><polyline points="9 18 15 12 9 6" /></svg>
         </button>
       </div>
       <div className="mini-cal-weekdays">
@@ -207,7 +207,7 @@ export default function AttendancePage() {
     setShowDisclaimer(false);
     setShowOdModal(true);
   };
-  
+
   const handleCancelDisclaimer = () => {
     setShowDisclaimer(false);
   };
@@ -248,26 +248,26 @@ export default function AttendancePage() {
       const title = (a.courseTitle || '').trim();
       const code = (a.courseCode || '').trim();
       if (!title || title.length <= 2) return false;
-      
+
       const conducted = parseInt(a.hoursConducted);
       if (isNaN(conducted) || conducted <= 0) return false;
-      
+
       const lowerTitle = title.toLowerCase();
       const lowerCode = code.toLowerCase();
       const combined = (title + ' ' + code).toLowerCase();
-      
+
       const isNoise = (
         lowerTitle === 'theory' || lowerTitle === 'practical' || lowerTitle === 'lab' || lowerTitle === 'clinical' ||
-        combined.includes('llj') || 
-        combined.includes('ft-') || 
-        combined.startsWith('ft') || 
-        combined.includes('fj-') || 
-        combined.includes('total') || 
+        combined.includes('llj') ||
+        combined.includes('ft-') ||
+        combined.startsWith('ft') ||
+        combined.includes('fj-') ||
+        combined.includes('total') ||
         combined.includes('faculty') ||
-        combined.startsWith('ct-') || 
+        combined.startsWith('ct-') ||
         combined.startsWith('cat-')
       );
-      
+
       return !isNoise;
     });
   }, [attendance]);
@@ -547,7 +547,7 @@ export default function AttendancePage() {
           <div className="apple-modal-card compact">
             <header className="apple-modal-header">
               <div className="warning-icon-wrap" style={{ background: 'var(--accent-subtle)', color: 'var(--accent)' }}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><circle cx="12" cy="12" r="10" /><path d="M12 6v6l4 2" /></svg>
               </div>
               <h2>Predict Absences</h2>
               <button className="apple-modal-close" onClick={() => setShowPredictModal(false)}>{Icons.close}</button>
@@ -556,12 +556,12 @@ export default function AttendancePage() {
               <p className="secondary-text">Select a future range to see how leaves will impact your percentages.</p>
 
               <div className="apple-form-group">
-                <MiniCalendar 
-                  startDate={predictFrom} 
-                  endDate={predictTo} 
-                  onRangeSelect={(s, e) => { setPredictFrom(s); setPredictTo(e); }} 
+                <MiniCalendar
+                  startDate={predictFrom}
+                  endDate={predictTo}
+                  onRangeSelect={(s, e) => { setPredictFrom(s); setPredictTo(e); }}
                 />
-                
+
                 <button
                   className="apple-btn primary full-width"
                   onClick={() => {
@@ -620,12 +620,12 @@ export default function AttendancePage() {
               <p className="secondary-text">Select dates to preview updated attendance.</p>
 
               <div className="apple-form-group">
-                <MiniCalendar 
-                  startDate={fromDate} 
-                  endDate={toDate} 
-                  onRangeSelect={(s, e) => { setFromDate(s); setToDate(e); }} 
+                <MiniCalendar
+                  startDate={fromDate}
+                  endDate={toDate}
+                  onRangeSelect={(s, e) => { setFromDate(s); setToDate(e); }}
                 />
-                
+
                 <button
                   className="apple-btn primary full-width"
                   onClick={handleAddOdDateRange}
@@ -662,15 +662,15 @@ export default function AttendancePage() {
           <p className="subpage-desc">Track and predict your course presence with ease.</p>
         </div>
         <div className="subpage-actions">
-          <button 
+          <button
             className={`apple-btn-secondary ${predictDates.length > 0 ? 'active' : ''}`}
             onClick={() => setShowPredictModal(true)}
             style={{ marginRight: '8px' }}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" /></svg>
             Predict {predictDates.length > 0 && <span>({predictDates.length})</span>}
           </button>
-          <button 
+          <button
             className={`apple-btn-secondary ${odDates.length > 0 ? 'active' : ''}`}
             onClick={() => setShowDisclaimer(true)}
           >
@@ -700,8 +700,8 @@ export default function AttendancePage() {
                   const finalAppliedOd = Math.min(Math.max(0, Math.min(odBonus, originalA) + safeOdAdj), originalA);
                   const A = Math.max(0, originalA - finalAppliedOd);
                   const P = Math.max(0, C - A);
-                  
-                   // Prediction logic
+
+                  // Prediction logic
                   const predStats = getPredictHours(a.courseCode, type);
                   const predictHrs = predStats.hours;
                   const optionalHrs = predStats.optionalHours;
@@ -732,17 +732,17 @@ export default function AttendancePage() {
                         </div>
                         <div className={`percent-ring ${isPredicting ? getProgressColor(predStatus.type) : getProgressColor(status.type)}`}>
                           <svg viewBox="0 0 36 36">
-                            <path 
+                            <path
                               className="ring-path-track"
-                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                              fill="none" 
-                              strokeWidth="3.2" 
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                              fill="none"
+                              strokeWidth="3.2"
                             />
-                            <path 
+                            <path
                               className="ring-path-progress"
-                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" 
-                              fill="none" 
-                              strokeWidth="3.2" 
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                              fill="none"
+                              strokeWidth="3.2"
                               strokeDasharray={`${isPredicting ? predPct : pct}, 100`}
                               stroke={`url(#ring-gradient-${(() => {
                                 const st = isPredicting ? predStatus.type : status.type;
@@ -773,7 +773,7 @@ export default function AttendancePage() {
                         </div>
                       </div>
 
-                       {isPredicting && (
+                      {isPredicting && (
                         <div className="prediction-overlay-hint">
                           PREDICTION ACTIVE: {predictHrs} hrs missed
                           {optionalHrs > 0 && <span> (excl. {optionalHrs} optional)</span>}
@@ -781,14 +781,14 @@ export default function AttendancePage() {
                       )}
 
                       <div className="card-actions">
-                         <div className="od-indicator">
-                            <span className="label">OD/ML Applied</span>
-                            <span className="count">{finalAppliedOd}</span>
-                         </div>
-                         <div className="od-controls">
-                            <button className="adj-btn" onClick={() => updateAdj(courseKey, 'odAdj', -1)} disabled={finalAppliedOd <= 0}>-</button>
-                            <button className="adj-btn" onClick={() => updateAdj(courseKey, 'odAdj', 1)} disabled={finalAppliedOd >= originalA}>+</button>
-                         </div>
+                        <div className="od-indicator">
+                          <span className="label">OD/ML Applied</span>
+                          <span className="count">{finalAppliedOd}</span>
+                        </div>
+                        <div className="od-controls">
+                          <button className="adj-btn" onClick={() => updateAdj(courseKey, 'odAdj', -1)} disabled={finalAppliedOd <= 0}>-</button>
+                          <button className="adj-btn" onClick={() => updateAdj(courseKey, 'odAdj', 1)} disabled={finalAppliedOd >= originalA}>+</button>
+                        </div>
                       </div>
                     </div>
                   );
