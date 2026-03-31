@@ -327,13 +327,16 @@ function SgpaPredictor({ courses, nameByCode, creditsByCode, onClose }) {
                     {isImpossible ? 'Impossible' : `${needed}/75`}
                   </span>
                 </div>
-                <div className="footer-right">
-                  {isEnabled && !isImpossible && (
-                    <span className={`diff-tag ${isHard ? 'red' : 'green'}`}>
-                      {isHard ? 'Hard' : 'Easy'}
-                    </span>
-                  )}
-                  <span className="pct-info">{projectedInternals.toFixed(1)} / 60 Internals</span>
+                <div className="projected">
+                  <span className="lbl">Projected Internals</span>
+                  <div className="val-section">
+                    {isEnabled && !isImpossible && (
+                      <span className={`diff-tag ${isHard ? 'red' : 'green'}`}>
+                        {isHard ? 'Hard' : 'Easy'}
+                      </span>
+                    )}
+                    <span className="val">{projectedInternals.toFixed(1)}<span>/60</span></span>
+                  </div>
                 </div>
               </div>
             </div>

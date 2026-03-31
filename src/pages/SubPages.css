@@ -1311,16 +1311,15 @@
 .input-wrap .denom {
   position: absolute;
   right: 14px;
+  top: 51%;
+  transform: translateY(-50%);
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--text-tertiary);
+  pointer-events: none;
 }
 
-.sgpa-item-footer .pct-info {
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--text-tertiary);
-}
+
 
 @keyframes slideDownIn {
   from {
@@ -1661,8 +1660,8 @@
 /* -- SGPA Inputs Row -- */
 .sgpa-inputs-row {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
 }
 
 @media (max-width: 480px) {
@@ -1812,6 +1811,42 @@
   font-weight: 800;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
+}
+
+.sgpa-item-footer .projected {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  text-align: right;
+}
+
+.sgpa-item-footer .projected .lbl {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.sgpa-item-footer .projected .val-group,
+.sgpa-item-footer .projected .val-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sgpa-item-footer .projected .val {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.sgpa-item-footer .projected .val span {
+  font-size: 0.75rem;
+  opacity: 0.5;
+  margin-left: 2px;
 }
 
 /* -- Difficulty Tag -- */
