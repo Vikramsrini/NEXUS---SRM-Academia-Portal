@@ -142,7 +142,7 @@ const GRADE_POINTS = { 'O': 10, 'A+': 9, 'A': 8, 'B+': 7, 'B': 6, 'C': 5, 'F': 0
 const PREDICT_GRADES = ['C', 'B', 'B+', 'A', 'A+', 'O'];
 const GRADE_THRESHOLDS = { 'O': 91, 'A+': 81, 'A': 71, 'B+': 61, 'B': 56, 'C': 50, 'F': 0 };
 
-function SgpaPredictor({ courses, nameByCode, onClose }) {
+function SgpaPredictor({ courses, nameByCode, creditsByCode, onClose }) {
   const [internalMarks, setInternalMarks] = useState({});
   const [expectedRemaining, setExpectedRemaining] = useState({});
   const [targetGrades, setTargetGrades] = useState({});
@@ -182,7 +182,7 @@ function SgpaPredictor({ courses, nameByCode, onClose }) {
 
       const grade = targetGrades[id] || 'O';
       const points = GRADE_POINTS[grade];
-      const credit = c.course?.toLowerCase().includes('lab') ? 1.5 : 4;
+      const credit = creditsByCode[normalizeCourseCode(id)] || (c.course?.toLowerCase().includes('lab') ? 1.5 : 4);
 
       totalPoints += points * credit;
       totalCredits += credit;
@@ -268,7 +268,7 @@ function SgpaPredictor({ courses, nameByCode, onClose }) {
                   </label>
                   <div className="course-info">
                     <h3>{getDisplayCourseName(c, nameByCode)}</h3>
-                    <span className="code">{id}</span>
+                    <span className="code">{id} • {creditsByCode[normalizeCourseCode(id)] || (c.course?.toLowerCase().includes('lab') ? 1.5 : 4)} Credits</span>
                   </div>
                 </div>
               </header>
@@ -366,6 +366,23 @@ export default function MarksPage() {
     return map;
   }, [attendance]);
 
+  const courseCreditsByCode = useMemo(() => {
+    const map = {};
+    const norm = (c) => String(c || '').toUpperCase().replace(/\s+/g, '').replace(/^21/, '');
+
+    (student.courses || []).forEach(c => {
+      const code = norm(c.code);
+      if (code && c.credit) map[code] = parseFloat(c.credit);
+    });
+
+    (student.timetable || []).forEach(cls => {
+      const code = norm(cls.courseCode);
+      if (code && cls.credit && !map[code]) map[code] = parseFloat(cls.credit);
+    });
+
+    return map;
+  }, [student]);
+
   const FILTERED_MARKS = useMemo(() => {
     return marks.filter((m) => {
       const title = String(m.course || '').trim();
@@ -455,6 +472,7 @@ export default function MarksPage() {
         <SgpaPredictor
           courses={FILTERED_MARKS}
           nameByCode={courseNameByCode}
+          creditsByCode={courseCreditsByCode}
           onClose={() => setIsPredictorOpen(false)}
         />
       ) : FILTERED_MARKS.length > 0 ? (
