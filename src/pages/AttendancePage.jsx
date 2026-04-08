@@ -266,7 +266,7 @@ export default function AttendancePage() {
         combined.includes('faculty') ||
         combined.startsWith('ct-') ||
         combined.startsWith('cat-') ||
-        combined.includes('r i')
+        combined === 'r i' || combined === 'r ii' || combined.startsWith('21r i/')
       );
 
       return !isNoise;
