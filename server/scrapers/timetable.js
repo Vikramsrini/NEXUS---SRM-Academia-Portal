@@ -26,12 +26,8 @@ export function parseCourses(html) {
   const regNumberMatch = html.match(/RA2\d{12}/);
   const regNumber = regNumberMatch ? regNumberMatch[0] : '';
 
-  // Robust Name Detection: Look for "Welcome NAME (REG)" in the header
-  const welcomeMatch = html.match(/Welcome\s+([^(<]+)\s+\(/i);
-  const detectedName = welcomeMatch ? welcomeMatch[1].trim() : '';
-
   let batch = '1';
-  let studentName = detectedName || '';
+  let studentName = '';
   const infoMap = {};
 
   $('table').each((_, table) => {
@@ -48,7 +44,7 @@ export function parseCourses(html) {
   });
 
   batch = infoMap.batch || batch;
-  studentName = infoMap.name || infoMap['student name'] || infoMap['candidate name'] || studentName;
+  studentName = infoMap.name || studentName;
   const program = infoMap.program || '';
   const deptRaw = infoMap.department || '';
   const deptParts = deptRaw.split('-');
@@ -65,6 +61,7 @@ export function parseCourses(html) {
     ['course title', 'title', 'subject'],
     ['slot'],
     ['course type', 'type'],
+    ['credit', 'credits', 'cr'],
     ['room', 'venue'],
   ]);
 
@@ -83,9 +80,8 @@ export function parseCourses(html) {
 
   const codeIdx = getColumnIndex(headers, ['course code', 'code'], 1);
   const titleIdx = getColumnIndex(headers, ['course title', 'title', 'subject'], 2);
-  const creditIdx = getColumnIndex(headers, ['credit', 'credits'], 3);
   const courseTypeIdx = getColumnIndex(headers, ['course type', 'type'], 6);
-  const facultyIdx = getColumnIndex(headers, ['faculty name', 'faculty'], 7);
+  const creditIdx = getColumnIndex(headers, ['credit', 'credits', 'cr'], -1);
   const slotIdx = getColumnIndex(headers, ['slot'], 8);
   const roomIdx = getColumnIndex(headers, ['room no', 'room', 'venue'], 10);
   const altRoomIdx = roomIdx === 10 ? 9 : Math.max(roomIdx - 1, 0);
@@ -99,9 +95,8 @@ export function parseCourses(html) {
 
     const code = cleanCourseCode(getText(codeIdx) || findCourseCodeCandidate(values));
     const title = cleanCourseTitle(getText(titleIdx) || findCourseTitleCandidate(values, [code]));
-    const credit = getText(creditIdx) || '0';
     const courseType = getText(courseTypeIdx) || 'N/A';
-    const faculty = getText(facultyIdx) || 'N/A';
+    const credit = getText(creditIdx);
     const slotCodes = extractSlotCodes(getText(slotIdx));
     const slot = slotCodes.join('+');
 
@@ -113,12 +108,7 @@ export function parseCourses(html) {
     const slotType = detectSlotType(slotCodes, code, title);
 
     if (looksLikeCourseCode(code) && title && slotCodes.length > 0) {
-      courses.push({ 
-        code, title, slot, 
-        room: normalizeRoom(room), 
-        slotType, courseType, 
-        credit, faculty 
-      });
+      courses.push({ code, title, slot, room: normalizeRoom(room), slotType, courseType, credit });
     }
   });
 
@@ -161,7 +151,6 @@ export function buildTimetable(courses, batch) {
           const last = timetable[timetable.length - 1];
           if (last.day === day) {
             last.time = last.time.split(' - ')[0] + ' - ' + SLOT_TIMES[pIdx].split(' - ')[1];
-            last.hours = (last.hours || 1) + 1;
             continue;
           }
         }
@@ -174,9 +163,6 @@ export function buildTimetable(courses, batch) {
           courseCode: course.code,
           slotType: currentSlotType,
           courseType: course.courseType,
-          credit: course.credit,
-          faculty: course.faculty,
-          hours: 1,
         });
         lastCode = course.code;
         lastSlotType = currentSlotType;

@@ -142,6 +142,12 @@ const GRADE_POINTS = { 'O': 10, 'A+': 9, 'A': 8, 'B+': 7, 'B': 6, 'C': 5, 'F': 0
 const PREDICT_GRADES = ['C', 'B', 'B+', 'A', 'A+', 'O'];
 const GRADE_THRESHOLDS = { 'O': 91, 'A+': 81, 'A': 71, 'B+': 61, 'B': 56, 'C': 50, 'F': 0 };
 
+const isInternalOnly = (id, category) => {
+  const s = String(id || '').toUpperCase();
+  const cat = String(category || '').toUpperCase();
+  return s.endsWith('P') || cat.includes('PROJECT') || cat === 'P';
+};
+
 function SgpaPredictor({ courses, nameByCode, creditsByCode, onClose }) {
   const [internalMarks, setInternalMarks] = useState({});
   const [expectedRemaining, setExpectedRemaining] = useState({});
@@ -158,7 +164,8 @@ function SgpaPredictor({ courses, nameByCode, creditsByCode, onClose }) {
       const id = c.courseCode;
       const currentMax = c.total?.maxMark || 0;
       const currentObtained = c.total?.obtained || 0;
-      const remaining = Math.max(0, 60 - currentMax);
+      const maxInternal = isInternalOnly(id, c.category) ? 100 : 60;
+      const remaining = Math.max(0, maxInternal - currentMax);
 
       initialInternals[id] = internalMarks[id] || currentObtained;
       initialRemaining[id] = expectedRemaining[id] || remaining;
@@ -182,7 +189,8 @@ function SgpaPredictor({ courses, nameByCode, creditsByCode, onClose }) {
 
       const grade = targetGrades[id] || 'O';
       const points = GRADE_POINTS[grade];
-      const credit = creditsByCode[normalizeCourseCode(id)] || (c.course?.toLowerCase().includes('lab') ? 1.5 : 4);
+      const rawCredit = creditsByCode[normalizeCourseCode(id)];
+      const credit = (rawCredit !== undefined && rawCredit !== null) ? rawCredit : (c.course?.toLowerCase().includes('lab') ? 1.5 : 4);
 
       totalPoints += points * credit;
       totalCredits += credit;
@@ -194,11 +202,15 @@ function SgpaPredictor({ courses, nameByCode, creditsByCode, onClose }) {
   }, [courses, targetGrades, enabledCourses]);
 
 
-  const calculateFinalsNeeded = (id, targetGrade) => {
+  const calculateFinalsNeeded = (c, targetGrade) => {
+    const id = c.courseCode;
+    const isP = isInternalOnly(id, c.category);
     const current = parseFloat(internalMarks[id]) || 0;
     const expected = parseFloat(expectedRemaining[id]) || 0;
     const projectedInternals = current + expected;
     const threshold = GRADE_THRESHOLDS[targetGrade];
+
+    if (isP) return null; // No end exams
     if (threshold === 0) return 0;
 
     // threshold = projectedInternals + (needed / 75) * 40
@@ -245,14 +257,16 @@ function SgpaPredictor({ courses, nameByCode, creditsByCode, onClose }) {
         {courses.map((c) => {
           const id = c.courseCode;
           const isEnabled = enabledCourses[id];
+          const isP = isInternalOnly(id, c.category);
           const current = internalMarks[id];
-          const remainingMax = Math.max(0, 60 - (c.total?.maxMark || 0));
+          const maxInternal = isP ? 100 : 60;
+          const remainingMax = Math.max(0, maxInternal - (c.total?.maxMark || 0));
           const expected = expectedRemaining[id];
           const target = targetGrades[id];
-          const needed = calculateFinalsNeeded(id, target);
-          const isHard = needed > 55;
-          const isImpossible = needed > 75;
           const projectedInternals = (parseFloat(current) || 0) + (parseFloat(expected) || 0);
+          const needed = calculateFinalsNeeded(c, target);
+          const isHard = needed > 55;
+          const isImpossible = (!isP && needed > 75) || (isP && projectedInternals < GRADE_THRESHOLDS[target]);
 
           return (
             <div key={id} className={`sgpa-item-card ${!isEnabled ? 'disabled' : ''}`}>
@@ -268,7 +282,7 @@ function SgpaPredictor({ courses, nameByCode, creditsByCode, onClose }) {
                   </label>
                   <div className="course-info">
                     <h3>{getDisplayCourseName(c, nameByCode)}</h3>
-                    <span className="code">{id} • {creditsByCode[normalizeCourseCode(id)] || (c.course?.toLowerCase().includes('lab') ? 1.5 : 4)} Credits</span>
+                    <span className="code">{id} • {((creditsByCode[normalizeCourseCode(id)] !== undefined && creditsByCode[normalizeCourseCode(id)] !== null) ? creditsByCode[normalizeCourseCode(id)] : (c.course?.toLowerCase().includes('lab') ? 1.5 : 4))} Credits</span>
                   </div>
                 </div>
               </header>
@@ -282,7 +296,7 @@ function SgpaPredictor({ courses, nameByCode, creditsByCode, onClose }) {
                       value={current}
                       onChange={(e) => setInternalMarks(p => ({ ...p, [id]: e.target.value }))}
                     />
-                    <span className="denom">/ {c.total?.maxMark || 0}</span>
+                    <span className="denom">/ {c.total?.maxMark || (isP ? 100 : 60)}</span>
                   </div>
                 </div>
                 <div className="apple-input-group">
@@ -322,9 +336,9 @@ function SgpaPredictor({ courses, nameByCode, creditsByCode, onClose }) {
 
               <div className="sgpa-item-footer">
                 <div className="needed">
-                  <span className="lbl">Finals needed</span>
+                  <span className="lbl">{isP ? 'Assessment' : 'Finals needed'}</span>
                   <span className={`val ${isImpossible ? 'impossible' : ''}`}>
-                    {isImpossible ? 'Impossible' : `${needed}/75`}
+                    {isP ? (isImpossible ? 'Shortfall' : 'Internal Only') : (isImpossible ? 'Impossible' : `${needed}/75`)}
                   </span>
                 </div>
                 <div className="projected">
@@ -335,7 +349,7 @@ function SgpaPredictor({ courses, nameByCode, creditsByCode, onClose }) {
                         {isHard ? 'Hard' : 'Easy'}
                       </span>
                     )}
-                    <span className="val">{projectedInternals.toFixed(1)}<span>/60</span></span>
+                    <span className="val">{projectedInternals.toFixed(1)}<span>/{isP ? 100 : 60}</span></span>
                   </div>
                 </div>
               </div>
@@ -375,12 +389,12 @@ export default function MarksPage() {
 
     (student.courses || []).forEach(c => {
       const code = norm(c.code);
-      if (code && c.credit) map[code] = parseFloat(c.credit);
+      if (code && (c.credit !== undefined && c.credit !== null)) map[code] = parseFloat(c.credit);
     });
 
     (student.timetable || []).forEach(cls => {
       const code = norm(cls.courseCode);
-      if (code && cls.credit && !map[code]) map[code] = parseFloat(cls.credit);
+      if (code && (cls.credit !== undefined && cls.credit !== null) && map[code] === undefined) map[code] = parseFloat(cls.credit);
     });
 
     return map;
