@@ -145,7 +145,7 @@ const GRADE_THRESHOLDS = { 'O': 91, 'A+': 81, 'A': 71, 'B+': 61, 'B': 56, 'C': 5
 const isInternalOnly = (id, category) => {
   const s = String(id || '').toUpperCase();
   const cat = String(category || '').toUpperCase();
-  return s.endsWith('P') || cat.includes('PROJECT') || cat === 'P';
+  return s.endsWith('P') || s.includes('CSP') || cat.includes('PROJECT') || cat === 'P';
 };
 
 function SgpaPredictor({ courses, nameByCode, creditsByCode, onClose }) {
