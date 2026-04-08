@@ -88,6 +88,7 @@ export default function CoursesPage() {
           s.startsWith('cat-') ||
           s.includes('pbl') ||
           s === 'r i' || s === 'r ii' || s.startsWith('21r i/') ||
+          /\d+\/\d+/.test(s) ||
           s === 'theory' || s === 'practical' || s === 'lab' || s === 'clinical'
         );
       };
