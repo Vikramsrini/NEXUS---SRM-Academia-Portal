@@ -63,6 +63,7 @@ export function parseCourses(html) {
     ['course type', 'type'],
     ['credit', 'credits', 'cr'],
     ['room', 'venue'],
+    ['faculty', 'instructor', 'teacher']
   ]);
 
   if (!courseTable) {
@@ -84,6 +85,7 @@ export function parseCourses(html) {
   const creditIdx = getColumnIndex(headers, ['credit', 'credits', 'cr'], -1);
   const slotIdx = getColumnIndex(headers, ['slot'], 8);
   const roomIdx = getColumnIndex(headers, ['room no', 'room', 'venue'], 10);
+  const facultyIdx = getColumnIndex(headers, ['faculty', 'instructor', 'teacher'], -1);
   const altRoomIdx = roomIdx === 10 ? 9 : Math.max(roomIdx - 1, 0);
 
   rows.slice(1).forEach(row => {
@@ -108,7 +110,16 @@ export function parseCourses(html) {
     const slotType = detectSlotType(slotCodes, code, title);
 
     if (looksLikeCourseCode(code) && title && slotCodes.length > 0) {
-      courses.push({ code, title, slot, room: normalizeRoom(room), slotType, courseType, credit });
+      courses.push({
+        code,
+        title,
+        slot,
+        room: normalizeRoom(room),
+        slotType,
+        courseType,
+        credit,
+        faculty: getText(facultyIdx) || 'N/A'
+      });
     }
   });
 
@@ -163,6 +174,7 @@ export function buildTimetable(courses, batch) {
           courseCode: course.code,
           slotType: currentSlotType,
           courseType: course.courseType,
+          faculty: course.faculty || 'N/A',
         });
         lastCode = course.code;
         lastSlotType = currentSlotType;

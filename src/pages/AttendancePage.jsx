@@ -265,7 +265,8 @@ export default function AttendancePage() {
         combined.includes('total') ||
         combined.includes('faculty') ||
         combined.startsWith('ct-') ||
-        combined.startsWith('cat-')
+        combined.startsWith('cat-') ||
+        combined.includes('r i')
       );
 
       return !isNoise;
