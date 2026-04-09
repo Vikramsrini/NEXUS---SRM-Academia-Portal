@@ -449,7 +449,21 @@ export default function AttendancePage() {
 
         const id = `${cls.courseCode}_${cls.time}_${cls.dayOrder || cls.day}`;
         const isOptional = hidden.includes(id);
-        const count = (tallies[order] || 0) * (cls.hours || 1);
+
+        let h = cls.hours;
+        if (h === undefined && cls.time) {
+          try {
+            const [s, e] = cls.time.split(' - ');
+            const parse = (str) => {
+              let [hh, mm] = str.split(':').map(Number);
+              if (hh < 8) hh += 12;
+              return hh * 60 + mm;
+            };
+            h = Math.max(1, Math.round((parse(e) - parse(s)) / 50));
+          } catch { h = 1; }
+        }
+
+        const count = (tallies[order] || 0) * (h || 1);
 
         if (isOptional) {
           optionalSum += count;
