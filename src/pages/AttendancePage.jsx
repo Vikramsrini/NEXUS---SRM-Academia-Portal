@@ -744,14 +744,8 @@ export default function AttendancePage() {
                   const pct = C === 0 ? 100 : (P / C) * 100;
                   const status = getAttendanceStatus(C, A);
                   const isPredicting = predictDates.length > 0;
-
                   return (
                     <div key={i} className="attendance-card-apple">
-                      {finalAppliedOd > 0 && (
-                        <div className="od-stamp-badge" title={`Percentage boosted by ${finalAppliedOd} OD/ML hours`}>
-                          OD Applied
-                        </div>
-                      )}
                       <div className="card-top">
                         <div className="course-info">
                           <h3>{a.courseTitle}</h3>
@@ -788,6 +782,9 @@ export default function AttendancePage() {
                             />
                           </svg>
                           <span className="pct-text">{isPredicting ? predPct.toFixed(0) : pct.toFixed(0)}</span>
+                          {finalAppliedOd > 0 && (
+                            <div className="od-percentage-badge">OD</div>
+                          )}
                         </div>
                       </div>
 
