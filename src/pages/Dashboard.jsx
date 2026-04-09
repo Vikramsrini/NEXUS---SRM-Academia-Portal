@@ -475,15 +475,17 @@ export default function Dashboard({ children }) {
   const resolveAttendanceType = (a) => {
     const code = normalizeCourseCode(a.courseCode);
     const types = timetableMapping[code];
-    if (types) {
-      if (types.size === 1) return Array.from(types)[0];
-      const s = String(a.slot || '').toUpperCase();
-      if (s && (s.includes('P') || s.includes('L'))) return 'Practical';
-      if (s && /^[A-G](?:\d+)?$/.test(s)) return 'Theory';
-      // Fallback to backend slottype for ambiguous or missing slots
-      if (a.slotType) return a.slotType;
-    }
-    return a.slotType || 'Theory';
+    
+    const s = String(a.slot || '').toUpperCase();
+    if (s && (s.includes('P') || s.includes('L'))) return 'Practical';
+    if (s && /^[A-G](?:\d+)?$/.test(s)) return 'Theory';
+
+    // Prioritize specific backend detection over general mapping
+    if (a.slotType) return a.slotType;
+    
+    if (types && types.size === 1) return Array.from(types)[0];
+    
+    return 'Theory';
   };
 
   const todayLowAttendanceSubjects = (() => {

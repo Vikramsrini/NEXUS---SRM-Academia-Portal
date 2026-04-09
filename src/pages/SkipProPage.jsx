@@ -85,15 +85,16 @@ export default function SkipProPage() {
   const resolveType = (a) => {
     const code = (a.courseCode || '').trim().toUpperCase();
     const types = timetableMapping[code] || timetableMapping[code.replace(/^21/, '')];
-    if (types) {
-      if (types.size === 1) return Array.from(types)[0];
-      const s = (a.slot || '').toUpperCase();
-      if (s && (s.includes('P') || s.includes('L'))) return 'Practical';
-      if (s && /^[A-G](?:\d+)?$/.test(s)) return 'Theory';
-      // Trust backend detection
-      if (a.slotType) return a.slotType;
-    }
-    return a.slotType || 'Theory';
+    
+    const s = (a.slot || '').toUpperCase();
+    if (s && (s.includes('P') || s.includes('L'))) return 'Practical';
+    if (s && /^[A-G](?:\d+)?$/.test(s)) return 'Theory';
+    
+    if (a.slotType) return a.slotType;
+
+    if (types && types.size === 1) return Array.from(types)[0];
+    
+    return 'Theory';
   };
 
   const [showDisclaimer, setShowDisclaimer] = useState(true);

@@ -156,7 +156,7 @@ export function buildTimetable(courses, batch) {
       const course = slotMap[slotCode];
 
       if (course) {
-        const currentSlotType = /^P\d+$/i.test(slotCode) ? 'Practical' : 'Theory';
+        const currentSlotType = /^[PL]\d+$/i.test(slotCode) ? 'Practical' : 'Theory';
 
         if (lastCode === course.code && lastSlotType === currentSlotType && timetable.length > 0) {
           const last = timetable[timetable.length - 1];

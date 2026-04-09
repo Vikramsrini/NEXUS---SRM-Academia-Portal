@@ -134,33 +134,40 @@ export function detectSlotType(slotCodes = [], courseCode = '', courseTitle = ''
   const hasTheoryTitle = title.includes('theory');
   const hasTheorySlot = slotCodes.some(s => /^[A-G]$/.test(s.toUpperCase()));
 
-  // P-numbered slots (P1-P50) are always practical — this is the primary signal
+  // P or L numbered slots (P1, L1, etc) are always practical
   const hasPracticalSlot = slotCodes.some(s => {
     const us = s.toUpperCase();
-    return /^P\d+$/.test(us) || us.includes('LAB') || us.includes('PRAC') || us.includes('WORK');
+    return /^[PL]\d+$/.test(us) || us.includes('LAB') || us.includes('PRAC') || us.includes('WORK');
   });
 
   // Unambiguous SRM course code suffixes: P=Practical, L=Lab
   const isPurePracticalCode = /[PL]$/.test(code);
   const isEmbeddedCode = code.endsWith('J');
 
-  // Title keywords — "seminar" is excluded as SRM seminars are theory/attendance sessions
+  // Title keywords
   const hasPracticalTitle =
     title.includes('lab') ||
     title.includes('practical') ||
+    title.includes('practice') ||
     title.includes('workshop') ||
     title.includes('project') ||
     title.includes('clinical') ||
     title.includes('studio');
 
   // Decision logic:
-  // 1. If it has practical slot or title, it's Practical (Strongest signal)
-  if (hasPracticalSlot || hasPracticalTitle) return 'Practical';
-  
-  // 2. If it has theory title or slot, it's Theory
-  if (hasTheoryTitle || hasTheorySlot) return 'Theory';
+  // 1. Explicit slot indicators are the most authoritative
+  if (hasPracticalSlot) return 'Practical';
+  if (hasTheorySlot) return 'Theory';
 
-  // 3. Fallback to code suffixes
+  // 2. Explicit title indicators (e.g. "Subject - Practical")
+  if (title.includes('practical') || title.includes(' - lab') || title.includes('(lab)') || title.includes(' practical')) return 'Practical';
+  if (title.includes('theory') || title.includes(' - theory') || title.includes('(theory)')) return 'Theory';
+
+  // 3. Title keywords (weaker signals)
+  if (hasPracticalTitle) return 'Practical';
+  if (hasTheoryTitle) return 'Theory';
+
+  // 4. Fallback to code suffixes
   if (isPurePracticalCode) return 'Practical';
   if (isEmbeddedCode) return 'Practical'; // Default for J if no other signals
 

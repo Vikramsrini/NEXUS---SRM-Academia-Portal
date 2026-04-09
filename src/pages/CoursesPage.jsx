@@ -58,15 +58,16 @@ export default function CoursesPage() {
   const resolveType = (a) => {
     const code = (a.courseCode || '').trim().toUpperCase().replace(/^21/, '');
     const data = timetableMapping[code];
-    if (data) {
-      if (data.types.size === 1) return Array.from(data.types)[0];
-      const s = (a.slot || '').toUpperCase();
-      if (s && (s.includes('P') || s.includes('L'))) return 'Practical';
-      if (s && /^[A-G](?:\d+)?$/.test(s)) return 'Theory';
-      // Trust backend detection if slot is ambiguous
-      if (a.slotType) return a.slotType;
-    }
-    return a.slotType || 'Theory';
+    
+    const s = (a.slot || '').toUpperCase();
+    if (s && (s.includes('P') || s.includes('L'))) return 'Practical';
+    if (s && /^[A-G](?:\d+)?$/.test(s)) return 'Theory';
+
+    if (a.slotType) return a.slotType;
+
+    if (data && data.types.size === 1) return Array.from(data.types)[0];
+    
+    return 'Theory';
   };
 
   const FILTERED_ATTENDANCE = useMemo(() => {

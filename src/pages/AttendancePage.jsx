@@ -202,15 +202,17 @@ export default function AttendancePage() {
   const resolveType = (a) => {
     const code = normalizeCourseCode(a.courseCode);
     const types = timetableMapping[code];
-    if (types) {
-      if (types.size === 1) return Array.from(types)[0];
-      const s = (a.slot || '').toUpperCase();
-      if (s && (s.includes('P') || s.includes('L'))) return 'Practical';
-      if (s && /^[A-G](?:\d+)?$/.test(s)) return 'Theory';
-      // If slot is missing or ambiguous, trust the backend detection
-      if (a.slotType) return a.slotType;
-    }
-    return a.slotType || 'Theory';
+    
+    const s = (a.slot || '').toUpperCase();
+    if (s && (s.includes('P') || s.includes('L'))) return 'Practical';
+    if (s && /^[A-G](?:\d+)?$/.test(s)) return 'Theory';
+    
+    // Backend row-level detection is more specific than code-level mapping
+    if (a.slotType) return a.slotType;
+
+    if (types && types.size === 1) return Array.from(types)[0];
+    
+    return 'Theory';
   };
 
   const [showOdModal, setShowOdModal] = useState(false);
@@ -707,28 +709,6 @@ export default function AttendancePage() {
           </button>
         </div>
       </div>
-      
-      {attendanceInsights && (
-        <div className="attendance-insights-summary stagger-children">
-          <div className="insight-stat-card">
-            <span className="lbl">Mean Attendance</span>
-            <div className="val-group">
-              <span className="val">{attendanceInsights.average}%</span>
-              {attendanceInsights.odCount > 0 && <span className="od-plus-hint">({Icons.shield} OD Active)</span>}
-            </div>
-          </div>
-          <div className="insight-stat-card">
-            <span className="lbl">At Risk</span>
-            <span className={`val ${attendanceInsights.riskCount > 0 ? 'danger' : 'safe'}`}>
-              {attendanceInsights.riskCount}
-            </span>
-          </div>
-          <div className="insight-stat-card">
-            <span className="lbl">Tracked</span>
-            <span className="val">{attendanceInsights.tracked}</span>
-          </div>
-        </div>
-      )}
 
       {FILTERED_ATTENDANCE.length > 0 ? (
         <div className="attendance-groups-wrap stagger-children">
