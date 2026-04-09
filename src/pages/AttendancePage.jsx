@@ -747,6 +747,11 @@ export default function AttendancePage() {
 
                   return (
                     <div key={i} className="attendance-card-apple">
+                      {finalAppliedOd > 0 && (
+                        <div className="od-stamp-badge" title={`Percentage boosted by ${finalAppliedOd} OD/ML hours`}>
+                          {Icons.shield} OD
+                        </div>
+                      )}
                       <div className="card-top">
                         <div className="course-info">
                           <h3>{a.courseTitle}</h3>
@@ -783,11 +788,6 @@ export default function AttendancePage() {
                             />
                           </svg>
                           <span className="pct-text">{isPredicting ? predPct.toFixed(0) : pct.toFixed(0)}</span>
-                          {finalAppliedOd > 0 && (
-                            <div className="od-boost-badge" title={`Percentage boosted by ${finalAppliedOd} OD/ML hours`}>
-                              {Icons.shield} OD
-                            </div>
-                          )}
                         </div>
                       </div>
 
