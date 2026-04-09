@@ -194,8 +194,10 @@ export default function AttendancePage() {
     if (types) {
       if (types.size === 1) return Array.from(types)[0];
       const s = (a.slot || '').toUpperCase();
-      if (s.includes('P') || s.includes('L')) return 'Practical';
-      return 'Theory';
+      if (s && (s.includes('P') || s.includes('L'))) return 'Practical';
+      if (s && /^[A-G](?:\d+)?$/.test(s)) return 'Theory';
+      // If slot is missing or ambiguous, trust the backend detection
+      if (a.slotType) return a.slotType;
     }
     return a.slotType || 'Theory';
   };

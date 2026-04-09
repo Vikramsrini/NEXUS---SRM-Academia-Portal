@@ -130,15 +130,19 @@ export function detectSlotType(slotCodes = [], courseCode = '', courseTitle = ''
   const code = (courseCode || '').toUpperCase();
   const title = (courseTitle || '').toLowerCase();
 
+  // Explicit Theory detection (High priority)
+  const hasTheoryTitle = title.includes('theory');
+  const hasTheorySlot = slotCodes.some(s => /^[A-G]$/.test(s.toUpperCase()));
+
   // P-numbered slots (P1-P50) are always practical — this is the primary signal
   const hasPracticalSlot = slotCodes.some(s => {
     const us = s.toUpperCase();
     return /^P\d+$/.test(us) || us.includes('LAB') || us.includes('PRAC') || us.includes('WORK');
   });
 
-  // Unambiguous SRM course code suffixes: P=Practical, L=Lab, J=Project
-  // S is excluded — it appears on many theory courses and is not a reliable indicator
-  const isPracticalCode = /[PLJ]$/.test(code);
+  // Unambiguous SRM course code suffixes: P=Practical, L=Lab
+  const isPurePracticalCode = /[PL]$/.test(code);
+  const isEmbeddedCode = code.endsWith('J');
 
   // Title keywords — "seminar" is excluded as SRM seminars are theory/attendance sessions
   const hasPracticalTitle =
@@ -149,5 +153,16 @@ export function detectSlotType(slotCodes = [], courseCode = '', courseTitle = ''
     title.includes('clinical') ||
     title.includes('studio');
 
-  return (hasPracticalSlot || isPracticalCode || hasPracticalTitle) ? 'Practical' : 'Theory';
+  // Decision logic:
+  // 1. If it has practical slot or title, it's Practical (Strongest signal)
+  if (hasPracticalSlot || hasPracticalTitle) return 'Practical';
+  
+  // 2. If it has theory title or slot, it's Theory
+  if (hasTheoryTitle || hasTheorySlot) return 'Theory';
+
+  // 3. Fallback to code suffixes
+  if (isPurePracticalCode) return 'Practical';
+  if (isEmbeddedCode) return 'Practical'; // Default for J if no other signals
+
+  return 'Theory';
 }

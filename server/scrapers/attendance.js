@@ -62,9 +62,8 @@ export function parseAttendance(decodedHtml) {
           conductedNum = 0;
           absentNum = 0;
         }
-        // use utility function for robust detection
         const slotCodes = extractSlotCodes(slot);
-        const slotType = detectSlotType(slotCodes, courseCode, courseTitle);
+        const slotType = detectSlotType(slotCodes, courseCode, rawTitle);
 
         if (courseCode && courseTitle && courseTitle.toLowerCase() !== 'null') {
           attendance.push({
@@ -81,7 +80,7 @@ export function parseAttendance(decodedHtml) {
     });
   }
 
-  // ── Strategy 2: bgcolor=#E6E6FA cells ─────────────────────────────
+  // ── Strategy 2: bgcolor='#E6E6FA cells ─────────────────────────────
   if (attendance.length === 0) {
     $("td[bgcolor='#E6E6FA']").each((i, el) => {
       const cell = $(el);
@@ -101,7 +100,7 @@ export function parseAttendance(decodedHtml) {
         const percentage = conductedNum > 0 ? (((conductedNum - absentNum) / conductedNum) * 100) : 0;
 
         const slotCodes = extractSlotCodes(slot);
-        const slotType = detectSlotType(slotCodes, courseCode, courseTitle);
+        const slotType = detectSlotType(slotCodes, courseCode, rawTitle);
 
         if (courseCode && courseTitle && courseTitle.toLowerCase() !== 'null') {
           attendance.push({
@@ -148,11 +147,13 @@ export function parseAttendance(decodedHtml) {
           }
 
           if (courseCode && courseTitle && percentage > 0) {
+            const rawTitle = values[1] || values[2] || '';
+            const slotType = detectSlotType([], courseCode, rawTitle);
             attendance.push({
               courseCode,
               courseTitle,
               slot: 'N/A',
-              slotType: 'Theory',
+              slotType,
               hoursConducted: '0',
               hoursAbsent: '0',
               attendancePercentage: percentage.toFixed(2),
