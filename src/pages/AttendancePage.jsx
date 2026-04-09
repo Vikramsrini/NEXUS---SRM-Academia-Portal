@@ -9,6 +9,7 @@ const Icons = {
   closeSmall: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>,
   od: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>,
   attendance: <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M9 11l3 3L22 4" /><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" /></svg>,
+  shield: <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
 };
 
 const MONTH_NAMES = [
@@ -696,7 +697,28 @@ export default function AttendancePage() {
           </button>
         </div>
       </div>
-
+      
+      {attendanceInsights && (
+        <div className="attendance-insights-summary stagger-children">
+          <div className="insight-stat-card">
+            <span className="lbl">Mean Attendance</span>
+            <div className="val-group">
+              <span className="val">{attendanceInsights.average}%</span>
+              {attendanceInsights.odCount > 0 && <span className="od-plus-hint">({Icons.shield} OD Active)</span>}
+            </div>
+          </div>
+          <div className="insight-stat-card">
+            <span className="lbl">At Risk</span>
+            <span className={`val ${attendanceInsights.riskCount > 0 ? 'danger' : 'safe'}`}>
+              {attendanceInsights.riskCount}
+            </span>
+          </div>
+          <div className="insight-stat-card">
+            <span className="lbl">Tracked</span>
+            <span className="val">{attendanceInsights.tracked}</span>
+          </div>
+        </div>
+      )}
 
       {FILTERED_ATTENDANCE.length > 0 ? (
         <div className="attendance-groups-wrap stagger-children">
@@ -771,6 +793,11 @@ export default function AttendancePage() {
                             />
                           </svg>
                           <span className="pct-text">{isPredicting ? predPct.toFixed(0) : pct.toFixed(0)}</span>
+                          {finalAppliedOd > 0 && (
+                            <div className="od-boost-badge" title={`Percentage boosted by ${finalAppliedOd} OD/ML hours`}>
+                              {Icons.shield} OD
+                            </div>
+                          )}
                         </div>
                       </div>
 
@@ -799,10 +826,13 @@ export default function AttendancePage() {
                       )}
 
                       <div className="card-actions">
-                        <div className="od-indicator">
-                          <span className="label">OD/ML Applied</span>
-                          <span className="count">{finalAppliedOd}</span>
-                        </div>
+                         <div className={`od-indicator ${finalAppliedOd > 0 ? 'active' : ''}`}>
+                           <span className="od-icon-wrap">{Icons.shield}</span>
+                           <div className="od-text">
+                             <span className="label">OD/ML Units</span>
+                             <span className="count">{finalAppliedOd}</span>
+                           </div>
+                         </div>
                         <div className="od-controls">
                           <button className="adj-btn" onClick={() => updateAdj(courseKey, 'odAdj', -1)} disabled={finalAppliedOd <= 0}>-</button>
                           <button className="adj-btn" onClick={() => updateAdj(courseKey, 'odAdj', 1)} disabled={finalAppliedOd >= originalA}>+</button>
