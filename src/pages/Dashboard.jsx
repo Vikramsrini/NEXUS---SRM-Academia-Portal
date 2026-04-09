@@ -169,13 +169,22 @@ export default function Dashboard({ children }) {
 
   const timetableMapping = useMemo(() => {
     const map = {};
+    
+    // 1. From courses metadata (academic source)
+    (student.courses || []).forEach(course => {
+      const code = normalizeCourseCode(course.code);
+      if (!map[code]) map[code] = new Set();
+      if (course.slotType) map[code].add(course.slotType);
+    });
+
+    // 2. From active timetable
     (student.timetable || []).forEach((cls) => {
       const code = normalizeCourseCode(cls.courseCode);
       if (!map[code]) map[code] = new Set();
-      map[code].add(cls.slotType);
+      if (cls.slotType) map[code].add(cls.slotType);
     });
     return map;
-  }, [student.timetable]);
+  }, [student.timetable, student.courses]);
 
   useEffect(() => {
     if ('scrollRestoration' in window.history) {

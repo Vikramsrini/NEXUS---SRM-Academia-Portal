@@ -178,16 +178,26 @@ export default function AttendancePage() {
   const regNumber = (student.regNumber || '').trim();
   const attendance = student.attendance || [];
   const timetable = student.timetable || [];
+  const coursesMetadata = student.courses || [];
 
   const timetableMapping = useMemo(() => {
     const map = {};
+    
+    // 1. From courses metadata (reliable academic source)
+    coursesMetadata.forEach(course => {
+      const code = normalizeCourseCode(course.code);
+      if (!map[code]) map[code] = new Set();
+      if (course.slotType) map[code].add(course.slotType);
+    });
+
+    // 2. Supplement with active timetable sessions
     timetable.forEach(cls => {
       const code = normalizeCourseCode(cls.courseCode);
       if (!map[code]) map[code] = new Set();
-      map[code].add(cls.slotType);
+      if (cls.slotType) map[code].add(cls.slotType);
     });
     return map;
-  }, [timetable]);
+  }, [timetable, coursesMetadata]);
 
   const resolveType = (a) => {
     const code = normalizeCourseCode(a.courseCode);
