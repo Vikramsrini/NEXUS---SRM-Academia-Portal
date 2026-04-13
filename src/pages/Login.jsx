@@ -121,11 +121,6 @@ export default function Login() {
 
       <div className="login-card">
         <div className="login-top-actions">
-          {deferredPrompt && (
-            <button className="login-action-btn install-btn" onClick={handleInstallClick} aria-label="Install app">
-              {MobileIcons.install}
-            </button>
-          )}
           <button className="login-action-btn theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
             <ThemeIcon theme={theme} />
           </button>
@@ -134,9 +129,6 @@ export default function Login() {
         {showInstallSuggestion && (
           <div className="login-install-suggestion animate-fade-in-down">
             <div className="install-content">
-              <div className="install-icon-wrap">
-                {MobileIcons.install}
-              </div>
               <div className="install-text">
                 <h3>Install NEXUS</h3>
                 <p>{isIOS ? 'Tap Share > Add to Home Screen' : 'Add to home screen for full experience'}</p>

@@ -127,13 +127,6 @@
   transform: scale(0.95);
 }
 
-.install-btn {
-  background: var(--accent-subtle);
-  color: var(--accent);
-  border-color: var(--accent-glow);
-  animation: fadeInDown 0.5s var(--ease-soft);
-}
-
 /* ── Form ─────────────────────────────────────────────────────────── */
 .login-form {
   display: flex;
