@@ -17,6 +17,26 @@ function normalizeSlot(type) {
   return { label: 'Theory', css: 'theory' };
 }
 
+function isNAType(type) {
+  const t = (type || '').trim().toLowerCase();
+  return t === 'n/a' || t === 'na';
+}
+
+function isNASlot(slot) {
+  const raw = (slot || '').trim();
+  if (!raw) return true;
+
+  const s = raw.toLowerCase();
+  if (s === 'n/a' || s === 'na' || s === '-') return true;
+
+  // Accept common SRM slot formats only; reject placeholder sections/noise.
+  const compact = raw.toUpperCase().replace(/\s+/g, '');
+  const isTheorySlot = /^[A-G](?:\d+)?$/.test(compact);
+  const isLabSlot = /^(?:L\d+|P\d+|LAB(?:\d+)?)$/.test(compact);
+
+  return !(isTheorySlot || isLabSlot);
+}
+
 export default function CoursesPage() {
   const student = getStudentData();
   const attendance = student.attendance || [];
@@ -37,7 +57,9 @@ export default function CoursesPage() {
           faculty: course.faculty
         };
       }
-      map[code].types.add(course.slotType);
+      if (!isNAType(course.slotType) && course.slotType) {
+        map[code].types.add(course.slotType);
+      }
     });
 
     // Then, supplement/override with active timetable sessions
@@ -50,7 +72,9 @@ export default function CoursesPage() {
           faculty: cls.faculty
         };
       }
-      map[code].types.add(cls.slotType);
+      if (!isNAType(cls.slotType) && cls.slotType) {
+        map[code].types.add(cls.slotType);
+      }
     });
     return map;
   }, [timetable, coursesMetadata]);
@@ -63,7 +87,8 @@ export default function CoursesPage() {
     if (s && (s.includes('P') || s.includes('L'))) return 'Practical';
     if (s && /^[A-G](?:\d+)?$/.test(s)) return 'Theory';
 
-    if (a.slotType) return a.slotType;
+    if (a.slotType && !isNAType(a.slotType)) return a.slotType;
+    if (isNAType(a.slotType)) return null;
 
     if (data && data.types.size === 1) return Array.from(data.types)[0];
     
@@ -106,7 +131,9 @@ export default function CoursesPage() {
     const normalize = (c) => (c || '').trim().toUpperCase().replace(/^21/, '');
     
     return FILTERED_ATTENDANCE.map(a => {
+      if (isNASlot(a.slot)) return null;
       const type = resolveType(a);
+      if (!type) return null;
       const norm = normalizeSlot(type);
       const code = normalize(a.courseCode);
       const data = timetableMapping[code];
@@ -120,7 +147,7 @@ export default function CoursesPage() {
         credit: data?.credit || '0',
         faculty: data?.faculty || 'N/A',
       };
-    });
+    }).filter(Boolean);
   }, [FILTERED_ATTENDANCE, timetableMapping]);
 
   const needsResync = useMemo(() => {
