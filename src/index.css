@@ -180,12 +180,12 @@
   /* ── Frosted Glass Design Tokens ── */
   --glass-blur: 24px;
   --glass-saturation: 200%;
-  --glass-bg-card: rgba(22, 24, 30, 0.78);
-  --glass-bg-card-hover: rgba(30, 33, 40, 0.85);
+  --glass-bg-card: rgba(18, 20, 26, 0.65);
+  --glass-bg-card-hover: rgba(26, 29, 36, 0.75);
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.3), inset 0 0 0 0.5px rgba(255, 255, 255, 0.06);
   --glass-shadow-hover: 0 8px 40px rgba(0, 0, 0, 0.4), inset 0 0 0 0.5px rgba(255, 255, 255, 0.08);
-  --glass-bg-elevated: rgba(26, 28, 35, 0.9);
+  --glass-bg-elevated: rgba(24, 26, 32, 0.75);
 
   --gradient-page: radial-gradient(at 14% 8%, rgba(220, 20, 60, 0.16) 0, transparent 42%),
                     radial-gradient(at 86% 0%, rgba(90, 200, 250, 0.1) 0, transparent 38%),

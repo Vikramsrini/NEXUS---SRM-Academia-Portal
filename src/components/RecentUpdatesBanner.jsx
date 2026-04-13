@@ -7,11 +7,13 @@ function looksLikeCourseCode(value) {
   return /^(?:\d{2})?[A-Z]{2,}\d+[A-Z0-9]*$/.test(code);
 }
 
-export default function RecentUpdatesBanner({ regNumber, type }) {
+export default function RecentUpdatesBanner({ regNumber, type, variant = 'subpage' }) {
   const [updates, setUpdates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [dismissed, setDismissed] = useState(false);
+
+  const isDashboard = variant === 'dashboard';
 
   useEffect(() => {
     if (!regNumber || !type) {
@@ -34,7 +36,9 @@ export default function RecentUpdatesBanner({ regNumber, type }) {
       setError('');
       try {
         const cleanReg = String(regNumber).trim().toUpperCase();
-        const params = new URLSearchParams({ regNumber: cleanReg, days: '7' });
+        // Use a very short window for high relevance
+        const days = isDashboard ? '2' : '2';
+        const params = new URLSearchParams({ regNumber: cleanReg, days });
         const res = await fetch(apiUrl(`/recent-updates?${params.toString()}`), {
           headers: {
             Authorization: `Bearer ${currentToken}`,
@@ -72,7 +76,7 @@ export default function RecentUpdatesBanner({ regNumber, type }) {
     return () => {
       aborted = true;
     };
-  }, [regNumber, type]);
+  }, [regNumber, type, isDashboard]);
 
   const visibleUpdates = useMemo(() => {
     if (!Array.isArray(updates)) return [];
@@ -117,10 +121,11 @@ export default function RecentUpdatesBanner({ regNumber, type }) {
   }, [visibleUpdates]);
 
   const hasNewUpdates = useMemo(() => {
+    if (isDashboard) return true; // On dashboard, we show the recent summary regardless of "seen" state
     if (!lastSeenKey || latestUpdateMs <= 0) return false;
     const seenMs = Number(localStorage.getItem(lastSeenKey) || 0);
     return latestUpdateMs > seenMs;
-  }, [lastSeenKey, latestUpdateMs]);
+  }, [lastSeenKey, latestUpdateMs, isDashboard]);
 
   const previewUpdates = useMemo(() => visibleUpdates.slice(0, 3), [visibleUpdates]);
 
@@ -156,7 +161,7 @@ export default function RecentUpdatesBanner({ regNumber, type }) {
       </div>
 
       <p className="recent-updates-meta">
-        {visibleUpdates.length} new {isMarks ? 'marks' : 'attendance'} update{visibleUpdates.length !== 1 ? 's' : ''} in the last 7 days.
+        {visibleUpdates.length} new {isMarks ? 'marks' : 'attendance'} update{visibleUpdates.length !== 1 ? 's' : ''} in the last 2 days.
       </p>
 
       <ul className="recent-updates-list">

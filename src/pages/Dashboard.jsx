@@ -918,8 +918,8 @@ export default function Dashboard({ children }) {
               </section>
 
               <div className="recent-updates-dashboard-group animate-fade-in-up delay-1">
-                <RecentUpdatesBanner regNumber={student.regNumber} type="attendance" />
-                <RecentUpdatesBanner regNumber={student.regNumber} type="marks" />
+                <RecentUpdatesBanner regNumber={student.regNumber} type="attendance" variant="dashboard" />
+                <RecentUpdatesBanner regNumber={student.regNumber} type="marks" variant="dashboard" />
               </div>
 
               <div className="home-alerts-row animate-fade-in-up delay-2">
@@ -936,6 +936,14 @@ export default function Dashboard({ children }) {
                   <div className="alert-pill-content">
                     <span className="alert-pill-label">Performance</span>
                     <span className="alert-pill-value">Review Internals</span>
+                  </div>
+                </div>
+
+                <div className="home-alert-pill attendance-pill" onClick={() => navigate('/dashboard/attendance')}>
+                  <div className="alert-pill-icon">{Icons.attendance}</div>
+                  <div className="alert-pill-content">
+                    <span className="alert-pill-label">Attendance</span>
+                    <span className="alert-pill-value">Review Attendance</span>
                   </div>
                 </div>
 
