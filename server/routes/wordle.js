@@ -26,13 +26,13 @@ async function generateDailyWord() {
     MISTRAL_API_URL,
     {
       model: MISTRAL_MODEL,
-      temperature: 0.7,
+      temperature: 0.4,
       max_tokens: 30,
       response_format: { type: 'json_object' },
       messages: [
         {
           role: 'system',
-          content: 'You are a Wordle word generator. Generate exactly one 5-letter English word. Output it in JSON format: {"word": "APPLE"}. The word must be exactly 5 letters long and common enough for a game.'
+          content: 'You are a Wordle word generator. Generate exactly one 5-letter English word. Output it in JSON format: {"word": "APPLE"}. The word MUST be extremely common, simple, and easy to guess (e.g., HEART, WATER, SMILE, CLOUD). Avoid obscure, rare, or complex words.'
         },
         {
           role: 'user',

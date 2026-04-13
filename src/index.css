@@ -237,8 +237,8 @@ body.mobile-sheet-open {
 
 .glass {
   background: var(--bg-glass);
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   border: 1px solid var(--border-glass);
   box-shadow: var(--glass-shadow, 0 8px 32px 0 rgba(0, 0, 0, 0.05));
   transform: translateZ(0); /* GPU compositing — fixes mobile Safari/Chrome/Android WebView */
@@ -248,8 +248,8 @@ body.mobile-sheet-open {
 
 .glass-card {
   background: var(--glass-bg-card, var(--bg-glass));
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   border: 1px solid var(--glass-border, var(--border-glass));
   border-radius: var(--radius-lg);
   box-shadow: var(--glass-shadow);
@@ -267,8 +267,8 @@ body.mobile-sheet-open {
 /* Lighter frosted glass for secondary/subtle surfaces */
 .glass-subtle {
   background: var(--glass-bg-card, var(--bg-glass));
-  backdrop-filter: blur(12px) saturate(160%);
   -webkit-backdrop-filter: blur(12px) saturate(160%);
+  backdrop-filter: blur(12px) saturate(160%);
   border: 1px solid var(--glass-border, var(--border-glass));
   transform: translateZ(0);
   isolation: isolate;
@@ -434,8 +434,8 @@ input::placeholder { color: var(--text-tertiary); }
   border-radius: var(--radius-lg);
   border: 1px solid var(--glass-border, var(--border-secondary));
   background: var(--glass-bg-card, var(--surface-primary));
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   transform: translateZ(0);
   text-align: center;
   animation: fadeInUp 400ms ease both;
@@ -486,8 +486,8 @@ input::placeholder { color: var(--text-tertiary); }
   justify-content: center;
   padding: 24px;
   background: rgba(10, 11, 14, 0.45) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
   transform: translateZ(0);
   isolation: isolate;
   pointer-events: auto;
@@ -505,8 +505,8 @@ input::placeholder { color: var(--text-tertiary); }
   max-height: 85vh;
   border-radius: var(--radius-xl);
   background: var(--glass-bg-elevated, var(--bg-elevated));
-  backdrop-filter: blur(32px) saturate(200%);
   -webkit-backdrop-filter: blur(32px) saturate(200%);
+  backdrop-filter: blur(32px) saturate(200%);
   border: 1px solid var(--glass-border, var(--border-primary));
   box-shadow: var(--shadow-xl);
   overflow: hidden;
@@ -517,8 +517,8 @@ input::placeholder { color: var(--text-tertiary); }
 
 [data-theme="dark"] .apple-modal-card {
   background: rgba(22, 24, 30, 0.82);
-  backdrop-filter: blur(40px) saturate(200%);
   -webkit-backdrop-filter: blur(40px) saturate(200%);
+  backdrop-filter: blur(40px) saturate(200%);
 }
 
 .apple-modal-card.compact {
@@ -612,7 +612,6 @@ input::placeholder { color: var(--text-tertiary); }
 @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
   [data-theme="light"] {
     --glass-bg-card: rgba(255, 255, 255, 0.95);
-    --glass-bg-card-hover: rgba(255, 255, 255, 0.98);
     --glass-bg-elevated: rgba(255, 255, 255, 0.98);
     --glass-border: rgba(0, 0, 0, 0.1);
     --bg-glass: rgba(255, 255, 255, 0.95);

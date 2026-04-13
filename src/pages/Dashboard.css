@@ -39,8 +39,8 @@
 .sidebar {
   width: var(--sidebar-width);
   background: var(--bg-sidebar);
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   display: flex;
   flex-direction: column;
   position: fixed;
@@ -176,8 +176,8 @@
   inset: 0;
   z-index: 1099;
   background: var(--modal-overlay);
-  backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
   opacity: 0;
   pointer-events: none;
   transition: opacity var(--transition-base);
@@ -266,8 +266,8 @@
   height: 40px;
   border-radius: var(--radius-full);
   background: var(--glass-bg-card, var(--bg-glass));
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   border: 1px solid var(--glass-border, var(--border-glass));
   display: flex;
   align-items: center;
@@ -304,8 +304,8 @@
   padding: 0 6px 0 16px;
   border-radius: var(--radius-full);
   background: var(--glass-bg-card, var(--bg-glass));
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   border: 1px solid var(--glass-border, var(--border-glass));
   display: flex;
   align-items: center;
@@ -348,8 +348,8 @@
   right: 0;
   width: 320px;
   background: var(--glass-bg-elevated, rgba(255, 255, 255, 0.85));
-  backdrop-filter: blur(40px) saturate(200%);
   -webkit-backdrop-filter: blur(40px) saturate(200%);
+  backdrop-filter: blur(40px) saturate(200%);
   border: 1px solid var(--glass-border, rgba(0, 0, 0, 0.08));
   border-radius: var(--radius-lg);
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18), inset 0 0 0 0.5px rgba(255, 255, 255, 0.4);
@@ -362,8 +362,8 @@
 
 [data-theme="dark"] .sidebar {
   background: var(--bg-sidebar);
-  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
   border-color: var(--glass-border);
   box-shadow: var(--glass-shadow);
 }
@@ -371,8 +371,8 @@
 [data-theme="dark"] .action-btn,
 [data-theme="dark"] .user-profile-pill {
   background: var(--glass-bg-card);
-  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
   border-color: var(--glass-border);
   box-shadow: var(--glass-shadow);
 }
@@ -386,8 +386,8 @@
 
 [data-theme="dark"] .profile-dropdown-card {
   background: var(--glass-bg-elevated);
-  backdrop-filter: blur(40px) saturate(200%);
   -webkit-backdrop-filter: blur(40px) saturate(200%);
+  backdrop-filter: blur(40px) saturate(200%);
   border-color: var(--glass-border);
   box-shadow: 0 32px 72px rgba(0, 0, 0, 0.5), inset 0 0 0 0.5px rgba(255, 255, 255, 0.06);
 }
@@ -513,8 +513,8 @@
   gap: 20px;
   padding: 28px 32px;
   background: var(--glass-bg-card, var(--surface-primary));
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   border: 1px solid var(--glass-border, var(--border-secondary));
   border-radius: var(--radius-lg);
   box-shadow: var(--glass-shadow, var(--shadow-card));
@@ -610,8 +610,8 @@
 .schedule-item-card {
   min-width: 240px;
   background: var(--glass-bg-card, var(--surface-primary));
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   border: 1px solid var(--glass-border, var(--border-secondary));
   border-radius: var(--radius-lg);
   padding: 20px;
@@ -711,8 +711,8 @@
   gap: 12px;
   padding: 28px 20px;
   background: var(--glass-bg-card, var(--surface-primary));
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   border: 1px solid var(--glass-border, var(--border-secondary));
   border-radius: var(--radius-lg);
   box-shadow: var(--glass-shadow, var(--shadow-card));
@@ -875,8 +875,8 @@
 
 .ov-stat-card {
   background: var(--glass-bg-card, var(--bg-glass));
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   border: 1px solid var(--glass-border, var(--border-glass));
   border-radius: var(--radius-lg);
   padding: 18px 20px;
@@ -1102,8 +1102,8 @@
 
 .now-card {
   background: var(--glass-bg-card, var(--bg-glass));
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   border: 1px solid var(--glass-border, var(--border-glass));
   border-radius: var(--radius-lg);
   padding: 20px;
@@ -1271,8 +1271,8 @@
   padding: 14px 18px;
   border-radius: var(--radius-lg);
   background: var(--glass-bg-card, var(--bg-glass));
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   border: 1px solid var(--glass-border, var(--border-glass));
   transform: translateZ(0);
   isolation: isolate;
@@ -1357,8 +1357,8 @@
     padding: 6px 10px;
     border-radius: 32px;
     background: var(--glass-bg-elevated);
-    backdrop-filter: blur(24px) saturate(200%);
-    -webkit-backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  backdrop-filter: blur(24px) saturate(200%);
     border: 1px solid var(--glass-border);
     margin: 10px auto;
     width: fit-content;
@@ -1472,8 +1472,8 @@
   [data-theme="dark"] .top-bar-container.mobile-top-bar .action-btn,
   [data-theme="dark"] .top-bar-container.mobile-top-bar .user-profile-pill {
     background: var(--glass-bg-card);
-    backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
-    -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
     border-color: var(--glass-border);
     box-shadow: var(--glass-shadow);
   }
@@ -1505,8 +1505,8 @@
     transform: translate3d(0, 100%, 0);
     transition: transform 550ms cubic-bezier(0.16, 1, 0.3, 1), opacity 300ms ease;
     background: var(--glass-bg-elevated, rgba(255, 255, 255, 0.82));
-    backdrop-filter: blur(28px) saturate(200%);
-    -webkit-backdrop-filter: blur(28px) saturate(200%);
+  -webkit-backdrop-filter: blur(28px) saturate(200%);
+  backdrop-filter: blur(28px) saturate(200%);
     border: 1px solid var(--glass-border, var(--border-primary));
     border-bottom: none;
     box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.12);
@@ -1818,8 +1818,8 @@
     inset: 0;
     z-index: 1180;
     background: rgba(20, 23, 30, 0.52);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
     opacity: 0;
     pointer-events: none;
     transition: opacity var(--transition-base);
@@ -1855,8 +1855,8 @@
     padding: 28px 20px calc(32px + env(safe-area-inset-bottom, 0px));
     border-radius: 32px 32px 0 0;
     background: var(--glass-bg-elevated, rgba(255, 255, 255, 0.82));
-    backdrop-filter: blur(28px) saturate(200%);
-    -webkit-backdrop-filter: blur(28px) saturate(200%);
+  -webkit-backdrop-filter: blur(28px) saturate(200%);
+  backdrop-filter: blur(28px) saturate(200%);
     border: 1px solid var(--glass-border, var(--border-primary));
     border-bottom: none;
     box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.12);
@@ -2020,8 +2020,8 @@
     padding: 10px 10px 12px;
     border-radius: 28px;
     background: rgba(255, 255, 255, 0.75);
-    backdrop-filter: blur(24px) saturate(200%);
-    -webkit-backdrop-filter: blur(24px) saturate(200%);
+  -webkit-backdrop-filter: blur(24px) saturate(200%);
+  backdrop-filter: blur(24px) saturate(200%);
     border: 1px solid var(--glass-border, rgba(223, 227, 235, 0.6));
     box-shadow: var(--glass-shadow, 0 20px 45px rgba(0, 0, 0, 0.18));
     isolation: isolate;
@@ -2037,13 +2037,9 @@
   }
 
   @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
-
-    .mobile-top-shell,
-    .mobile-tabbar,
-    .mobile-more-sheet,
-    .profile-dropdown-card {
-      background: rgba(18, 21, 28, 0.9);
-      border-color: rgba(255, 255, 255, 0.14);
+    .mobile-tabbar {
+      background: rgba(255, 255, 255, 0.92);
+      border-color: rgba(0, 0, 0, 0.1);
     }
 
     .mobile-sheet-overlay {

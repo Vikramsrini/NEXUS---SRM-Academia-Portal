@@ -6,8 +6,8 @@ const STORAGE_KEY = `academia_features_seen_${VERSION}`;
 
 const FEATURES = [
   {
-    title: 'Mistral-Powered Wordle',
-    description: 'A new daily word game powered by Mistral AI. Challenge yourself and climb the leaderboard!',
+    title: 'NEXUS Wordle Daily',
+    description: 'A new daily word game. Challenge yourself and climb the leaderboard!',
     icon: '🎮',
   },
   {

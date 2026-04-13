@@ -23,8 +23,8 @@
   gap: 16px;
   text-align: center;
   background: var(--glass-bg-card, var(--surface-primary));
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   border: 1px solid var(--glass-border, var(--border-secondary));
   border-radius: var(--radius-xl);
   box-shadow: var(--glass-shadow, var(--shadow-card));
@@ -61,8 +61,8 @@
   align-items: center;
   gap: 8px;
   background: var(--glass-bg-card, var(--surface-primary));
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   padding: 6px;
   border-radius: var(--radius-lg);
   border: 1px solid var(--glass-border, var(--border-secondary));
@@ -181,8 +181,8 @@
 /* ── Main Calendar Card ─────────────────────────────────────────────── */
 .cal-main-card {
   background: var(--glass-bg-card, var(--surface-primary));
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   border: 1px solid var(--glass-border, var(--border-primary));
   border-radius: var(--radius-xl);
   overflow: hidden;
@@ -372,8 +372,8 @@
 /* ── Event Item Card ────────────────────────────────────────────────── */
 .event-item-apple {
   background: var(--glass-bg-card, var(--surface-primary));
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   border: 1px solid var(--glass-border, var(--border-secondary));
   border-radius: var(--radius-lg);
   padding: 16px;

@@ -215,8 +215,8 @@
 }
 
 [data-theme="dark"] .apple-btn-secondary {
-  backdrop-filter: var(--blur-md);
   -webkit-backdrop-filter: var(--blur-md);
+  backdrop-filter: var(--blur-md);
 }
 
 @media (max-width: 430px) {
@@ -365,8 +365,8 @@
   flex-direction: column;
   border-radius: var(--radius-lg);
   background: var(--glass-bg-card, var(--surface-primary));
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   border: 1px solid var(--glass-border, var(--border-primary));
   box-shadow: var(--glass-shadow, var(--shadow-card));
   overflow: hidden;
@@ -377,8 +377,8 @@
 
 [data-theme="dark"] .attendance-card-apple {
   background: var(--glass-bg-card);
-  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
   justify-content: flex-end;
 }
 
@@ -844,8 +844,8 @@
   flex-direction: column;
   border-radius: var(--radius-lg);
   background: var(--glass-bg-card, var(--surface-primary));
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   border: 1px solid var(--glass-border, var(--border-primary));
   box-shadow: var(--glass-shadow, var(--shadow-card));
   overflow: hidden;
@@ -856,8 +856,8 @@
 
 [data-theme="dark"] .marks-card-apple {
   background: var(--glass-bg-card);
-  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
 }
 
 .marks-card-apple:hover {
@@ -1152,8 +1152,8 @@
   padding: 24px;
   border-radius: var(--radius-lg);
   background: var(--glass-bg-card, var(--surface-primary));
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   border: 1px solid var(--glass-border, var(--border-primary));
   box-shadow: var(--glass-shadow, var(--shadow-card));
   transform: translateZ(0);
@@ -1162,8 +1162,8 @@
 
 [data-theme="dark"] .sgpa-panel-apple {
   background: var(--glass-bg-card);
-  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
 }
 
 /* -- SGPA Predictor Section -- */
@@ -1173,8 +1173,8 @@
   gap: 24px;
   padding: 32px;
   background: var(--glass-bg-card, var(--surface-primary));
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   border-radius: var(--radius-lg);
   border: 1px solid var(--glass-border, var(--border-primary));
   box-shadow: var(--glass-shadow, var(--shadow-card));
@@ -1186,8 +1186,8 @@
 
 [data-theme="dark"] .sgpa-section-apple {
   background: var(--glass-bg-card);
-  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
 }
 
 @media (max-width: 768px) {
@@ -1204,8 +1204,8 @@
   gap: clamp(20px, 4vw, 32px);
   padding: clamp(20px, 5vw, 40px);
   background: var(--glass-bg-card, var(--surface-primary));
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   border-radius: var(--radius-lg);
   border: 1px solid var(--glass-border, var(--border-primary));
   margin-bottom: clamp(24px, 6vw, 48px);
@@ -1216,8 +1216,8 @@
 
 [data-theme="dark"] .sgpa-inline-container {
   background: var(--glass-bg-card);
-  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
 }
 
 .sgpa-inline-header {
@@ -1607,8 +1607,8 @@
   padding: 18px;
   border-radius: var(--radius-md);
   background: var(--glass-bg-card, var(--bg-tertiary));
-  backdrop-filter: blur(12px) saturate(160%);
   -webkit-backdrop-filter: blur(12px) saturate(160%);
+  backdrop-filter: blur(12px) saturate(160%);
   border: 1px solid var(--glass-border, var(--border-secondary));
   transition: all 0.2s ease;
   transform: translateZ(0);
@@ -1617,8 +1617,8 @@
 
 [data-theme="dark"] .sgpa-item-card {
   background: var(--glass-bg-card);
-  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
 }
 
 .sgpa-item-card.disabled {
@@ -2065,8 +2065,8 @@
 /* -- Class Card -- */
 .class-card-v2 {
   background: var(--glass-bg-card, var(--surface-primary));
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   border: 1px solid var(--glass-border, var(--border-primary));
   border-radius: var(--radius-lg);
   padding: 18px 20px;
@@ -2078,8 +2078,8 @@
 
 [data-theme="dark"] .class-card-v2 {
   background: var(--glass-bg-card);
-  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
 }
 
 .class-card-v2:hover {
@@ -2222,8 +2222,8 @@
   display: flex;
   border-radius: var(--radius-lg);
   background: var(--glass-bg-card, var(--surface-primary));
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   border: 1px solid var(--glass-border, var(--border-primary));
   box-shadow: var(--glass-shadow, var(--shadow-card));
   overflow: hidden;
@@ -2234,8 +2234,8 @@
 
 [data-theme="dark"] .course-card-apple {
   background: var(--glass-bg-card);
-  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
 }
 
 .course-card-apple:hover {
@@ -2348,8 +2348,8 @@
   justify-content: center;
   padding: 24px;
   background: rgba(10, 11, 14, 0.45) !important;
-  backdrop-filter: blur(16px) saturate(180%) !important;
   -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  backdrop-filter: blur(16px) saturate(180%) !important;
   transform: translateZ(0);
   pointer-events: auto;
 }
@@ -2374,8 +2374,8 @@
 
 [data-theme="dark"] .apple-modal-card {
   background: var(--bg-secondary);
-  backdrop-filter: var(--blur-lg);
   -webkit-backdrop-filter: var(--blur-lg);
+  backdrop-filter: var(--blur-lg);
 }
 
 .apple-modal-card.compact {
@@ -2705,8 +2705,8 @@
   border-radius: var(--radius-lg);
   border: 1px solid var(--glass-border, var(--border-primary));
   background: var(--glass-bg-card, var(--surface-primary));
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   box-shadow: var(--glass-shadow, var(--shadow-card));
   text-align: center;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
@@ -2716,8 +2716,8 @@
 
 [data-theme="dark"] .skippro-stat-card {
   background: var(--glass-bg-card);
-  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
 }
 
 [data-theme="dark"] .skippro-page .skippro-stat-card {
@@ -2840,8 +2840,8 @@
   min-height: 100%;
   border-radius: var(--radius-lg);
   background: var(--glass-bg-card, var(--bg-glass));
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   border: 1px solid var(--glass-border, var(--border-glass));
   box-shadow: var(--glass-shadow);
   overflow: hidden;
@@ -2852,8 +2852,8 @@
 
 [data-theme="dark"] .skippro-card-apple {
   background: var(--glass-bg-card);
-  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
 }
 
 [data-theme="dark"] .skippro-page .skippro-card-apple {
@@ -3122,8 +3122,8 @@
   border-radius: var(--radius-lg);
   border: 1px solid var(--glass-border, var(--border-primary));
   background: var(--glass-bg-card, var(--surface-primary));
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   box-shadow: var(--glass-shadow, var(--shadow-card));
   cursor: pointer;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
@@ -3133,8 +3133,8 @@
 
 [data-theme="dark"] .semester-card-apple {
   background: var(--glass-bg-card);
-  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
 }
 
 .semester-card-apple:hover {
@@ -3251,8 +3251,8 @@
   border-radius: var(--radius-md);
   border: 1px solid var(--glass-border, var(--border-primary));
   background: var(--glass-bg-card, var(--surface-primary));
-  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   box-shadow: var(--glass-shadow, var(--shadow-card));
   text-decoration: none;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast), background var(--transition-fast);
@@ -3262,8 +3262,8 @@
 
 [data-theme="dark"] .resource-subject-card {
   background: var(--glass-bg-card);
-  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
   -webkit-backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
+  backdrop-filter: blur(var(--glass-blur, 24px)) saturate(var(--glass-saturation, 200%));
 }
 
 .resource-subject-card:hover {
@@ -3433,8 +3433,8 @@
   .apple-modal-overlay {
     padding: 16px;
     background: rgba(0, 0, 0, 0.55) !important;
-    backdrop-filter: blur(12px) saturate(160%) !important;
-    -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(160%) !important;
+  backdrop-filter: blur(12px) saturate(160%) !important;
     transform: translateZ(0);
   }
 
@@ -3447,8 +3447,8 @@
     margin: 0 auto;
     border-radius: 24px;
     background: rgba(255, 255, 255, 0.94) !important;
-    backdrop-filter: blur(30px) saturate(190%) !important;
-    -webkit-backdrop-filter: blur(30px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(30px) saturate(190%) !important;
+  backdrop-filter: blur(30px) saturate(190%) !important;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.14);
   }
 
