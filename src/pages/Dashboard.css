@@ -1333,7 +1333,7 @@
     z-index: 60;
     margin-bottom: 20px;
     display: flex;
-    justify-content: center;
+    justify-content: stretch;
   }
 
   .mobile-top-shell {
@@ -1354,6 +1354,7 @@
     box-shadow: var(--glass-shadow, 0 8px 24px rgba(0, 0, 0, 0.12));
     isolation: isolate;
     transform: translateZ(0);
+    
     transition: all 0.3s ease;
   }
 
@@ -1368,7 +1369,7 @@
     align-items: center;
     gap: 8px;
     min-width: 0;
-    flex: 0 1 auto;
+    flex: 1;
   }
 
   .mobile-brand-logo {
@@ -1649,10 +1650,14 @@
   }
 
   .home-alerts-row {
-    display: flex;
-    flex-direction: row;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
     margin-top: 4px;
+  }
+
+  .home-alert-pill.game-pill {
+    grid-column: 1 / -1;
   }
 
   .home-alert-pill {
@@ -1709,7 +1714,7 @@
   }
 
   .mobile-top-shell {
-    padding: 6px 6px 6px 10px;
+    padding: 8px 12px;
   }
 
   .tod-section {
@@ -1723,8 +1728,10 @@
   }
 
   .section-header {
-    flex-direction: column;
+    flex-direction: row;
     align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
     gap: 10px;
   }
 
@@ -2144,9 +2151,17 @@
   }
 
   .mobile-top-shell {
-    max-width: 96%;
-    padding: 8px;
+    max-width: 100%;
+    padding: 8px 10px;
     gap: 8px;
+  }
+
+  .home-alerts-row {
+    grid-template-columns: 1fr;
+  }
+
+  .home-alert-pill.game-pill {
+    grid-column: auto;
   }
 
   .mobile-brand-title {

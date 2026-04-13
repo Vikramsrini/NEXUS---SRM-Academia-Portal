@@ -231,6 +231,20 @@
   overflow: hidden;
 }
 
+.login-btn-content {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.login-btn-label {
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+}
+
 .login-btn:hover:not(:disabled) {
   background: var(--accent-hover);
   transform: translateY(-1px);
@@ -252,6 +266,7 @@
   border-color: rgba(255, 255, 255, 0.3);
   border-top-color: #fff;
   flex-shrink: 0;
+  display: inline-block;
 }
 
 /* ── Error ────────────────────────────────────────────────────────── */
