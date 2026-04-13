@@ -364,12 +364,12 @@ input::placeholder { color: var(--text-tertiary); }
 }
 
 /* ── Animation Utilities ─────────────────────────────────────────────── */
-.animate-fade-in { animation: fadeIn 300ms ease both; }
-.animate-fade-in-up { animation: fadeInUp 450ms cubic-bezier(0.25, 0.1, 0.25, 1) both; }
-.animate-fade-in-down { animation: fadeInDown 400ms cubic-bezier(0.25, 0.1, 0.25, 1) both; }
-.animate-fade-in-scale { animation: fadeInScale 400ms cubic-bezier(0.25, 0.1, 0.25, 1) both; }
-.animate-scale-in { animation: scaleIn 350ms cubic-bezier(0.25, 0.1, 0.25, 1) both; }
-.animate-slide-up { animation: slideUp 500ms cubic-bezier(0.25, 0.1, 0.25, 1) both; }
+.animate-fade-in { animation: fadeIn 200ms ease both; }
+.animate-fade-in-up { animation: fadeInUp 300ms cubic-bezier(0.25, 0.1, 0.25, 1) both; }
+.animate-fade-in-down { animation: fadeInDown 250ms cubic-bezier(0.25, 0.1, 0.25, 1) both; }
+.animate-fade-in-scale { animation: fadeInScale 250ms cubic-bezier(0.25, 0.1, 0.25, 1) both; }
+.animate-scale-in { animation: scaleIn 250ms cubic-bezier(0.25, 0.1, 0.25, 1) both; }
+.animate-slide-up { animation: slideUp 300ms cubic-bezier(0.25, 0.1, 0.25, 1) both; }
 
 .delay-1 { animation-delay: 60ms; }
 .delay-2 { animation-delay: 120ms; }

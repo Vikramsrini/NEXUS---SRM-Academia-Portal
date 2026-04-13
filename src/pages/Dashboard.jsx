@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { useTheme } from '../ThemeContext';
 import { fetchThoughtOfDay, fetchOdState, saveOdState } from '../lib/api';
 import { normalizeCourseCode } from '../lib/slotTypes';
@@ -145,6 +145,8 @@ export default function Dashboard({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 768);
   const [profileOpen, setProfileOpen] = useState(false);
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
+  const [mobileNavPulseId, setMobileNavPulseId] = useState('');
+  const mobileNavAnimationRef = useRef(null);
   const [syncing, setSyncing] = useState(false);
   const syncingRef = useRef(false);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -258,8 +260,17 @@ export default function Dashboard({ children }) {
     };
   }, []);
 
-  const handleSync = useCallback(async () => {
+  const handleSync = useCallback(async (manual = false) => {
     if (syncingRef.current) return;
+
+    // Throttle automatic syncs (5 minutes)
+    const lastSync = localStorage.getItem('academia_last_sync_time');
+    const now = Date.now();
+    if (!manual && lastSync && (now - parseInt(lastSync)) < 5 * 60 * 1000) {
+      console.log('[Auto Sync] Throttled. Last sync was less than 5 mins ago.');
+      return;
+    }
+
     syncingRef.current = true;
     setSyncing(true);
 
@@ -305,6 +316,7 @@ export default function Dashboard({ children }) {
       }
 
       localStorage.setItem('academia_login_time', new Date().toISOString());
+      localStorage.setItem('academia_last_sync_time', Date.now().toString());
 
       // Update local state to trigger reactive updates in all components 
       const updatedStudent = getStudentData();
@@ -391,8 +403,24 @@ export default function Dashboard({ children }) {
     setProfileOpen(false);
   };
 
+  const triggerMobileNavPulse = (id) => {
+    if (!id) return;
+    window.clearTimeout(mobileNavAnimationRef.current);
+    setMobileNavPulseId(id);
+    mobileNavAnimationRef.current = window.setTimeout(() => {
+      setMobileNavPulseId('');
+    }, 300); // Snappier duration
+  };
+
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(mobileNavAnimationRef.current);
+    };
+  }, []);
+
 
   const handleNavClick = (path, navId = '') => {
+    if (isMobile && navId) triggerMobileNavPulse(navId);
     navigate(path);
     if (isMobile) closeMobilePanels();
   };
@@ -471,7 +499,7 @@ export default function Dashboard({ children }) {
     return 'Theory';
   };
 
-  const todayLowAttendanceSubjects = (() => {
+  const todayLowAttendanceSubjects = useMemo(() => {
     const LOW_ATTENDANCE_THRESHOLD = 75;
     const odDates = getStoredJson('academia_od_dates', []);
     const manualAdjs = getStoredJson('academia_attendance_adjs', {});
@@ -586,9 +614,9 @@ export default function Dashboard({ children }) {
     return Array.from(
       new Map(matches.map(item => [`${normalizeCourseCode(item.code)}_${normalizeText(item.title)}_${normalizeSlot(item.type).label}`, item])).values()
     );
-  })();
+  }, [student, todaySchedule, currentTime, timetable]);
 
-  const overallMarks = (() => {
+  const overallMarks = useMemo(() => {
     if (!marks.length) return '—';
     let totalObtained = 0;
     let totalMax = 0;
@@ -601,9 +629,9 @@ export default function Dashboard({ children }) {
       }
     });
     return totalMax > 0 ? ((totalObtained / totalMax) * 100).toFixed(1) : '—';
-  })();
+  }, [marks]);
 
-  const todaySkipSummary = (() => {
+  const todaySkipSummary = useMemo(() => {
     if (!todaySchedule.length) return { canSkipCount: 0, total: 0 };
     const odDates = getStoredJson('academia_od_dates', []);
     const manualAdjs = getStoredJson('academia_attendance_adjs', {});
@@ -634,9 +662,9 @@ export default function Dashboard({ children }) {
       total: sortedSchedule.length,
       classesLeft: sortedSchedule.filter(cls => parseTime(cls.time.split(' - ')[0]) > currentTime).length
     };
-  })();
+  }, [student, todaySchedule, activeClasses, sortedSchedule, currentTime]);
 
-  const averageAttendance = (() => {
+  const averageAttendance = useMemo(() => {
     const rawAtt = student.attendance || [];
     const att = rawAtt.filter(a => {
       const title = (a.courseTitle || '').trim().toLowerCase();
@@ -655,7 +683,7 @@ export default function Dashboard({ children }) {
       const absent = parseInt(curr.hoursAbsent) || 0;
       return acc + (conducted > 0 ? ((conducted - absent) / conducted) * 100 : 100);
     }, 0) / att.length).toFixed(1);
-  })();
+  }, [student.attendance]);
 
   const getCurrentClassInfo = () => {
     if (!todaySchedule.length) return null;
@@ -755,7 +783,7 @@ export default function Dashboard({ children }) {
       <button className="action-btn theme-toggle-btn" onClick={toggleTheme} aria-label="Toggle theme">
         {theme === 'dark' ? Icons.sun : Icons.moon}
       </button>
-      <button className={`action-btn ${syncing ? 'spinning' : ''}`} onClick={handleSync} aria-label="Sync data">
+      <button className={`action-btn ${syncing ? 'spinning' : ''}`} onClick={() => handleSync(true)} aria-label="Sync data">
         {Icons.sync}
       </button>
       <div
@@ -821,7 +849,7 @@ export default function Dashboard({ children }) {
           {NAV_ITEMS.map(item => (
             <div
               key={item.id}
-              className={`sidebar-item ${activePath === item.path ? 'active' : ''}`}
+              className={`sidebar-item ${activePath === item.path ? 'active' : ''} ${mobileNavPulseId === item.id ? 'tap-burst' : ''}`}
               onClick={() => handleNavClick(item.path, item.id)}
             >
               <span className="sidebar-item-icon">{item.icon}</span>
@@ -1006,8 +1034,8 @@ export default function Dashboard({ children }) {
               {isMobile && renderDeveloperInfo('mobile-home-mode')}
             </div>
           ) : (
-            <div key={student.timestamp || 'root'} className="subpage-viewport">
-              {children}
+            <div className="subpage-viewport">
+              <Outlet />
             </div>
           )}
         </div>
@@ -1030,7 +1058,7 @@ export default function Dashboard({ children }) {
               {mobileSecondaryNav.map(item => (
                 <button
                   key={item.id}
-                  className={`mobile-more-card ${activePath === item.path ? 'active' : ''}`}
+                  className={`mobile-more-card ${activePath === item.path ? 'active' : ''} ${mobileNavPulseId === item.id ? 'tap-burst' : ''}`}
                   onClick={() => handleNavClick(item.path, item.id)}
                 >
                   <span className="mobile-more-card-icon">{item.icon}</span>
@@ -1047,7 +1075,7 @@ export default function Dashboard({ children }) {
             {mobilePrimaryNav.map(item => (
               <button
                 key={item.id}
-                className={`mobile-tabbar-item ${activePath === item.path && !mobileMoreOpen ? 'active' : ''}`}
+                className={`mobile-tabbar-item ${activePath === item.path && !mobileMoreOpen ? 'active' : ''} ${mobileNavPulseId === item.id ? 'tap-burst' : ''}`}
                 onClick={() => handleNavClick(item.path, item.id)}
               >
                 <span className="mobile-tabbar-icon">{item.icon}</span>
@@ -1055,8 +1083,9 @@ export default function Dashboard({ children }) {
               </button>
             ))}
             <button
-              className={`mobile-tabbar-item ${mobileMoreActive || mobileMoreOpen ? 'active' : ''}`}
+              className={`mobile-tabbar-item ${mobileMoreActive || mobileMoreOpen ? 'active' : ''} ${mobileNavPulseId === 'more' ? 'tap-burst' : ''}`}
               onClick={() => {
+                triggerMobileNavPulse('more');
                 setProfileOpen(false);
                 setMobileMoreOpen(!mobileMoreOpen);
               }}

@@ -27,7 +27,7 @@ export default function App() {
         {/* Login */}
         <Route path="/" element={<Login />} />
 
-        {/* Dashboard (Overview) */}
+        {/* Dashboard Layout & Sub-pages */}
         <Route
           path="/dashboard"
           element={
@@ -35,73 +35,20 @@ export default function App() {
               <Dashboard />
             </ProtectedRoute>
           }
-        />
-
-        {/* Sub-pages inside Dashboard layout */}
-        <Route
-          path="/dashboard/attendance"
-          element={
-            <ProtectedRoute>
-              <Dashboard><AttendancePage /></Dashboard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/skippro"
-          element={
-            <ProtectedRoute>
-              <Dashboard><SkipProPage /></Dashboard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/marks"
-          element={
-            <ProtectedRoute>
-              <Dashboard><MarksPage /></Dashboard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/timetable"
-          element={
-            <ProtectedRoute>
-              <Dashboard><TimetablePage /></Dashboard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/courses"
-          element={
-            <ProtectedRoute>
-              <Dashboard><CoursesPage /></Dashboard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/calendar"
-          element={
-            <ProtectedRoute>
-              <Dashboard><CalendarPage /></Dashboard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/resources"
-          element={
-            <ProtectedRoute>
-              <Dashboard><ResourcesPage /></Dashboard>
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/dashboard/cgpa"
-          element={
-            <ProtectedRoute>
-              <Dashboard><CgpaPage /></Dashboard>
-            </ProtectedRoute>
-          }
-        />
+        >
+          {/* Default overview */}
+          <Route index element={null} /> 
+          
+          {/* Sub-pages */}
+          <Route path="attendance" element={<AttendancePage />} />
+          <Route path="skippro" element={<SkipProPage />} />
+          <Route path="marks" element={<MarksPage />} />
+          <Route path="timetable" element={<TimetablePage />} />
+          <Route path="courses" element={<CoursesPage />} />
+          <Route path="calendar" element={<CalendarPage />} />
+          <Route path="resources" element={<ResourcesPage />} />
+          <Route path="cgpa" element={<CgpaPage />} />
+        </Route>
 
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" replace />} />
