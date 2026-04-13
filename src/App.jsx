@@ -10,6 +10,7 @@ import CalendarPage from './pages/CalendarPage';
 import SkipProPage from './pages/SkipProPage';
 import ResourcesPage from './pages/ResourcesPage';
 import CgpaPage from './pages/CgpaPage';
+import WordlePage from './pages/WordlePage';
 
 function isLoggedIn() {
   return !!localStorage.getItem('academia_token');
@@ -48,6 +49,7 @@ export default function App() {
           <Route path="calendar" element={<CalendarPage />} />
           <Route path="resources" element={<ResourcesPage />} />
           <Route path="cgpa" element={<CgpaPage />} />
+          <Route path="wordle" element={<WordlePage />} />
         </Route>
 
         {/* Fallback */}
