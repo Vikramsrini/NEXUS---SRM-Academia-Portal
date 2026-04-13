@@ -145,8 +145,6 @@ export default function Dashboard({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(() => window.innerWidth > 768);
   const [profileOpen, setProfileOpen] = useState(false);
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
-  const [mobileNavPulseId, setMobileNavPulseId] = useState('');
-  const mobileNavAnimationRef = useRef(null);
   const [syncing, setSyncing] = useState(false);
   const syncingRef = useRef(false);
   const [currentTime, setCurrentTime] = useState(new Date());
@@ -393,23 +391,8 @@ export default function Dashboard({ children }) {
     setProfileOpen(false);
   };
 
-  const triggerMobileNavPulse = (id) => {
-    if (!id) return;
-    window.clearTimeout(mobileNavAnimationRef.current);
-    setMobileNavPulseId(id);
-    mobileNavAnimationRef.current = window.setTimeout(() => {
-      setMobileNavPulseId('');
-    }, 460);
-  };
-
-  useEffect(() => {
-    return () => {
-      window.clearTimeout(mobileNavAnimationRef.current);
-    };
-  }, []);
 
   const handleNavClick = (path, navId = '') => {
-    if (isMobile && navId) triggerMobileNavPulse(navId);
     navigate(path);
     if (isMobile) closeMobilePanels();
   };
@@ -838,7 +821,7 @@ export default function Dashboard({ children }) {
           {NAV_ITEMS.map(item => (
             <div
               key={item.id}
-              className={`sidebar-item ${activePath === item.path ? 'active' : ''} ${mobileNavPulseId === item.id ? 'tap-burst' : ''}`}
+              className={`sidebar-item ${activePath === item.path ? 'active' : ''}`}
               onClick={() => handleNavClick(item.path, item.id)}
             >
               <span className="sidebar-item-icon">{item.icon}</span>
@@ -1047,7 +1030,7 @@ export default function Dashboard({ children }) {
               {mobileSecondaryNav.map(item => (
                 <button
                   key={item.id}
-                  className={`mobile-more-card ${activePath === item.path ? 'active' : ''} ${mobileNavPulseId === item.id ? 'tap-burst' : ''}`}
+                  className={`mobile-more-card ${activePath === item.path ? 'active' : ''}`}
                   onClick={() => handleNavClick(item.path, item.id)}
                 >
                   <span className="mobile-more-card-icon">{item.icon}</span>
@@ -1064,7 +1047,7 @@ export default function Dashboard({ children }) {
             {mobilePrimaryNav.map(item => (
               <button
                 key={item.id}
-                className={`mobile-tabbar-item ${activePath === item.path && !mobileMoreOpen ? 'active' : ''} ${mobileNavPulseId === item.id ? 'tap-burst' : ''}`}
+                className={`mobile-tabbar-item ${activePath === item.path && !mobileMoreOpen ? 'active' : ''}`}
                 onClick={() => handleNavClick(item.path, item.id)}
               >
                 <span className="mobile-tabbar-icon">{item.icon}</span>
@@ -1072,9 +1055,8 @@ export default function Dashboard({ children }) {
               </button>
             ))}
             <button
-              className={`mobile-tabbar-item ${mobileMoreActive || mobileMoreOpen ? 'active' : ''} ${mobileNavPulseId === 'more' ? 'tap-burst' : ''}`}
+              className={`mobile-tabbar-item ${mobileMoreActive || mobileMoreOpen ? 'active' : ''}`}
               onClick={() => {
-                triggerMobileNavPulse('more');
                 setProfileOpen(false);
                 setMobileMoreOpen(!mobileMoreOpen);
               }}

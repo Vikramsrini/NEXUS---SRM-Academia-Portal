@@ -17,59 +17,6 @@
   transition: background var(--transition-base);
 }
 
-/* ── Apple Liquid Pop Keyframes (Shared) ─────────────────────────── */
-@keyframes apple-pop-press {
-  0% {
-    transform: scale(1);
-  }
-
-  25% {
-    transform: scale(0.88);
-  }
-
-  60% {
-    transform: scale(1.08);
-  }
-
-  100% {
-    transform: scale(1);
-  }
-}
-
-@keyframes apple-pop-ripple {
-  0% {
-    opacity: 0.4;
-    transform: translate(-50%, -50%) scale(0.2);
-  }
-
-  40% {
-    opacity: 0.2;
-  }
-
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(5.5);
-    filter: blur(12px);
-  }
-}
-
-@keyframes apple-pop-icon-hop {
-  0% {
-    transform: translateY(0) scale(1);
-  }
-
-  35% {
-    transform: translateY(-7px) scale(1.2) rotate(-3deg);
-  }
-
-  65% {
-    transform: translateY(1.5px) scale(0.96) rotate(1.5deg);
-  }
-
-  100% {
-    transform: translateY(0) scale(1) rotate(0deg);
-  }
-}
 
 /* ── Sidebar ──────────────────────────────────────────────────────── */
 .sidebar {
@@ -172,17 +119,6 @@
   pointer-events: none;
 }
 
-.sidebar-item.tap-burst {
-  animation: apple-pop-press 420ms var(--ease-emphasized);
-}
-
-.sidebar-item.tap-burst::after {
-  animation: apple-pop-ripple 420ms var(--ease-soft);
-}
-
-.sidebar-item.tap-burst .sidebar-item-icon {
-  animation: apple-pop-icon-hop 420ms var(--ease-emphasized);
-}
 
 .sidebar-item:hover {
   background: var(--bg-glass-hover);
@@ -1994,17 +1930,6 @@
     pointer-events: none;
   }
 
-  .mobile-more-card.tap-burst {
-    animation: apple-pop-press 420ms var(--ease-emphasized);
-  }
-
-  .mobile-more-card.tap-burst::after {
-    animation: apple-pop-ripple 420ms var(--ease-soft);
-  }
-
-  .mobile-more-card.tap-burst .mobile-more-card-icon {
-    animation: apple-pop-icon-hop 420ms var(--ease-emphasized);
-  }
 
   .mobile-more-card.active {
     background: var(--surface-active);
@@ -2148,17 +2073,6 @@
     transform: scale(0.94);
   }
 
-  .mobile-tabbar-item.tap-burst {
-    animation: apple-pop-press 420ms var(--ease-emphasized);
-  }
-
-  .mobile-tabbar-item.tap-burst::after {
-    animation: apple-pop-ripple 420ms var(--ease-soft);
-  }
-
-  .mobile-tabbar-item.tap-burst .mobile-tabbar-icon {
-    animation: apple-pop-icon-hop 420ms var(--ease-emphasized);
-  }
 }
 
 @media (max-width: 430px) {
