@@ -18,11 +18,13 @@
 
   --sidebar-width: 260px;
 
-  --transition-micro: 120ms cubic-bezier(0.25, 0.1, 0.25, 1);
-  --transition-fast: 200ms cubic-bezier(0.25, 0.1, 0.25, 1);
-  --transition-base: 350ms cubic-bezier(0.25, 0.1, 0.25, 1);
-  --transition-slow: 500ms cubic-bezier(0.25, 0.1, 0.25, 1);
-  --transition-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-micro: 120ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-fast: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 350ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --transition-slow: 500ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --transition-spring: 600ms cubic-bezier(0.3, 1.5, 0.5, 1);
+  --ease-emphasized: cubic-bezier(0.15, 0, 0, 1);
+  --ease-soft: cubic-bezier(0.2, 0.8, 0.2, 1);
 
   /* ── Apple System Colors ──────────────────────────────────────────── */
   --apple-blue: #007AFF;
@@ -364,12 +366,12 @@ input::placeholder { color: var(--text-tertiary); }
 }
 
 /* ── Animation Utilities ─────────────────────────────────────────────── */
-.animate-fade-in { animation: fadeIn 200ms ease both; }
-.animate-fade-in-up { animation: fadeInUp 300ms cubic-bezier(0.25, 0.1, 0.25, 1) both; }
-.animate-fade-in-down { animation: fadeInDown 250ms cubic-bezier(0.25, 0.1, 0.25, 1) both; }
-.animate-fade-in-scale { animation: fadeInScale 250ms cubic-bezier(0.25, 0.1, 0.25, 1) both; }
-.animate-scale-in { animation: scaleIn 250ms cubic-bezier(0.25, 0.1, 0.25, 1) both; }
-.animate-slide-up { animation: slideUp 300ms cubic-bezier(0.25, 0.1, 0.25, 1) both; }
+.animate-fade-in { animation: fadeIn 250ms var(--ease-soft) both; }
+.animate-fade-in-up { animation: fadeInUp 400ms var(--ease-soft) both; }
+.animate-fade-in-down { animation: fadeInDown 350ms var(--ease-soft) both; }
+.animate-fade-in-scale { animation: fadeInScale 350ms var(--ease-soft) both; }
+.animate-scale-in { animation: scaleIn 300ms var(--ease-soft) both; }
+.animate-slide-up { animation: slideUp 400ms var(--ease-soft) both; }
 
 .delay-1 { animation-delay: 60ms; }
 .delay-2 { animation-delay: 120ms; }

@@ -3,16 +3,21 @@
    Sidebar, Navigation, Top Bar, Profile, Sheets
    ═══════════════════════════════════════════════════════════════════════ */
 
-@keyframes snappy-pop {
+@keyframes smooth-pop {
   0% { transform: scale(1); }
-  35% { transform: scale(0.92); }
+  30% { transform: scale(0.94); }
   100% { transform: scale(1); }
+}
+
+@keyframes icon-hop {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
 }
 
 .sidebar-item.tap-burst,
 .mobile-more-card.tap-burst,
 .mobile-tabbar-item.tap-burst {
-  animation: snappy-pop 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  animation: smooth-pop 350ms var(--ease-soft);
 }
 
 .dashboard-layout {
@@ -143,6 +148,10 @@
   color: var(--accent);
   opacity: 1;
   font-weight: 600;
+}
+
+.sidebar-item:hover .sidebar-item-icon {
+  animation: icon-hop 400ms var(--ease-emphasized);
 }
 
 .sidebar-item-icon {

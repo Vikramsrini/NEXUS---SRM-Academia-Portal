@@ -896,7 +896,7 @@ export default function Dashboard({ children }) {
                 <p className="ov-welcome-date">{formatDate()}</p>
               </div>
 
-              <section className="tod-section" aria-live="polite">
+              <section className="tod-section animate-fade-in-up delay-1" aria-live="polite">
                 <div className="tod-header-row">
                   <h3>Quote of the Day</h3>
                 </div>
@@ -911,7 +911,7 @@ export default function Dashboard({ children }) {
                 )}
               </section>
 
-              <div className="home-alerts-row">
+              <div className="home-alerts-row animate-fade-in-up delay-2">
                 <div className="home-alert-pill skip-pill" onClick={() => navigate('/dashboard/skippro')}>
                   <div className="alert-pill-icon">{Icons.skippro}</div>
                   <div className="alert-pill-content">
@@ -929,7 +929,7 @@ export default function Dashboard({ children }) {
                 </div>
               </div>
 
-              <div className="today-schedule-section">
+              <div className="today-schedule-section animate-fade-in-up delay-3">
                 <div className="section-header">
                   <div>
                     <h3>Today's Schedule</h3>
