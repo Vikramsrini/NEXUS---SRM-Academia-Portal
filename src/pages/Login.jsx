@@ -120,9 +120,16 @@ export default function Login() {
       <div className="login-bg" />
 
       <div className="login-card">
-        <button className="login-theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
-          <ThemeIcon theme={theme} />
-        </button>
+        <div className="login-top-actions">
+          {deferredPrompt && (
+            <button className="login-action-btn install-btn" onClick={handleInstallClick} aria-label="Install app">
+              {MobileIcons.install}
+            </button>
+          )}
+          <button className="login-action-btn theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
+            <ThemeIcon theme={theme} />
+          </button>
+        </div>
 
         {showInstallSuggestion && (
           <div className="login-install-suggestion animate-fade-in-down">
