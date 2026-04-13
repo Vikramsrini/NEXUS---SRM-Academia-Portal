@@ -16,6 +16,8 @@ import thoughtRoutes from './routes/thought.js';
 import cgpaRoutes from './routes/cgpa.js';
 import odRoutes from './routes/od.js';
 import timetableStateRoutes from './routes/timetable-state.js';
+import recentUpdatesRoutes from './routes/recent-updates.js';
+import wordleRoutes from './routes/wordle.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -39,6 +41,8 @@ app.use('/api', thoughtRoutes);
 app.use('/api', cgpaRoutes);
 app.use('/api', odRoutes);
 app.use('/api', timetableStateRoutes);
+app.use('/api', recentUpdatesRoutes);
+app.use('/api/wordle', wordleRoutes);
 
 
 // ── Health Check ──────────────────────────────────────────────────────
