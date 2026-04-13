@@ -32,6 +32,7 @@ function getAuthHeaders() {
 }
 
 export default function WordlePage() {
+  const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [word, setWord] = useState('');
   const [guesses, setGuesses] = useState(Array(ROWS).fill(null).map(() => ''));
   const [currentRow, setCurrentRow] = useState(0);
@@ -170,6 +171,13 @@ export default function WordlePage() {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && showHowToPlay) {
+        setShowHowToPlay(false);
+        return;
+      }
+
+      if (showHowToPlay) return;
+
       if (e.key === 'Enter') {
         handleEnter();
       } else if (e.key === 'Backspace') {
@@ -180,7 +188,7 @@ export default function WordlePage() {
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleChar, handleDelete, handleEnter]);
+  }, [handleChar, handleDelete, handleEnter, showHowToPlay]);
 
   const getRowStates = (guess, target) => {
     if (!guess || !target || guess.length !== target.length) {
@@ -242,6 +250,51 @@ export default function WordlePage() {
 
   return (
     <div className="wordle-page-wrapper animate-fade-in">
+      {showHowToPlay && (
+        <div className="apple-modal-overlay wordle-howto-overlay" onClick={() => setShowHowToPlay(false)}>
+          <div
+            className="apple-modal-card compact wordle-howto-dialog"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="How to play Wordle"
+          >
+            <header className="apple-modal-header">
+              <div className="warning-icon-wrap" style={{ background: 'var(--accent-subtle)', color: 'var(--accent)' }}>
+                {WordleIcons.game}
+              </div>
+              <h2>How to Play</h2>
+              <button
+                type="button"
+                className="apple-modal-close"
+                onClick={() => setShowHowToPlay(false)}
+                aria-label="Close instructions"
+              >
+                ×
+              </button>
+            </header>
+
+            <div className="apple-modal-body">
+              <p className="primary-text">Guess the 5-letter daily word in 6 tries.</p>
+              <ul className="apple-bullet-list wordle-howto-list">
+                <li><span>Type letters using keyboard or tap the on-screen keys.</span></li>
+                <li><span>Press <strong>Enter</strong> to submit your guess.</span></li>
+                <li><span><strong>Green</strong> means correct letter and correct position.</span></li>
+                <li><span><strong>Yellow</strong> means the letter exists but in a different position.</span></li>
+                <li><span><strong>Gray</strong> means the letter is not in the word.</span></li>
+                <li><span>You can play once per day and faster wins score higher.</span></li>
+              </ul>
+            </div>
+
+            <footer className="apple-modal-footer">
+              <button type="button" className="apple-btn primary" onClick={() => setShowHowToPlay(false)}>
+                Got it
+              </button>
+            </footer>
+          </div>
+        </div>
+      )}
+
       <div className="wordle-header-top">
         <div className="wordle-banner">
           <div className="wordle-banner-icon">{WordleIcons.game}</div>
@@ -252,6 +305,13 @@ export default function WordlePage() {
         </div>
         
         <div className="wordle-stats-bar">
+          <button
+            type="button"
+            className="wordle-howto-btn"
+            onClick={() => setShowHowToPlay(true)}
+          >
+            How to Play
+          </button>
           <div className="wordle-stat-box">
             <span className="stat-label">Total Score</span>
             <span className="stat-value">{userStats.score}</span>

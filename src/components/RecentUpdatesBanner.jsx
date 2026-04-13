@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { apiUrl } from '../lib/api';
+import './RecentUpdatesBanner.css';
 
 function looksLikeCourseCode(value) {
   const code = String(value || '').trim().toUpperCase().replace(/\s+/g, '');
@@ -10,6 +11,7 @@ export default function RecentUpdatesBanner({ regNumber, type }) {
   const [updates, setUpdates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [dismissed, setDismissed] = useState(false);
 
   const token = useMemo(() => localStorage.getItem('academia_token') || '', []);
 
@@ -92,44 +94,82 @@ export default function RecentUpdatesBanner({ regNumber, type }) {
     return [];
   }, [updates, type]);
 
-  if (loading || error || visibleUpdates.length === 0) return null;
+  const lastSeenKey = useMemo(() => {
+    if (!regNumber || !type) return '';
+    return `academia_recent_updates_seen_${String(regNumber).toUpperCase()}_${type}`;
+  }, [regNumber, type]);
 
-  const titleByType = type === 'marks' ? 'Recent Marks Updates (Last 7 Days)' : 'Recent Attendance Updates (Last 7 Days)';
+  const latestUpdateMs = useMemo(() => {
+    const latest = visibleUpdates.reduce((max, item) => {
+      const t = new Date(item?.synced_at || 0).getTime();
+      return Number.isFinite(t) ? Math.max(max, t) : max;
+    }, 0);
+    return Number.isFinite(latest) ? latest : 0;
+  }, [visibleUpdates]);
+
+  const hasNewUpdates = useMemo(() => {
+    if (!lastSeenKey || latestUpdateMs <= 0) return false;
+    const seenMs = Number(localStorage.getItem(lastSeenKey) || 0);
+    return latestUpdateMs > seenMs;
+  }, [lastSeenKey, latestUpdateMs]);
+
+  const previewUpdates = useMemo(() => visibleUpdates.slice(0, 3), [visibleUpdates]);
+
+  const handleDismiss = () => {
+    if (lastSeenKey && latestUpdateMs > 0) {
+      localStorage.setItem(lastSeenKey, String(latestUpdateMs));
+    }
+    setDismissed(true);
+  };
+
+  if (loading || error || visibleUpdates.length === 0 || !hasNewUpdates || dismissed) return null;
+
+  const isMarks = type === 'marks';
+  const titleByType = isMarks ? 'Marks Updated' : 'Attendance Updated';
 
   return (
-    <div
-      style={{
-        padding: '14px 16px',
-        marginBottom: '16px',
-        borderRadius: '12px',
-        border: '1px solid var(--border-active)',
-        background: 'var(--accent-subtle)',
-      }}
-    >
-      <h3 style={{ margin: '0 0 10px 0', fontSize: '1rem', color: 'var(--accent)' }}>
-        {titleByType}
-      </h3>
-      <ul style={{ margin: 0, paddingLeft: '18px', color: 'var(--text-secondary)' }}>
-        {visibleUpdates.map((update) => (
-          <li key={update.id} style={{ marginBottom: '6px', lineHeight: 1.4 }}>
-            <strong>{update.course_code}</strong> synced on{' '}
-            {new Date(update.synced_at).toLocaleDateString()} at{' '}
-            {new Date(update.synced_at).toLocaleTimeString()}
-            {type === 'attendance' && (
-              <span>
-                {' '}
-                - {update.hours_conducted} conducted, {update.hours_absent} absent.
+    <div className={`recent-updates-banner ${isMarks ? 'marks' : 'attendance'}`} role="status" aria-live="polite">
+      <div className="recent-updates-head">
+        <div>
+          <span className="recent-updates-kicker">Recent updates</span>
+          <h3>{titleByType}</h3>
+        </div>
+        <button
+          type="button"
+          className="recent-updates-dismiss"
+          onClick={handleDismiss}
+          aria-label="Dismiss recent updates"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 6 6 18M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <p className="recent-updates-meta">
+        {visibleUpdates.length} new {isMarks ? 'marks' : 'attendance'} update{visibleUpdates.length !== 1 ? 's' : ''} in the last 7 days.
+      </p>
+
+      <ul className="recent-updates-list">
+        {previewUpdates.map((update) => (
+          <li key={update.id} className="recent-updates-item">
+            <span className="recent-updates-course">{update.course_code}</span>
+            {isMarks ? (
+              <span className="recent-updates-detail">
+                {update.assessment_type}: {update.marks_obtained}/{update.max_marks}
               </span>
-            )}
-            {type === 'marks' && (
-              <span>
-                {' '}
-                - {update.assessment_type}: {update.marks_obtained}/{update.max_marks}.
+            ) : (
+              <span className="recent-updates-detail">
+                {update.hours_conducted} conducted, {update.hours_absent} absent
               </span>
             )}
           </li>
         ))}
       </ul>
+
+      {visibleUpdates.length > 3 && (
+        <p className="recent-updates-more">+{visibleUpdates.length - 3} more updates</p>
+      )}
     </div>
   );
 }

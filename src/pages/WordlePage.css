@@ -67,6 +67,48 @@
   gap: 20px;
 }
 
+.wordle-howto-btn {
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border-secondary);
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 0.86rem;
+  letter-spacing: 0.01em;
+  transition: all var(--transition-fast);
+}
+
+.wordle-howto-btn:hover {
+  border-color: var(--border-active);
+  color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.wordle-howto-dialog {
+  max-width: 430px;
+}
+
+.wordle-howto-overlay {
+  background: rgba(10, 11, 14, 0.42) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.wordle-howto-dialog .warning-icon-wrap svg {
+  width: 20px;
+  height: 20px;
+}
+
+.wordle-howto-dialog .apple-modal-body {
+  gap: 12px;
+}
+
+.wordle-howto-list {
+  gap: 8px;
+}
+
 .wordle-stat-box {
   display: flex;
   flex-direction: column;
@@ -440,6 +482,13 @@
   .wordle-stats-bar {
     justify-content: center;
     width: 100%;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .wordle-howto-btn {
+    width: 100%;
+    max-width: 220px;
   }
 
   .wordle-stat-box {
@@ -479,5 +528,13 @@
 
   .wordle-leaderboard-side {
     padding: 16px;
+  }
+
+  .wordle-howto-dialog {
+    max-width: 420px;
+  }
+
+  .wordle-howto-list {
+    font-size: 0.82rem;
   }
 }

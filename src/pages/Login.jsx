@@ -203,9 +203,8 @@ export default function Login() {
 
           {error && <div className="login-error">{error}</div>}
 
-          <button type="submit" className="login-btn" disabled={loading}>
+          <button type="submit" className={`login-btn ${loading ? 'is-loading' : ''}`} disabled={loading}>
             <span className="login-btn-content">
-              {loading && <span className="spinner" />}
               <span className="login-btn-label">{loading ? 'Signing in...' : 'Sign In'}</span>
             </span>
           </button>

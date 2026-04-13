@@ -232,17 +232,15 @@
 }
 
 .login-btn-content {
-  width: 100%;
+  width: auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .login-btn-label {
-  line-height: 1;
-  display: inline-flex;
-  align-items: center;
+  line-height: 1.2;
 }
 
 .login-btn:hover:not(:disabled) {
@@ -260,13 +258,25 @@
   cursor: not-allowed;
 }
 
-.login-btn .spinner {
-  width: 18px;
-  height: 18px;
+.login-btn-spinner {
+  width: 16px;
+  height: 16px;
   border-color: rgba(255, 255, 255, 0.3);
   border-top-color: #fff;
   flex-shrink: 0;
-  display: inline-block;
+  display: block;
+}
+
+.login-btn.is-loading .login-btn-content {
+  position: relative;
+  padding-left: 22px;
+}
+
+.login-btn.is-loading .login-btn-spinner {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 /* ── Error ────────────────────────────────────────────────────────── */

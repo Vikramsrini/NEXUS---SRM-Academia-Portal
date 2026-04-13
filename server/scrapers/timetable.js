@@ -82,6 +82,8 @@ export function parseCourses(html) {
   const courseTypeIdx = getColumnIndex(headers, ['course type', 'type'], 6);
   const slotIdx = getColumnIndex(headers, ['slot'], 8);
   const roomIdx = getColumnIndex(headers, ['room no', 'room', 'venue'], 10);
+  const creditIdx = getColumnIndex(headers, ['credit', 'credits', 'course credit'], -1);
+  const facultyIdx = getColumnIndex(headers, ['faculty', 'faculty name', 'staff', 'teacher'], -1);
   const altRoomIdx = roomIdx === 10 ? 9 : Math.max(roomIdx - 1, 0);
 
   rows.slice(1).forEach(row => {
@@ -94,6 +96,10 @@ export function parseCourses(html) {
     const code = cleanCourseCode(getText(codeIdx) || findCourseCodeCandidate(values));
     const title = cleanCourseTitle(getText(titleIdx) || findCourseTitleCandidate(values, [code]));
     const courseType = getText(courseTypeIdx) || 'N/A';
+    const creditRaw = getText(creditIdx);
+    const creditValue = Number.parseFloat(creditRaw);
+    const credit = Number.isFinite(creditValue) ? String(creditValue).replace(/\.0$/, '') : '0';
+    const faculty = getText(facultyIdx) || 'N/A';
     const slotCodes = extractSlotCodes(getText(slotIdx));
     const slot = slotCodes.join('+');
 
@@ -105,7 +111,16 @@ export function parseCourses(html) {
     const slotType = detectSlotType(slotCodes, code, title);
 
     if (looksLikeCourseCode(code) && title && slotCodes.length > 0) {
-      courses.push({ code, title, slot, room: normalizeRoom(room), slotType, courseType });
+      courses.push({
+        code,
+        title,
+        slot,
+        room: normalizeRoom(room),
+        slotType,
+        courseType,
+        credit,
+        faculty,
+      });
     }
   });
 
@@ -160,6 +175,8 @@ export function buildTimetable(courses, batch) {
           courseCode: course.code,
           slotType: currentSlotType,
           courseType: course.courseType,
+          credit: course.credit || '0',
+          faculty: course.faculty || 'N/A',
         });
         lastCode = course.code;
         lastSlotType = currentSlotType;
