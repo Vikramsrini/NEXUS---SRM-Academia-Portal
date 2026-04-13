@@ -13,8 +13,6 @@ export default function RecentUpdatesBanner({ regNumber, type }) {
   const [error, setError] = useState('');
   const [dismissed, setDismissed] = useState(false);
 
-  const token = useMemo(() => localStorage.getItem('academia_token') || '', []);
-
   useEffect(() => {
     if (!regNumber || !type) {
       setUpdates([]);
@@ -26,17 +24,28 @@ export default function RecentUpdatesBanner({ regNumber, type }) {
     let aborted = false;
 
     async function fetchUpdates() {
+      const currentToken = localStorage.getItem('academia_token') || '';
+      if (!currentToken) {
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       setError('');
       try {
-        const params = new URLSearchParams({ regNumber: String(regNumber), days: '7' });
+        const cleanReg = String(regNumber).trim().toUpperCase();
+        const params = new URLSearchParams({ regNumber: cleanReg, days: '7' });
         const res = await fetch(apiUrl(`/recent-updates?${params.toString()}`), {
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${currentToken}`,
           },
         });
 
-        if (!res.ok) throw new Error('Failed to fetch updates');
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          console.warn('[RecentUpdatesBanner] Fetch failed:', res.status, errData);
+          throw new Error('Failed to fetch updates');
+        }
 
         const data = await res.json();
         if (aborted) return;
@@ -50,7 +59,7 @@ export default function RecentUpdatesBanner({ regNumber, type }) {
         }
       } catch (error) {
         if (!aborted) {
-          console.error('Error fetching recent updates:', error);
+          console.error('[RecentUpdatesBanner] Error:', error);
           setUpdates([]);
           setError('Could not load recent updates right now.');
         }
@@ -63,7 +72,7 @@ export default function RecentUpdatesBanner({ regNumber, type }) {
     return () => {
       aborted = true;
     };
-  }, [regNumber, token, type]);
+  }, [regNumber, type]);
 
   const visibleUpdates = useMemo(() => {
     if (!Array.isArray(updates)) return [];

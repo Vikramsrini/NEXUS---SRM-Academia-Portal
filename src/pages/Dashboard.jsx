@@ -6,6 +6,7 @@ import { fetchThoughtOfDay, fetchOdState, saveOdState } from '../lib/api';
 import { normalizeCourseCode } from '../lib/slotTypes';
 import RecentUpdatesBanner from '../components/RecentUpdatesBanner';
 import FeaturesModal from '../components/FeaturesModal';
+import NotificationManager from '../components/NotificationManager';
 import './Dashboard.css';
 
 /* ── Inline SVG Icons ──────────────────────────────────────────────────── */
@@ -898,6 +899,7 @@ export default function Dashboard({ children }) {
               <div className="ov-welcome">
                 <h2 title={displayName}>Welcome, {compactWelcomeName}!</h2>
                 <p className="ov-welcome-date">{formatDate()}</p>
+                <NotificationManager />
               </div>
 
               <section className="tod-section animate-fade-in-up delay-1" aria-live="polite">

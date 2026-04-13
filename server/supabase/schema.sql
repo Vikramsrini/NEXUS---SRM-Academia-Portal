@@ -96,3 +96,15 @@ create table if not exists public.marks_snapshots (
 
 create index if not exists marks_snapshots_reg_number_course_code_idx
   on public.marks_snapshots (reg_number, course_code);
+
+-- Push Notification subscriptions for PWA
+create table if not exists public.push_subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  reg_number text not null,
+  endpoint text unique not null,
+  p256dh text not null,
+  auth text not null,
+  created_at timestamptz not null default (now() at time zone 'utc' at time zone 'Asia/Kolkata')
+);
+
+create index if not exists push_subscriptions_reg_number_idx on public.push_subscriptions (reg_number);

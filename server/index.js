@@ -18,6 +18,8 @@ import odRoutes from './routes/od.js';
 import timetableStateRoutes from './routes/timetable-state.js';
 import recentUpdatesRoutes from './routes/recent-updates.js';
 import wordleRoutes from './routes/wordle.js';
+import pushRoutes from './routes/push.js';
+import { initNotificationCrons } from './services/notificationService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,6 +46,7 @@ app.use('/api', cgpaRoutes);
 app.use('/api', odRoutes);
 app.use('/api', timetableStateRoutes);
 app.use('/api', recentUpdatesRoutes);
+app.use('/api', pushRoutes);
 app.use('/api/wordle', wordleRoutes);
 
 
@@ -69,6 +72,7 @@ app.use((err, req, res, next) => {
 if (process.env.NODE_ENV !== 'production' && import.meta.url === `file://${process.argv[1]}`) {
   app.listen(PORT, () => {
     console.log(`✨ Academia Backend running on http://localhost:${PORT}`);
+    initNotificationCrons();
   });
 }
 
