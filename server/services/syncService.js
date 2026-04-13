@@ -12,6 +12,7 @@ import { parseCourses, buildTimetable } from '../scrapers/timetable.js';
 import { fetchCurrentDayOrder } from '../scrapers/dayorder.js';
 import { fetchRealUserInfo } from '../scrapers/userinfo.js';
 import { getCalendarUrls, parseSrmCalendar } from '../scrapers/calendar.js';
+import { logAttendanceIfChanged, logMarksIfChanged, saveFullAttendance, saveFullMarks } from './snapshots.js';
 
 /**
  * Orchestrates a full academic record sync.
@@ -43,6 +44,40 @@ export async function performFullSync(authCookie, sessionId, sendStatus = () => 
       const attResult = parseAttendance(attHtml);
       result.attendance = attResult.attendance;
       result.marks = parseMarks(attHtml, result.attendance);
+
+      // Persist snapshots during sync so recent-updates can be queried immediately after sync.
+      const regNumber = String(attResult.regNumber || '').trim().toUpperCase();
+      if (regNumber) {
+        const attendanceLogs = result.attendance.map((row) => {
+          const courseCode = String(row.courseCode || '').trim().toUpperCase();
+          const conducted = parseInt(row.hoursConducted, 10);
+          const absent = parseInt(row.hoursAbsent, 10);
+          if (!courseCode || Number.isNaN(conducted) || Number.isNaN(absent)) return null;
+          return logAttendanceIfChanged(regNumber, courseCode, conducted, absent);
+        }).filter(Boolean);
+
+        const marksLogs = result.marks.flatMap((row) => {
+          const courseCode = String(row.courseCode || '').trim().toUpperCase();
+          if (!courseCode || !Array.isArray(row.marks)) return [];
+
+          return row.marks.map((mark) => {
+            const assessmentType = String(mark.exam || '').trim();
+            const obtained = parseFloat(mark.obtained);
+            const max = parseFloat(mark.maxMark);
+            if (!assessmentType || Number.isNaN(obtained) || Number.isNaN(max)) return null;
+            return logMarksIfChanged(regNumber, courseCode, assessmentType, obtained, max);
+          }).filter(Boolean);
+        });
+
+        // Save full attendance JSON
+        const fullAttendanceLog = saveFullAttendance(regNumber, result.attendance);
+
+        // Save full marks JSON
+        const fullMarksLog = saveFullMarks(regNumber, result.marks);
+
+        await Promise.allSettled([...attendanceLogs, ...marksLogs, fullAttendanceLog, fullMarksLog]);
+      }
+
       sendStatus(sessionId, 'attendance', `Synced ${result.attendance.length} courses and ${result.marks.length} marks`);
     } catch (e) {
       console.warn('[Sync Service] Attendance/Marks sync failed:', e.message);

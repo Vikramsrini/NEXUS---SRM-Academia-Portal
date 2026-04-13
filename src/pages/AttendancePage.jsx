@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { fetchOdState, saveOdState } from '../lib/api';
 import { normalizeCourseCode } from '../lib/slotTypes';
+import RecentUpdatesBanner from '../components/RecentUpdatesBanner';
 import './SubPages.css';
 
 const Icons = {
@@ -709,6 +710,8 @@ export default function AttendancePage() {
           </button>
         </div>
       </div>
+
+      <RecentUpdatesBanner regNumber={regNumber} type="attendance" />
 
       {FILTERED_ATTENDANCE.length > 0 ? (
         <div className="attendance-groups-wrap stagger-children">

@@ -6,7 +6,7 @@
 import * as cheerio from 'cheerio';
 import { normalizeKey } from '../utils/html.js';
 import { extractSlotCodes } from '../utils/slots.js';
-import { cleanCourseCode, cleanCourseTitle, detectSlotType } from '../utils/courses.js';
+import { cleanCourseCode, cleanCourseTitle, detectSlotType, looksLikeCourseCode } from '../utils/courses.js';
 
 /**
  * Parses attendance from the My_Attendance page HTML using 3 strategies:
@@ -65,7 +65,7 @@ export function parseAttendance(decodedHtml) {
         const slotCodes = extractSlotCodes(slot);
         const slotType = detectSlotType(slotCodes, courseCode, rawTitle);
 
-        if (courseCode && courseTitle && courseTitle.toLowerCase() !== 'null') {
+        if (courseCode && looksLikeCourseCode(courseCode) && courseTitle && courseTitle.toLowerCase() !== 'null') {
           attendance.push({
             courseCode,
             courseTitle,
@@ -80,15 +80,24 @@ export function parseAttendance(decodedHtml) {
     });
   }
 
-  // ── Strategy 2: bgcolor='#E6E6FA cells ─────────────────────────────
+  // ── Strategy 2: bgcolor='#E6E6FA' cells (Stricter Row-based) ──────────
   if (attendance.length === 0) {
+    const processedRows = new Set();
+    
     $("td[bgcolor='#E6E6FA']").each((i, el) => {
       const cell = $(el);
-      const text = cell.text().trim();
+      const row = cell.closest('tr');
+      if (processedRows.has(row[0])) return;
+      processedRows.add(row[0]);
 
-      if (/^\d/.test(text) || text.length > 10 || text.toLowerCase().includes('regular')) {
+      const text = cell.text().trim();
+      const courseCode = cleanCourseCode(text);
+
+      // Only proceed if the first cell looks like a Course Code
+      if (looksLikeCourseCode(courseCode)) {
         const cells = cell.nextAll();
-        const courseCode = cleanCourseCode(text);
+        if (cells.length < 6) return; // Not enough columns
+
         const rawTitle = cells.eq(0).text().trim();
         const courseTitle = cleanCourseTitle(rawTitle);
         const slot = cells.eq(3).text().trim();
@@ -97,12 +106,18 @@ export function parseAttendance(decodedHtml) {
 
         const conductedNum = parseFloat(conducted) || 0;
         const absentNum = parseFloat(absent) || 0;
-        const percentage = conductedNum > 0 ? (((conductedNum - absentNum) / conductedNum) * 100) : 0;
+        
+        // Safety: If conducted < absent, something is misaligned
+        if (conductedNum < absentNum && conductedNum > 0) return;
 
+        const percentage = conductedNum > 0 ? (((conductedNum - absentNum) / conductedNum) * 100) : 0;
         const slotCodes = extractSlotCodes(slot);
         const slotType = detectSlotType(slotCodes, courseCode, rawTitle);
 
         if (courseCode && courseTitle && courseTitle.toLowerCase() !== 'null') {
+          // Additional check for sensible data
+          if (conductedNum === 0 && absentNum === 0 && (text.includes('(') || text.length > 15)) return;
+
           attendance.push({
             courseCode,
             courseTitle,
@@ -113,7 +128,6 @@ export function parseAttendance(decodedHtml) {
             attendancePercentage: percentage.toFixed(2),
           });
         }
-
       }
     });
   }

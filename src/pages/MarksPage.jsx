@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
+import RecentUpdatesBanner from '../components/RecentUpdatesBanner';
 import './SubPages.css';
 
 const Icons = {
@@ -366,6 +367,7 @@ function SgpaPredictor({ courses, nameByCode, creditsByCode, onClose }) {
 export default function MarksPage() {
   const [isPredictorOpen, setIsPredictorOpen] = useState(false);
   const student = getStudentData();
+  const regNumber = String(student.regNumber || '').trim();
   const marks = student.marks || [];
   const attendance = student.attendance || [];
 
@@ -465,6 +467,8 @@ export default function MarksPage() {
           SGPA Calculator
         </button>
       </div>
+
+      <RecentUpdatesBanner regNumber={regNumber} type="marks" />
 
       {marksInsights && (
         <section className="marks-insights-row animate-fade-in-up" aria-label="Marks highlights">

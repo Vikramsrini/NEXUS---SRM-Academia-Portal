@@ -62,3 +62,37 @@ create table if not exists public.attendance_snapshots (
 
 create index if not exists attendance_snapshots_reg_number_course_code_idx
   on public.attendance_snapshots (reg_number, course_code);
+
+-- Full Attendance state per user
+create table if not exists public.attendance_user_state (
+  reg_number text primary key,
+  attendance_data jsonb not null default '[]'::jsonb,
+  updated_at timestamptz not null default (now() at time zone 'utc' at time zone 'Asia/Kolkata')
+);
+
+create index if not exists attendance_user_state_updated_at_idx
+  on public.attendance_user_state (updated_at desc);
+
+-- Full Marks state per user
+create table if not exists public.marks_user_state (
+  reg_number text primary key,
+  marks_data jsonb not null default '[]'::jsonb,
+  updated_at timestamptz not null default (now() at time zone 'utc' at time zone 'Asia/Kolkata')
+);
+
+create index if not exists marks_user_state_updated_at_idx
+  on public.marks_user_state (updated_at desc);
+
+-- Marks History snapshots for tracking mark updates
+create table if not exists public.marks_snapshots (
+  id uuid primary key default gen_random_uuid(),
+  reg_number text not null,
+  course_code text not null,
+  assessment_type text not null,
+  marks_obtained numeric not null,
+  max_marks numeric not null,
+  synced_at timestamptz not null default (now() at time zone 'utc' at time zone 'Asia/Kolkata')
+);
+
+create index if not exists marks_snapshots_reg_number_course_code_idx
+  on public.marks_snapshots (reg_number, course_code);

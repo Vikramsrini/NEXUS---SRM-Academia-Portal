@@ -4,6 +4,7 @@ import { useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { useTheme } from '../ThemeContext';
 import { fetchThoughtOfDay, fetchOdState, saveOdState } from '../lib/api';
 import { normalizeCourseCode } from '../lib/slotTypes';
+import RecentUpdatesBanner from '../components/RecentUpdatesBanner';
 import './Dashboard.css';
 
 /* ── Inline SVG Icons ──────────────────────────────────────────────────── */
@@ -911,6 +912,11 @@ export default function Dashboard({ children }) {
                   <p className="tod-fallback">Could not load today&apos;s thought right now.</p>
                 )}
               </section>
+
+              <div className="recent-updates-dashboard-group animate-fade-in-up delay-1">
+                <RecentUpdatesBanner regNumber={student.regNumber} type="attendance" />
+                <RecentUpdatesBanner regNumber={student.regNumber} type="marks" />
+              </div>
 
               <div className="home-alerts-row animate-fade-in-up delay-2">
                 <div className="home-alert-pill skip-pill" onClick={() => navigate('/dashboard/skippro')}>

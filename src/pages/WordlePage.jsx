@@ -105,7 +105,8 @@ export default function WordlePage() {
   }, []);
 
   const submitScore = async (won, attempts) => {
-    const pointsWon = won ? (ROWS - attempts) + 1 : 0;
+    const pointsMap = { 1: 100, 2: 80, 3: 60, 4: 40, 5: 20, 6: 10 };
+    const pointsWon = won ? (pointsMap[attempts] || 0) : 0;
     try {
       const headers = { ...getAuthHeaders(), 'Content-Type': 'application/json' };
       const res = await fetch(apiUrl('/wordle/submit'), {
