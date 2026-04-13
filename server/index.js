@@ -22,8 +22,10 @@ import wordleRoutes from './routes/wordle.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config({ path: path.resolve(__dirname, '.env') });
-dotenv.config({ path: path.resolve(__dirname, '../.env') });
+// Load env vars from various possible locations
+dotenv.config({ path: path.resolve(__dirname, '.env'), silent: true });
+dotenv.config({ path: path.resolve(__dirname, '../.env'), silent: true });
+dotenv.config({ silent: true });
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -64,6 +66,10 @@ app.use((err, req, res, next) => {
 });
 
 // ── Start Server ──────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`✨ Academia Backend running on http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'production' && import.meta.url === `file://${process.argv[1]}`) {
+  app.listen(PORT, () => {
+    console.log(`✨ Academia Backend running on http://localhost:${PORT}`);
+  });
+}
+
+export default app;
