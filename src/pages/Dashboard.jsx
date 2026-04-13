@@ -5,6 +5,7 @@ import { useTheme } from '../ThemeContext';
 import { fetchThoughtOfDay, fetchOdState, saveOdState } from '../lib/api';
 import { normalizeCourseCode } from '../lib/slotTypes';
 import RecentUpdatesBanner from '../components/RecentUpdatesBanner';
+import FeaturesModal from '../components/FeaturesModal';
 import './Dashboard.css';
 
 /* ── Inline SVG Icons ──────────────────────────────────────────────────── */
@@ -837,6 +838,7 @@ export default function Dashboard({ children }) {
 
   return (
     <div className={`dashboard-layout ${!isMobile && !sidebarOpen ? 'sidebar-collapsed' : ''} ${isMobile ? 'mobile-layout' : ''}`}>
+      <FeaturesModal />
       {syncError && createPortal(renderSessionModal(), document.body)}
       <div className={`sidebar-overlay ${sidebarOpen ? 'show' : ''}`} onClick={() => setSidebarOpen(false)} />
       {isMobile && <div className={`mobile-sheet-overlay ${mobileSheetOpen ? 'show' : ''}`} onClick={closeMobilePanels} />}
