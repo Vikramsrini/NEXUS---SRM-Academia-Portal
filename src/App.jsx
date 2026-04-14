@@ -11,6 +11,8 @@ import SkipProPage from './pages/SkipProPage';
 import ResourcesPage from './pages/ResourcesPage';
 import CgpaPage from './pages/CgpaPage';
 import WordlePage from './pages/WordlePage';
+import PageTransition from './components/PageTransition';
+import './animations.css';
 
 function isLoggedIn() {
   return !!localStorage.getItem('academia_token');
@@ -41,15 +43,15 @@ export default function App() {
           <Route index element={null} />
 
           {/* Sub-pages */}
-          <Route path="attendance" element={<AttendancePage />} />
-          <Route path="skippro" element={<SkipProPage />} />
-          <Route path="marks" element={<MarksPage />} />
-          <Route path="timetable" element={<TimetablePage />} />
-          <Route path="courses" element={<CoursesPage />} />
-          <Route path="calendar" element={<CalendarPage />} />
-          <Route path="resources" element={<ResourcesPage />} />
-          <Route path="cgpa" element={<CgpaPage />} />
-          <Route path="wordle" element={<WordlePage />} />
+          <Route path="attendance" element={<PageTransition><AttendancePage /></PageTransition>} />
+          <Route path="skippro" element={<PageTransition><SkipProPage /></PageTransition>} />
+          <Route path="marks" element={<PageTransition><MarksPage /></PageTransition>} />
+          <Route path="timetable" element={<PageTransition><TimetablePage /></PageTransition>} />
+          <Route path="courses" element={<PageTransition><CoursesPage /></PageTransition>} />
+          <Route path="calendar" element={<PageTransition><CalendarPage /></PageTransition>} />
+          <Route path="resources" element={<PageTransition><ResourcesPage /></PageTransition>} />
+          <Route path="cgpa" element={<PageTransition><CgpaPage /></PageTransition>} />
+          <Route path="wordle" element={<PageTransition><WordlePage /></PageTransition>} />
         </Route>
 
         {/* Fallback */}

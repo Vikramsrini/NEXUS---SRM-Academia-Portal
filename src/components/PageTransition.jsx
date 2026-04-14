@@ -27,11 +27,11 @@ export default function PageTransition({ children }) {
   return (
     <div
       className={`page-transition-wrapper ${
-        transitionStage === 'fade-in' ? 'animate-fade-in-scale' : 'animate-fade-out'
+        transitionStage === 'fade-in' ? 'animate-fade' : ''
       }`}
       onAnimationEnd={handleTransitionEnd}
       style={{
-        animationDuration: '300ms',
+        animationDuration: '200ms',
         animationTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
       }}
     >
