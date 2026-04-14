@@ -6,41 +6,61 @@ import { apiUrl } from '../lib/api';
  */
 export default function NotificationManager() {
   const [status, setStatus] = useState('default'); // 'default', 'granted', 'denied'
+  const [error, setError] = useState(null);
+  const [isSubscribing, setIsSubscribing] = useState(false);
   const [token, setToken] = useState(localStorage.getItem('academia_token'));
 
   useEffect(() => {
     if ('Notification' in window) {
       setStatus(Notification.permission);
+      console.log('[NotificationManager] Notification permission:', Notification.permission);
+    } else {
+      console.warn('[NotificationManager] Notifications not supported in this browser');
+      setError('Notifications not supported in this browser');
     }
   }, []);
 
   const subscribeUser = async () => {
     if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-      console.warn('Push not supported');
+      console.warn('[NotificationManager] Push not supported');
+      setError('Push notifications not supported in this browser');
       return;
     }
 
+    setIsSubscribing(true);
+    setError(null);
+
     try {
+      console.log('[NotificationManager] Getting service worker ready...');
       const registration = await navigator.serviceWorker.ready;
+      console.log('[NotificationManager] Service worker ready, fetching VAPID key...');
       
       // Get VAPID public key from backend
       const keyRes = await fetch(apiUrl('/push/key'), {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      
+      if (!keyRes.ok) {
+        const errorData = await keyRes.json().catch(() => ({}));
+        throw new Error(errorData.error || `Failed to fetch VAPID key (${keyRes.status})`);
+      }
+      
       const { publicKey } = await keyRes.json();
 
-      if (!publicKey) throw new Error('No public key received');
+      if (!publicKey) throw new Error('No public key received from server');
 
+      console.log('[NotificationManager] VAPID key received, subscribing to push...');
       const subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: urlBase64ToUint8Array(publicKey)
       });
 
+      console.log('[NotificationManager] Push subscription created, sending to backend...');
       // Send subscription to backend
       const student = JSON.parse(localStorage.getItem('academia_student') || '{}');
       const regNumber = student.regNumber || 'UNKNOWN';
 
-      await fetch(apiUrl('/push/subscribe'), {
+      const subRes = await fetch(apiUrl('/push/subscribe'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -52,19 +72,34 @@ export default function NotificationManager() {
         })
       });
 
+      if (!subRes.ok) {
+        const errorData = await subRes.json().catch(() => ({}));
+        throw new Error(errorData.error || `Failed to register subscription (${subRes.status})`);
+      }
+
       setStatus('granted');
       console.log('[NotificationManager] Subscribed successfully');
     } catch (err) {
       console.error('[NotificationManager] Subscription failed:', err);
+      setError(err.message || 'Failed to enable notifications');
+    } finally {
+      setIsSubscribing(false);
     }
   };
 
   const requestPermission = () => {
-    if (!('Notification' in window)) return;
+    if (!('Notification' in window)) {
+      setError('Notifications not supported in this browser');
+      return;
+    }
+    setError(null);
     Notification.requestPermission().then((permission) => {
       setStatus(permission);
+      console.log('[NotificationManager] Permission result:', permission);
       if (permission === 'granted') {
         subscribeUser();
+      } else if (permission === 'denied') {
+        setError('Notification permission denied. Please enable in browser settings.');
       }
     });
   };
@@ -72,12 +107,16 @@ export default function NotificationManager() {
   // If already granted, ensure we are subscribed (background task)
   useEffect(() => {
     if (status === 'granted' && token) {
+      console.log('[NotificationManager] Permission granted, subscribing...');
       subscribeUser();
     }
   }, [status, token]);
 
-  // We don't necessarily need to render anything, or we can render a setup prompt
-  if (status === 'granted') return null;
+  // Don't show anything if already subscribed successfully
+  if (status === 'granted' && !error) return null;
+
+  // Don't show if denied
+  if (status === 'denied') return null;
 
   return (
     <div className="notification-prompt glass-card" style={{
@@ -97,12 +136,27 @@ export default function NotificationManager() {
           </p>
         </div>
       </div>
+      
+      {error && (
+        <div style={{
+          padding: '8px 12px',
+          background: 'var(--badge-red-bg)',
+          color: 'var(--badge-red-text)',
+          borderRadius: '6px',
+          fontSize: '12px',
+          border: '1px solid var(--badge-red-border)'
+        }}>
+          {error}
+        </div>
+      )}
+      
       <button 
         className="apple-btn" 
         onClick={requestPermission}
-        style={{ width: '100%' }}
+        disabled={isSubscribing}
+        style={{ width: '100%', opacity: isSubscribing ? 0.6 : 1 }}
       >
-        Enable Notifications
+        {isSubscribing ? 'Enabling...' : 'Enable Notifications'}
       </button>
     </div>
   );

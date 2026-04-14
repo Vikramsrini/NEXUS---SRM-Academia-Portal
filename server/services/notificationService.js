@@ -114,7 +114,17 @@ export function initNotificationCrons() {
     }
   });
 
-  // 2. Wordle Refresh (Run every day at Midnight 00:01)
+  // 2. Daily Reminder (Run every day at 6:40 PM)
+  cron.schedule('40 18 * * *', async () => {
+    console.log('[Cron] Daily 6:40 PM reminder...');
+    await broadcastPushNotification({
+      title: 'Daily Reminder',
+      body: 'Check your attendance and marks on NEXUS!',
+      url: '/dashboard'
+    });
+  });
+
+  // 3. Wordle Refresh (Run every day at Midnight 00:01)
   cron.schedule('1 0 * * *', async () => {
     console.log('[Cron] New Wordle word notification...');
     await broadcastPushNotification({
