@@ -86,8 +86,20 @@ export default function WordlePage() {
       const wordData = await wordRes.json();
       
       if (wordData.word && wordData.word.trim().length === 5) {
-        setWord(wordData.word.trim().toUpperCase());
-        setGameState('playing');
+        const currentWord = wordData.word.trim().toUpperCase();
+        setWord(currentWord);
+
+        // Load local state
+        const savedState = JSON.parse(localStorage.getItem('wordle_local_state') || 'null');
+        if (savedState && savedState.word === currentWord) {
+          setGuesses(savedState.guesses);
+          setCurrentRow(savedState.currentRow);
+          setGameState(savedState.gameState);
+        } else {
+          setGuesses(Array(ROWS).fill(null).map(() => ''));
+          setCurrentRow(0);
+          setGameState('playing');
+        }
         fetchLeaderboard();
       } else {
         // Fallback for safety if backend somehow returns an invalid word
@@ -104,6 +116,17 @@ export default function WordlePage() {
   useEffect(() => {
     initGame();
   }, []);
+
+  useEffect(() => {
+    if (word && (gameState === 'playing' || gameState === 'won' || gameState === 'lost')) {
+      localStorage.setItem('wordle_local_state', JSON.stringify({
+        word,
+        guesses,
+        currentRow,
+        gameState
+      }));
+    }
+  }, [word, guesses, currentRow, gameState]);
 
   const submitScore = async (won, attempts) => {
     const pointsMap = { 1: 100, 2: 80, 3: 60, 4: 40, 5: 20, 6: 10 };
