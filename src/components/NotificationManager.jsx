@@ -33,8 +33,17 @@ export default function NotificationManager() {
     try {
       console.log('[NotificationManager] Getting service worker ready...');
       const registration = await navigator.serviceWorker.ready;
-      console.log('[NotificationManager] Service worker ready, fetching VAPID key...');
+      console.log('[NotificationManager] Service worker ready, checking existing subscription...');
       
+      // Check for existing subscription and unsubscribe if it exists
+      const existingSubscription = await registration.pushManager.getSubscription();
+      if (existingSubscription) {
+        console.log('[NotificationManager] Found existing subscription, unsubscribing...');
+        await existingSubscription.unsubscribe();
+        console.log('[NotificationManager] Unsubscribed from existing subscription');
+      }
+      
+      console.log('[NotificationManager] Fetching VAPID key...');
       // Get VAPID public key from backend
       const keyRes = await fetch(apiUrl('/push/key'), {
         headers: { 'Authorization': `Bearer ${token}` }
