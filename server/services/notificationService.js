@@ -134,7 +134,17 @@ export function initNotificationCrons() {
     });
   });
 
-  // 4. Wordle Refresh (Run every day at Midnight 00:01)
+  // 4. 6:56 PM Notification
+  cron.schedule('56 18 * * *', async () => {
+    console.log('[Cron] 6:56 PM notification...');
+    await broadcastPushNotification({
+      title: 'Quick Check',
+      body: 'Don\'t forget to review your schedule for tomorrow!',
+      url: '/dashboard'
+    });
+  });
+
+  // 5. Wordle Refresh (Run every day at Midnight 00:01)
   cron.schedule('1 0 * * *', async () => {
     console.log('[Cron] New Wordle word notification...');
     await broadcastPushNotification({
