@@ -7,6 +7,10 @@
   background: rgba(0, 0, 0, 0.75);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   z-index: 10000;
   display: flex;
   align-items: center;

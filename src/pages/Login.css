@@ -45,6 +45,10 @@
   background: var(--glass-bg-elevated, var(--bg-glass));
   -webkit-backdrop-filter: blur(32px) saturate(200%);
   backdrop-filter: blur(32px) saturate(200%);
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   border: 1px solid var(--glass-border, var(--border-glass));
   box-shadow: 0 16px 64px rgba(0, 0, 0, 0.15), inset 0 0 0 0.5px rgba(255, 255, 255, 0.3);
   display: flex;

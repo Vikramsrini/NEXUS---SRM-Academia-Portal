@@ -141,6 +141,9 @@
   backdrop-filter: blur(15px) saturate(180%) !important;
   background: rgba(0, 0, 0, 0.45) !important;
   transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .wordle-howto-dialog {

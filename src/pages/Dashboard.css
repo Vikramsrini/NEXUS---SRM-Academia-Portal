@@ -14,10 +14,30 @@
   50% { transform: translateY(-3px); }
 }
 
+@keyframes tab-scale-press {
+  0% { transform: scale(1); }
+  40% { transform: scale(0.88); }
+  100% { transform: scale(1); }
+}
+
+@keyframes tab-icon-bounce {
+  0% { transform: scale(1) translateY(0); }
+  50% { transform: scale(1.2) translateY(-4px); }
+  100% { transform: scale(1) translateY(0); }
+}
+
+@keyframes tab-ripple {
+  0% { transform: translate(-50%, -50%) scale(0); opacity: 0.6; }
+  100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
+}
+
 .sidebar-item.tap-burst,
-.mobile-more-card.tap-burst,
-.mobile-tabbar-item.tap-burst {
+.mobile-more-card.tap-burst {
   animation: smooth-pop 350ms var(--ease-soft);
+}
+
+.mobile-tabbar-item.tap-burst {
+  animation: tab-scale-press 280ms var(--ease-emphasized);
 }
 
 .dashboard-layout {
@@ -53,8 +73,11 @@
   border-radius: var(--radius-xl);
   box-shadow: var(--glass-shadow, 0 8px 32px 0 rgba(0, 0, 0, 0.06));
   border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.45));
-  overflow: hidden;
+  overflow: visible;
   transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   isolation: isolate;
 }
 
@@ -2116,19 +2139,33 @@
     overflow: hidden;
   }
 
+  .mobile-tabbar-item:active {
+    transform: scale(0.90);
+    transition: transform 100ms var(--ease-emphasized);
+  }
+
+  .mobile-tabbar-item:active .mobile-tabbar-icon {
+    transform: scale(1.15) translateY(-2px);
+    transition: transform 150ms var(--ease-emphasized);
+  }
+
   .mobile-tabbar-item::after {
     content: '';
     position: absolute;
     left: 50%;
     top: 50%;
-    width: 24px;
-    height: 24px;
+    width: 48px;
+    height: 48px;
     border-radius: 999px;
     background: var(--accent);
-    transform: translate(-50%, -50%) scale(0.2);
+    transform: translate(-50%, -50%) scale(0);
     opacity: 0;
     z-index: 0;
     pointer-events: none;
+  }
+
+  .mobile-tabbar-item:active::after {
+    animation: tab-ripple 400ms ease-out;
   }
 
   .mobile-tabbar-item.active {

@@ -241,8 +241,10 @@ body.mobile-sheet-open {
   backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   border: 1px solid var(--border-glass);
   box-shadow: var(--glass-shadow, 0 8px 32px 0 rgba(0, 0, 0, 0.05));
-  transform: translateZ(0); /* GPU compositing — fixes mobile Safari/Chrome/Android WebView */
-  will-change: backdrop-filter;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   isolation: isolate;
 }
 
@@ -255,6 +257,9 @@ body.mobile-sheet-open {
   box-shadow: var(--glass-shadow);
   transition: all var(--transition-base);
   transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   isolation: isolate;
 }
 
@@ -271,6 +276,9 @@ body.mobile-sheet-open {
   backdrop-filter: blur(12px) saturate(160%);
   border: 1px solid var(--glass-border, var(--border-glass));
   transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   isolation: isolate;
 }
 

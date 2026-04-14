@@ -25,6 +25,10 @@
   background: var(--glass-bg-card, var(--surface-primary));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   border: 1px solid var(--glass-border, var(--border-secondary));
   border-radius: var(--radius-xl);
   box-shadow: var(--glass-shadow, var(--shadow-card));
@@ -63,6 +67,10 @@
   background: var(--glass-bg-card, var(--surface-primary));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   padding: 6px;
   border-radius: var(--radius-lg);
   border: 1px solid var(--glass-border, var(--border-secondary));
@@ -183,6 +191,10 @@
   background: var(--glass-bg-card, var(--surface-primary));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   border: 1px solid var(--glass-border, var(--border-primary));
   border-radius: var(--radius-xl);
   overflow: hidden;
@@ -374,6 +386,10 @@
   background: var(--glass-bg-card, var(--surface-primary));
   -webkit-backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
   backdrop-filter: blur(var(--glass-blur, 20px)) saturate(var(--glass-saturation, 180%));
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   border: 1px solid var(--glass-border, var(--border-secondary));
   border-radius: var(--radius-lg);
   padding: 16px;
