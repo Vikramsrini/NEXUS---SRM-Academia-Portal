@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState, useMemo, useCallback } fr
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { useTheme } from '../ThemeContext';
-import { fetchThoughtOfDay, fetchOdState, saveOdState } from '../lib/api';
+import { fetchThoughtOfDay, fetchOdState, saveOdState, fetchWeeklyWinners } from '../lib/api';
 import { normalizeCourseCode } from '../lib/slotTypes';
 import RecentUpdatesBanner from '../components/RecentUpdatesBanner';
 import FeaturesModal from '../components/FeaturesModal';
@@ -32,6 +32,7 @@ const Icons = {
   linkedin: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" /></svg>,
   github: <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.22c0 4.5 2.87 8.32 6.84 9.67.5.1.66-.22.66-.49 0-.24-.01-1.05-.01-1.91-2.78.62-3.37-1.21-3.37-1.21-.45-1.2-1.11-1.52-1.11-1.52-.91-.64.07-.62.07-.62 1 .08 1.53 1.06 1.53 1.06.9 1.57 2.35 1.12 2.92.86.09-.67.35-1.12.63-1.38-2.22-.26-4.55-1.14-4.55-5.05 0-1.12.39-2.03 1.03-2.74-.1-.26-.45-1.31.1-2.72 0 0 .84-.27 2.75 1.05A9.3 9.3 0 0 1 12 6.84a9.3 9.3 0 0 1 2.5.35c1.9-1.32 2.74-1.05 2.74-1.05.55 1.41.2 2.46.1 2.72.64.71 1.03 1.62 1.03 2.74 0 3.92-2.34 4.79-4.57 5.04.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.8 0 .27.17.6.67.49A10.25 10.25 0 0 0 22 12.22C22 6.58 17.52 2 12 2Z" /></svg>,
   game: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="6" width="20" height="12" rx="2" /><path d="M6 12h4" /><path d="M8 10v4" /><circle cx="15" cy="13" r="1" /><circle cx="18" cy="11" r="1" /></svg>,
+  trophy: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>,
 };
 
 const SLOT_TIMES = [
@@ -159,6 +160,7 @@ export default function Dashboard({ children }) {
   const [thoughtLoading, setThoughtLoading] = useState(true);
   const [syncError, setSyncError] = useState(false);
   const [student, setStudent] = useState(getStudentData);
+  const [weeklyWinners, setWeeklyWinners] = useState([]);
   const displayName = student.name || 'User';
 
   useEffect(() => {
@@ -166,6 +168,21 @@ export default function Dashboard({ children }) {
       setSyncError(true);
     }
   }, [student.name, student.regNumber, syncing]);
+
+  // Fetch weekly winners
+  useEffect(() => {
+    const loadWinners = async () => {
+      try {
+        const result = await fetchWeeklyWinners();
+        if (result.winners && result.winners.length > 0) {
+          setWeeklyWinners(result.winners);
+        }
+      } catch (err) {
+        console.error('Failed to load weekly winners', err);
+      }
+    };
+    loadWinners();
+  }, []);
   const compactDisplayName = getShortDisplayName(displayName, 18);
   const compactWelcomeName = getShortDisplayName(displayName, 24);
   const activePath = location.pathname === '/dashboard/' ? '/dashboard' : location.pathname;
@@ -956,6 +973,27 @@ export default function Dashboard({ children }) {
                   </div>
                 </div>
               </div>
+
+              {weeklyWinners.length > 0 && (
+                <section className="weekly-winners-section animate-fade-in-up delay-2">
+                  <div className="section-header">
+                    <div>
+                      <h3>Last Week's Winners</h3>
+                      <p className="section-subhead">Wordle Champions</p>
+                    </div>
+                    <span className="trophy-icon">{Icons.trophy}</span>
+                  </div>
+                  <div className="winners-podium">
+                    {weeklyWinners.map((winner, idx) => (
+                      <div key={idx} className={`winner-card rank-${idx + 1}`}>
+                        <div className="winner-rank">{idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'}</div>
+                        <div className="winner-name">{winner.name}</div>
+                        <div className="winner-score">{winner.points} pts</div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
+              )}
 
               <div className="today-schedule-section animate-fade-in-up delay-3">
                 <div className="section-header">

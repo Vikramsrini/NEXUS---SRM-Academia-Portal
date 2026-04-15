@@ -18,6 +18,36 @@ function getDateKey() {
   }).format(new Date());
 }
 
+function getWeekKey() {
+  const now = new Date();
+  const fmt = new Intl.DateTimeFormat('en-CA', {
+    timeZone: TIMEZONE,
+    year: 'numeric',
+  });
+  const year = fmt.format(now);
+  
+  // Get current date in IST
+  const istDateStr = new Intl.DateTimeFormat('en-CA', {
+    timeZone: TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(now);
+  const [y, m, d] = istDateStr.split('-').map(Number);
+  const istDate = new Date(Date.UTC(y, m - 1, d));
+  
+  // Find Monday of current week (week starts Monday 12 AM IST)
+  const dayOfWeek = istDate.getUTCDay(); // 0 = Sunday, 1 = Monday, ...
+  const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  const monday = new Date(istDate);
+  monday.setUTCDate(istDate.getUTCDate() - daysSinceMonday);
+  
+  // Format as YYYY-MM-DD of Monday
+  const weekStart = `${monday.getUTCFullYear()}-${String(monday.getUTCMonth() + 1).padStart(2, '0')}-${String(monday.getUTCDate()).padStart(2, '0')}`;
+  
+  return weekStart;
+}
+
 async function generateDailyWord() {
   const apiKey = process.env.MISTRAL_API_KEY;
   if (!apiKey) throw new Error('Mistral API Key missing.');
@@ -155,6 +185,7 @@ router.post('/submit', requireAuth, async (req, res) => {
     if (!supabase) return res.status(500).json({ error: 'DB unavailable' });
 
     const dateKey = getDateKey();
+    const weekKey = getWeekKey();
 
     // Check if already played today
     const { data: current } = await supabase
@@ -167,7 +198,17 @@ router.post('/submit', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'Already played today' });
     }
 
-    let newScore = (current?.total_score || 0) + pointsWon;
+    // Check if this is a new week - if so, reset total_score to 0
+    const currentWeekKey = current?.week_key || '';
+    let newScore;
+    if (currentWeekKey !== weekKey) {
+      // New week - start fresh with just today's points
+      newScore = pointsWon;
+    } else {
+      // Same week - add to existing score
+      newScore = (current?.total_score || 0) + pointsWon;
+    }
+    
     let newStreak = won ? (current?.streak || 0) + 1 : 0;
 
     await supabase
@@ -178,7 +219,8 @@ router.post('/submit', requireAuth, async (req, res) => {
         total_score: newScore,
         streak: newStreak,
         last_played_date: dateKey,
-        last_played_at: new Date().toISOString()
+        last_played_at: new Date().toISOString(),
+        week_key: weekKey
       }, { onConflict: 'netid' });
 
     res.json({ success: true, score: newScore, streak: newStreak });
@@ -193,13 +235,76 @@ router.get('/leaderboard', requireAuth, async (req, res) => {
     const supabase = getSupabaseAdmin();
     if (!supabase) return res.status(500).json({ error: 'DB unavailable' });
 
+    const weekKey = getWeekKey();
+
+    // Get weekly leaderboard - only show scores from current week
     const { data } = await supabase
       .from('wordle_scores')
       .select('name, total_score, streak')
+      .eq('week_key', weekKey)
       .order('total_score', { ascending: false })
       .limit(10);
 
-    res.json({ leaderboard: data || [] });
+    // Map to expected format
+    const leaderboard = (data || []).map(item => ({
+      name: item.name,
+      points: item.total_score,
+      streak: item.streak
+    }));
+
+    res.json({ leaderboard, weekKey });
+  } catch (err) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.get('/weekly-winners', requireAuth, async (req, res) => {
+  try {
+    const supabase = getSupabaseAdmin();
+    if (!supabase) return res.status(500).json({ error: 'DB unavailable' });
+
+    // Get last completed week (previous Monday)
+    const now = new Date();
+    const istDateStr = new Intl.DateTimeFormat('en-CA', {
+      timeZone: TIMEZONE,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(now);
+    const [y, m, d] = istDateStr.split('-').map(Number);
+    const istDate = new Date(Date.UTC(y, m - 1, d));
+    
+    // Find Monday of current week
+    const dayOfWeek = istDate.getUTCDay();
+    const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    const currentMonday = new Date(istDate);
+    currentMonday.setUTCDate(istDate.getUTCDate() - daysSinceMonday);
+    
+    // Get previous Monday (last week's start)
+    const prevMonday = new Date(currentMonday);
+    prevMonday.setUTCDate(currentMonday.getUTCDate() - 7);
+    const lastWeekKey = `${prevMonday.getUTCFullYear()}-${String(prevMonday.getUTCMonth() + 1).padStart(2, '0')}-${String(prevMonday.getUTCDate()).padStart(2, '0')}`;
+
+    // Get top 3 from last week using wordle_scores
+    const { data } = await supabase
+      .from('wordle_scores')
+      .select('name, total_score, streak')
+      .eq('week_key', lastWeekKey)
+      .order('total_score', { ascending: false })
+      .limit(3);
+
+    // Map to expected format
+    const winners = (data || []).map(item => ({
+      name: item.name,
+      points: item.total_score,
+      streak: item.streak
+    }));
+
+    res.json({ 
+      winners, 
+      weekKey: lastWeekKey,
+      currentWeek: getWeekKey()
+    });
   } catch (err) {
     res.status(500).json({ error: 'Internal server error' });
   }

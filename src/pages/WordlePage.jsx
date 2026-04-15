@@ -42,6 +42,7 @@ export default function WordlePage() {
   
   const [userStats, setUserStats] = useState({ score: 0, streak: 0 });
   const [leaderboard, setLeaderboard] = useState([]);
+  const [weekKey, setWeekKey] = useState('');
   
   const showMessage = (msg) => {
     setMessage(msg);
@@ -56,6 +57,7 @@ export default function WordlePage() {
       if (res.ok) {
         const data = await res.json();
         setLeaderboard(data.leaderboard || []);
+        setWeekKey(data.weekKey || '');
       }
     } catch (err) {
       console.error('Failed to fetch leaderboard', err);
@@ -420,8 +422,8 @@ export default function WordlePage() {
 
         <div className="wordle-leaderboard-side">
           <div className="lb-header">
-            <h3>Leaderboard</h3>
-            <span className="lb-badge">Top 10</span>
+            <h3>Weekly Leaderboard</h3>
+            <span className="lb-badge">{weekKey || 'Top 10'}</span>
           </div>
           <div className="lb-list">
             {leaderboard.length === 0 ? (
@@ -432,9 +434,9 @@ export default function WordlePage() {
                   <div className="lb-rank">{idx + 1}</div>
                   <div className="lb-info">
                     <span className="lb-name">{lb.name}</span>
-                    <span className="lb-streak-box">{lb.streak > 0 ? WordleIcons.streak : ''} {lb.streak > 0 ? lb.streak : ''}</span>
+                    <span className="lb-streak-box">{lb.streak > 0 ? WordleIcons.streak : ''}</span>
                   </div>
-                  <div className="lb-score">{lb.total_score} pts</div>
+                  <div className="lb-score">{lb.points} pts</div>
                 </div>
               ))
             )}

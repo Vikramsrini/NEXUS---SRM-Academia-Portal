@@ -182,5 +182,16 @@ export async function saveTimetableState({ regNumber, token, hiddenClasses }) {
   return res.json();
 }
 
+export async function fetchWeeklyWinners() {
+  const token = localStorage.getItem('academia_token');
+  const res = await fetch(apiUrl('/wordle/weekly-winners'), {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) {
+    return { winners: [] };
+  }
+  return res.json();
+}
+
 export { API_BASE };
 
