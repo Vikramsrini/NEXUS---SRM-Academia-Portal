@@ -300,9 +300,38 @@
   font-weight: 700;
 }
 
-.lb-streak-box svg {
-  width: 14px;
-  height: 14px;
+.lb-section {
+  margin-bottom: 24px;
+}
+
+.winners-section {
+  border: 1px solid #FFD700;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.05) 0%, rgba(255, 215, 0, 0.1) 100%);
+  animation: slide-up 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.gold {
+  background: #FFD700 !important;
+  color: #000 !important;
+}
+
+.winner-rank-1 { background: rgba(255, 215, 0, 0.15); border-left: 4px solid #FFD700; }
+.winner-rank-2 { background: rgba(192, 192, 192, 0.15); border-left: 4px solid #C0C0C0; }
+.winner-rank-3 { background: rgba(205, 127, 50, 0.15); border-left: 4px solid #CD7F32; }
+
+.lb-footer-info {
+  margin-top: 12px;
+  font-size: 0.7rem;
+  color: var(--text-tertiary);
+  text-align: center;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+@keyframes slide-up {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 
@@ -349,6 +378,7 @@
   font-weight: 900;
   background: linear-gradient(135deg, var(--accent) 0%, #FF8E53 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   margin-top: 24px;
   filter: drop-shadow(0 4px 8px var(--accent-glow));

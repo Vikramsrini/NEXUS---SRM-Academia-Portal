@@ -48,25 +48,29 @@ function getWeekKey() {
   return weekStart;
 }
 
-async function generateDailyWord() {
+async function generateDailyWord(excludeWords = []) {
   const apiKey = process.env.MISTRAL_API_KEY;
   if (!apiKey) throw new Error('Mistral API Key missing.');
+
+  const excludeList = excludeWords.length > 0 
+    ? `\n\nIMPORTANT: Do NOT use any of these words: ${excludeWords.join(', ')}.`
+    : '';
 
   const response = await axios.post(
     MISTRAL_API_URL,
     {
       model: MISTRAL_MODEL,
-      temperature: 0.4,
+      temperature: 0.7, // Increased temperature for more variety
       max_tokens: 30,
       response_format: { type: 'json_object' },
       messages: [
         {
           role: 'system',
-          content: 'You are a Wordle word generator. Generate exactly one 5-letter English word. Output it in JSON format: {"word": "APPLE"}. The word MUST be extremely common, simple, and easy to guess (e.g., HEART, WATER, SMILE, CLOUD). Avoid obscure, rare, or complex words.'
+          content: `You are a Wordle word generator. Generate exactly one 5-letter English word. Output it in JSON format: {"word": "APPLE"}. The word MUST be extremely common, simple, and easy to guess (e.g., HEART, WATER, SMILE, CLOUD). Avoid obscure, rare, or complex words.${excludeList}`
         },
         {
           role: 'user',
-          content: 'Give me a 5-letter word for today.'
+          content: 'Give me a new 5-letter word for today.'
         }
       ]
     },
@@ -105,10 +109,19 @@ async function getOrCreateDailyWord(supabase, dateKey) {
 
   if (data && data.word && data.word.trim().length === 5) return data.word.trim().toUpperCase();
 
+  // Fetch recent words to avoid repeats (last 30 days)
+  const { data: recentWordsData } = await supabase
+    .from('daily_wordle')
+    .select('word')
+    .order('generated_at', { ascending: false })
+    .limit(30);
+  
+  const recentWords = (recentWordsData || []).map(row => row.word.toUpperCase());
+
   // Generate new
   let freshWord = 'NEXUS'; // fallback
   try {
-    freshWord = await generateDailyWord();
+    freshWord = await generateDailyWord(recentWords);
   } catch (err) {
     console.error('[Wordle] Mistral generator error:', err.message);
   }
@@ -241,18 +254,13 @@ router.get('/leaderboard', requireAuth, async (req, res) => {
 
     const weekKey = getWeekKey();
 
-    // Get weekly leaderboard - only show scores from current week
-    let query = supabase
+    // Get weekly leaderboard - filter by week_key to ensure we only show current week scores
+    const { data: weeklyData } = await supabase
       .from('wordle_scores')
       .select('name, total_score, streak, week_key')
+      .eq('week_key', weekKey)
       .order('total_score', { ascending: false })
       .limit(10);
-
-    // Only filter by week_key if we want weekly-only
-    // For now, show all scores since week_key is NULL
-    // query = query.eq('week_key', weekKey);
-
-    const { data: weeklyData } = await query;
 
     // Map to expected format
     const weeklyLeaderboard = (weeklyData || []).map(item => ({

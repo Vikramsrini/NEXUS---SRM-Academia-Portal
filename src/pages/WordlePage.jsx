@@ -43,7 +43,9 @@ export default function WordlePage() {
   
   const [userStats, setUserStats] = useState({ score: 0, streak: 0 });
   const [leaderboard, setLeaderboard] = useState([]);
+  const [weeklyWinners, setWeeklyWinners] = useState([]);
   const [weekKey, setWeekKey] = useState('');
+  const [lastWeekKey, setLastWeekKey] = useState('');
   
   const showMessage = (msg) => {
     setMessage(msg);
@@ -52,16 +54,25 @@ export default function WordlePage() {
 
   const fetchLeaderboard = async () => {
     try {
-      const res = await fetch(apiUrl('/wordle/leaderboard'), {
-        headers: getAuthHeaders()
-      });
-      if (res.ok) {
-        const data = await res.json();
+      const headers = getAuthHeaders();
+      const [lbRes, winnersRes] = await Promise.all([
+        fetch(apiUrl('/wordle/leaderboard'), { headers }),
+        fetch(apiUrl('/wordle/weekly-winners'), { headers })
+      ]);
+
+      if (lbRes.ok) {
+        const data = await lbRes.json();
         setLeaderboard(data.leaderboard || []);
         setWeekKey(data.weekKey || '');
       }
+
+      if (winnersRes.ok) {
+        const data = await winnersRes.json();
+        setWeeklyWinners(data.winners || []);
+        setLastWeekKey(data.weekKey || '');
+      }
     } catch (err) {
-      console.error('Failed to fetch leaderboard', err);
+      console.error('Failed to fetch leaderboard or winners', err);
     }
   };
 
@@ -423,26 +434,49 @@ export default function WordlePage() {
         </div>
 
         <div className="wordle-leaderboard-side">
-          <div className="lb-header">
-            <h3>Leaderboard</h3>
-            <span className="lb-badge">Top 10</span>
-          </div>
-          <div className="lb-list">
-            {leaderboard.length === 0 ? (
-              <div className="lb-empty">No scores yet. Be the first!</div>
-            ) : (
-              leaderboard.map((lb, idx) => (
-                <div key={idx} className={`lb-item ${idx < 3 ? `top-${idx+1}` : ''}`}>
-                  <div className="lb-rank">{idx + 1}</div>
-                  <div className="lb-info">
-                    <span className="lb-name">{lb.name}</span>
-                    <span className="lb-streak-box">{lb.streak > 0 ? WordleIcons.streak : ''}</span>
+          <div className="lb-section">
+            <div className="lb-header">
+              <h3>Weekly Leaderboard</h3>
+              <span className="lb-badge">Top 10</span>
+            </div>
+            <div className="lb-list">
+              {leaderboard.length === 0 ? (
+                <div className="lb-empty">No scores yet. Be the first!</div>
+              ) : (
+                leaderboard.map((lb, idx) => (
+                  <div key={idx} className={`lb-item ${idx < 3 ? `top-${idx+1}` : ''}`}>
+                    <div className="lb-rank">{idx + 1}</div>
+                    <div className="lb-info">
+                      <span className="lb-name">{lb.name}</span>
+                      <span className="lb-streak-box">{lb.streak > 0 ? WordleIcons.streak : ''}</span>
+                    </div>
+                    <div className="lb-score">{lb.points} pts</div>
                   </div>
-                  <div className="lb-score">{lb.points} pts</div>
-                </div>
-              ))
-            )}
+                ))
+              )}
+            </div>
           </div>
+
+          {weeklyWinners.length > 0 && (
+            <div className="lb-section winners-section animate-slide-up">
+              <div className="lb-header">
+                <h3>Last Week's Champions</h3>
+                <span className="lb-badge gold">Winners</span>
+              </div>
+              <div className="lb-list winners-list">
+                {weeklyWinners.map((lb, idx) => (
+                  <div key={idx} className={`lb-item winner-rank-${idx+1}`}>
+                    <div className="lb-rank">{idx === 0 ? '🏆' : idx === 1 ? '🥈' : '🥉'}</div>
+                    <div className="lb-info">
+                      <span className="lb-name">{lb.name}</span>
+                    </div>
+                    <div className="lb-score">{lb.points} pts</div>
+                  </div>
+                ))}
+              </div>
+              <div className="lb-footer-info">Week of {lastWeekKey}</div>
+            </div>
+          )}
         </div>
       </div>
     </div>
