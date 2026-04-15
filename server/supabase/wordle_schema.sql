@@ -12,18 +12,24 @@ CREATE TABLE IF NOT EXISTS public.daily_wordle (
 CREATE TABLE IF NOT EXISTS public.wordle_scores (
   netid TEXT PRIMARY KEY,
   name TEXT NOT NULL,
-  total_score INTEGER DEFAULT 0,
+  total_score INTEGER DEFAULT 0,  -- Weekly score (resets Monday)
+  cumulative_score INTEGER DEFAULT 0,  -- All-time score (never resets)
   streak INTEGER DEFAULT 0,
   last_played_date TEXT,
   last_played_at TIMESTAMP WITH TIME ZONE,
   week_key TEXT  -- YYYY-MM-DD format of Monday of current week
 );
 
--- Add week_key column if it doesn't exist (for existing installations)
+-- Add columns if they don't exist (for existing installations)
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
     WHERE table_name = 'wordle_scores' AND column_name = 'week_key') THEN
     ALTER TABLE public.wordle_scores ADD COLUMN week_key TEXT;
+  END IF;
+  
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'wordle_scores' AND column_name = 'cumulative_score') THEN
+    ALTER TABLE public.wordle_scores ADD COLUMN cumulative_score INTEGER DEFAULT 0;
   END IF;
 END $$;

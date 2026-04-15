@@ -209,6 +209,9 @@ router.post('/submit', requireAuth, async (req, res) => {
       newScore = (current?.total_score || 0) + pointsWon;
     }
     
+    // Cumulative score always adds up (never resets)
+    const newCumulativeScore = (current?.cumulative_score || 0) + pointsWon;
+    
     let newStreak = won ? (current?.streak || 0) + 1 : 0;
 
     await supabase
@@ -217,6 +220,7 @@ router.post('/submit', requireAuth, async (req, res) => {
         netid,
         name: name || current?.name || 'Anonymous',
         total_score: newScore,
+        cumulative_score: newCumulativeScore,
         streak: newStreak,
         last_played_date: dateKey,
         last_played_at: new Date().toISOString(),
@@ -238,22 +242,56 @@ router.get('/leaderboard', requireAuth, async (req, res) => {
     const weekKey = getWeekKey();
 
     // Get weekly leaderboard - only show scores from current week
-    const { data } = await supabase
+    let query = supabase
       .from('wordle_scores')
-      .select('name, total_score, streak')
-      .eq('week_key', weekKey)
+      .select('name, total_score, streak, week_key')
       .order('total_score', { ascending: false })
       .limit(10);
 
+    // Only filter by week_key if we want weekly-only
+    // For now, show all scores since week_key is NULL
+    // query = query.eq('week_key', weekKey);
+
+    const { data: weeklyData } = await query;
+
     // Map to expected format
-    const leaderboard = (data || []).map(item => ({
+    const weeklyLeaderboard = (weeklyData || []).map(item => ({
       name: item.name,
       points: item.total_score,
       streak: item.streak
     }));
 
-    res.json({ leaderboard, weekKey });
+    res.json({ 
+      weeklyLeaderboard, 
+      weekKey,
+      leaderboard: weeklyLeaderboard // backward compat
+    });
   } catch (err) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+router.get('/alltime-leaderboard', requireAuth, async (req, res) => {
+  try {
+    const supabase = getSupabaseAdmin();
+    if (!supabase) return res.status(500).json({ error: 'DB unavailable' });
+
+    // Get all-time leaderboard using cumulative_score
+    const { data } = await supabase
+      .from('wordle_scores')
+      .select('name, cumulative_score, streak')
+      .order('cumulative_score', { ascending: false })
+      .limit(10);
+
+    const allTimeLeaderboard = (data || []).map(item => ({
+      name: item.name,
+      points: item.cumulative_score,
+      streak: item.streak
+    }));
+
+    res.json({ allTimeLeaderboard });
+  } catch (err) {
+    console.error('[Wordle] All-time leaderboard error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

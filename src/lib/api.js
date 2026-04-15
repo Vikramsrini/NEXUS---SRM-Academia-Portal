@@ -193,5 +193,16 @@ export async function fetchWeeklyWinners() {
   return res.json();
 }
 
+export async function fetchAllTimeLeaderboard() {
+  const token = localStorage.getItem('academia_token');
+  const res = await fetch(apiUrl('/wordle/alltime-leaderboard'), {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!res.ok) {
+    return { allTimeLeaderboard: [] };
+  }
+  return res.json();
+}
+
 export { API_BASE };
 
