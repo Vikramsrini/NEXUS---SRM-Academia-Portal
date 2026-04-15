@@ -49,6 +49,7 @@ const NAV_ITEMS = [
   { id: 'skippro', label: 'Skip Now', icon: Icons.skippro, path: '/dashboard/skippro' },
   { id: 'cgpa', label: 'CGPA', icon: Icons.cgpa, path: '/dashboard/cgpa' },
   { id: 'resources', label: 'Resources', icon: Icons.resources, path: '/dashboard/resources' },
+  { id: 'minigames', label: 'Mini Games', icon: Icons.game, path: '/dashboard/wordle' },
 ];
 
 const MOBILE_PRIMARY_NAV_IDS = ['home', 'timetable', 'attendance', 'marks'];
