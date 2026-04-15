@@ -4,7 +4,10 @@ import './RecentUpdatesBanner.css';
 
 function looksLikeCourseCode(value) {
   const code = String(value || '').trim().toUpperCase().replace(/\s+/g, '');
-  return /^(?:\d{2})?[A-Z]{2,}\d+[A-Z0-9]*$/.test(code);
+  // Match server-side validation: 2+ letters, 1 digit, then 0+ alphanumeric/hyphens
+  // Allow optional 2-digit prefix (e.g., "21CSE202J" -> "CSE202J")
+  const withoutPrefix = code.replace(/^\d{2}/, '');
+  return /^[A-Z]{2,}\d[A-Z0-9-]*$/.test(withoutPrefix);
 }
 
 export default function RecentUpdatesBanner({ regNumber, type, variant = 'subpage' }) {
@@ -53,6 +56,8 @@ export default function RecentUpdatesBanner({ regNumber, type, variant = 'subpag
 
         const data = await res.json();
         if (aborted) return;
+
+        console.log('[RecentUpdatesBanner] Raw data:', { type, attendanceCount: data.attendanceUpdates?.length, marksCount: data.marksUpdates?.length });
 
         if (type === 'attendance') {
           setUpdates(Array.isArray(data.attendanceUpdates) ? data.attendanceUpdates : []);
@@ -128,6 +133,11 @@ export default function RecentUpdatesBanner({ regNumber, type, variant = 'subpag
   }, [lastSeenKey, latestUpdateMs, isDashboard]);
 
   const previewUpdates = useMemo(() => visibleUpdates.slice(0, 3), [visibleUpdates]);
+
+  // Debug logging
+  useEffect(() => {
+    console.log('[RecentUpdatesBanner] State:', { type, updatesCount: updates.length, visibleCount: visibleUpdates.length, hasNewUpdates, loading, error: error || null });
+  }, [updates, visibleUpdates, hasNewUpdates, loading, error, type]);
 
   const handleDismiss = () => {
     if (lastSeenKey && latestUpdateMs > 0) {
