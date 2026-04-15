@@ -42,8 +42,7 @@ export default function WordlePage() {
   const [message, setMessage] = useState('');
   
   const [userStats, setUserStats] = useState({ score: 0, streak: 0 });
-  const [weeklyLeaderboard, setWeeklyLeaderboard] = useState([]);
-  const [allTimeLeaderboard, setAllTimeLeaderboard] = useState([]);
+  const [leaderboard, setLeaderboard] = useState([]);
   const [weekKey, setWeekKey] = useState('');
   
   const showMessage = (msg) => {
@@ -58,25 +57,11 @@ export default function WordlePage() {
       });
       if (res.ok) {
         const data = await res.json();
-        setWeeklyLeaderboard(data.weeklyLeaderboard || []);
+        setLeaderboard(data.leaderboard || []);
         setWeekKey(data.weekKey || '');
       }
     } catch (err) {
       console.error('Failed to fetch leaderboard', err);
-    }
-  };
-
-  const fetchAllTime = async () => {
-    try {
-      const res = await fetch(apiUrl('/wordle/alltime-leaderboard'), {
-        headers: getAuthHeaders()
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setAllTimeLeaderboard(data.allTimeLeaderboard || []);
-      }
-    } catch (err) {
-      console.error('Failed to fetch all-time leaderboard', err);
     }
   };
 
@@ -96,7 +81,6 @@ export default function WordlePage() {
       if (stateData.playedToday) {
         setGameState('already_played');
         fetchLeaderboard();
-        fetchAllTime();
         return;
       }
 
@@ -120,7 +104,6 @@ export default function WordlePage() {
           setGameState('playing');
         }
         fetchLeaderboard();
-        fetchAllTime();
       } else {
         // Fallback for safety if backend somehow returns an invalid word
         showMessage('Invalid daily word received. Retrying...');
@@ -162,7 +145,6 @@ export default function WordlePage() {
         const data = await res.json();
         setUserStats({ score: data.score, streak: data.streak });
         fetchLeaderboard();
-        fetchAllTime();
         if (won) {
           showMessage(`Genius! You earned ${pointsWon} points`);
         }
@@ -442,35 +424,14 @@ export default function WordlePage() {
 
         <div className="wordle-leaderboard-side">
           <div className="lb-header">
-            <h3>Weekly Leaderboard</h3>
-            <span className="lb-badge">{weekKey || 'Top 10'}</span>
+            <h3>Leaderboard</h3>
+            <span className="lb-badge">Top 10</span>
           </div>
           <div className="lb-list">
-            {weeklyLeaderboard.length === 0 ? (
+            {leaderboard.length === 0 ? (
               <div className="lb-empty">No scores yet. Be the first!</div>
             ) : (
-              weeklyLeaderboard.map((lb, idx) => (
-                <div key={idx} className={`lb-item ${idx < 3 ? `top-${idx+1}` : ''}`}>
-                  <div className="lb-rank">{idx + 1}</div>
-                  <div className="lb-info">
-                    <span className="lb-name">{lb.name}</span>
-                    <span className="lb-streak-box">{lb.streak > 0 ? WordleIcons.streak : ''}</span>
-                  </div>
-                  <div className="lb-score">{lb.points} pts</div>
-                </div>
-              ))
-            )}
-          </div>
-
-          <div className="lb-header" style={{ marginTop: '24px' }}>
-            <h3>All-Time Leaderboard</h3>
-            <span className="lb-badge">All Time</span>
-          </div>
-          <div className="lb-list">
-            {allTimeLeaderboard.length === 0 ? (
-              <div className="lb-empty">No scores yet. Be the first!</div>
-            ) : (
-              allTimeLeaderboard.map((lb, idx) => (
+              leaderboard.map((lb, idx) => (
                 <div key={idx} className={`lb-item ${idx < 3 ? `top-${idx+1}` : ''}`}>
                   <div className="lb-rank">{idx + 1}</div>
                   <div className="lb-info">
