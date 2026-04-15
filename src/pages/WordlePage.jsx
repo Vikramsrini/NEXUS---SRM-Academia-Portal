@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { apiUrl } from '../lib/api';
 import './WordlePage.css';
 
@@ -275,7 +276,7 @@ export default function WordlePage() {
 
   return (
     <div className="wordle-page-wrapper animate-fade-in">
-      {showHowToPlay && (
+      {showHowToPlay && createPortal(
         <div className="apple-modal-overlay wordle-howto-overlay" onClick={() => setShowHowToPlay(false)}>
           <div
             className="apple-modal-card compact wordle-howto-dialog"
@@ -317,7 +318,8 @@ export default function WordlePage() {
               </button>
             </footer>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       <div className="wordle-header-top">
