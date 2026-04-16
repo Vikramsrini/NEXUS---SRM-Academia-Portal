@@ -1,6 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
-import RecentUpdatesBanner from '../components/RecentUpdatesBanner';
 import './SubPages.css';
 
 const Icons = {
@@ -470,7 +469,6 @@ export default function MarksPage() {
         </button>
       </div>
 
-      <RecentUpdatesBanner regNumber={regNumber} type="marks" refreshTrigger={student.timestamp} />
 
       {marksInsights && (
         <section className="marks-insights-row animate-fade-in-up" aria-label="Marks highlights">

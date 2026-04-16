@@ -4,7 +4,6 @@ import { useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { useTheme } from '../ThemeContext';
 import { fetchThoughtOfDay, fetchOdState, saveOdState, fetchWeeklyWinners } from '../lib/api';
 import { normalizeCourseCode } from '../lib/slotTypes';
-import RecentUpdatesBanner from '../components/RecentUpdatesBanner';
 import FeaturesModal from '../components/FeaturesModal';
 import NotificationManager from '../components/NotificationManager';
 import './Dashboard.css';
@@ -950,10 +949,6 @@ export default function Dashboard({ children }) {
                 )}
               </section>
 
-              <div className="recent-updates-dashboard-group animate-fade-in-up delay-1">
-                <RecentUpdatesBanner regNumber={student.regNumber} type="attendance" variant="dashboard" refreshTrigger={student.timestamp} />
-                <RecentUpdatesBanner regNumber={student.regNumber} type="marks" variant="dashboard" refreshTrigger={student.timestamp} />
-              </div>
 
               <div className="home-alerts-row animate-fade-in-up delay-2">
                 <div className="home-alert-pill skip-pill" onClick={() => navigate('/dashboard/skippro')}>

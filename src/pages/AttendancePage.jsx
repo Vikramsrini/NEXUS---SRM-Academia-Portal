@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom';
 import { useOutletContext } from 'react-router-dom';
 import { fetchOdState, saveOdState } from '../lib/api';
 import { normalizeCourseCode } from '../lib/slotTypes';
-import RecentUpdatesBanner from '../components/RecentUpdatesBanner';
 import './SubPages.css';
 
 const Icons = {
@@ -713,7 +712,6 @@ export default function AttendancePage() {
         </div>
       </div>
 
-      <RecentUpdatesBanner regNumber={regNumber} type="attendance" refreshTrigger={student.timestamp} />
 
       {FILTERED_ATTENDANCE.length > 0 ? (
         <div className="attendance-groups-wrap stagger-children">

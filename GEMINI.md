@@ -35,7 +35,6 @@ This document provides essential context and instructions for developers working
 1. **Auth:** User logs in with SRM credentials → Backend scrapes portal and generates a session token → Token stored in `localStorage`.
 2. **Scraping:** Backend uses `Cheerio` to parse various portal pages (Attendance, Marks, etc.).
 3. **Persistence:** User-specific settings (OD dates, CGPA inputs) are stored in Supabase.
-4. **Sync:** Periodic snapshots of attendance and marks are taken for "Recent Updates" tracking.
 
 ## Development Workflow
 
