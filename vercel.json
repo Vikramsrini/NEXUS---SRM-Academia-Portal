@@ -2,15 +2,15 @@
   "crons": [
     {
       "path": "/api/cron/quote",
-      "schedule": "0 8 * * *"
+      "schedule": "30 2 * * *"
     },
     {
       "path": "/api/cron/wordle",
-      "schedule": "40 10 * * *"
+      "schedule": "31 18 * * *"
     },
     {
       "path": "/api/cron/day-order",
-      "schedule": "0 20 * * *"
+      "schedule": "30 14 * * *"
     }
   ],
   "rewrites": [
