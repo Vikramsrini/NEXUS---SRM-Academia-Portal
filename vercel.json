@@ -1,4 +1,18 @@
 {
+  "crons": [
+    {
+      "path": "/api/cron/quote",
+      "schedule": "0 8 * * *"
+    },
+    {
+      "path": "/api/cron/wordle",
+      "schedule": "40 10 * * *"
+    },
+    {
+      "path": "/api/cron/day-order",
+      "schedule": "0 20 * * *"
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/(.*)",
