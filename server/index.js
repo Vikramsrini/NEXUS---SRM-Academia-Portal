@@ -19,7 +19,6 @@ import timetableStateRoutes from './routes/timetable-state.js';
 import recentUpdatesRoutes from './routes/recent-updates.js';
 import wordleRoutes from './routes/wordle.js';
 import pushRoutes from './routes/push.js';
-import cronRoutes from './routes/cron.js';
 import { initNotificationCrons } from './services/notificationService.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -53,7 +52,6 @@ app.use('/api', timetableStateRoutes);
 app.use('/api', recentUpdatesRoutes);
 app.use('/api', pushRoutes);
 app.use('/api/wordle', wordleRoutes);
-app.use('/api/cron', cronRoutes);
 
 
 // ── Health Check ──────────────────────────────────────────────────────
