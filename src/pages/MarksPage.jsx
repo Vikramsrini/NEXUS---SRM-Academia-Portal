@@ -277,7 +277,7 @@ function SgpaPredictor({ courses, nameByCode, creditsByCode, onClose }) {
                   <label className="apple-switch">
                     <input
                       type="checkbox"
-                      checked={isEnabled}
+                      checked={Boolean(isEnabled)}
                       onChange={() => setEnabledCourses(p => ({ ...p, [id]: !Boolean(p[id]) }))}
                     />
                     <span className="slider"></span>

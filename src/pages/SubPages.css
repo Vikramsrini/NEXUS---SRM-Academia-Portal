@@ -1631,7 +1631,6 @@
   opacity: 0.45;
 }
 
-.sgpa-item-card.disabled header,
 .sgpa-item-card.disabled .sgpa-inputs-row,
 .sgpa-item-card.disabled .grade-slider-wrap,
 .sgpa-item-card.disabled .sgpa-item-footer {
