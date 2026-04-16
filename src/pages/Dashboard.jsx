@@ -364,7 +364,7 @@ export default function Dashboard({ children }) {
   useEffect(() => {
     // 1. Sync immediately on mount
     console.log('[Auto Sync] Dashboard mounted. Triggering data sync...');
-    handleSync();
+    handleSync(true);
 
     // 2. Sync on visibility change (when user returns to the app)
     const handleVisibilityChange = () => {
