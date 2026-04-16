@@ -2,12 +2,19 @@ import { useEffect, useMemo, useState } from 'react';
 import { apiUrl } from '../lib/api';
 import './RecentUpdatesBanner.css';
 
-function looksLikeCourseCode(value) {
-  const code = String(value || '').trim().toUpperCase().replace(/\s+/g, '');
-  // Match server-side validation: 2+ letters, 1 digit, then 0+ alphanumeric/hyphens
-  // Allow optional 2-digit prefix (e.g., "21CSE202J" -> "CSE202J")
-  const withoutPrefix = code.replace(/^\d{2}/, '');
-  return /^[A-Z]{2,}\d[A-Z0-9-]*$/.test(withoutPrefix);
+function hasUsableCourseCode(value) {
+  return String(value || '').trim().length > 0;
+}
+
+function getUpdateTimestampMs(item) {
+  const raw =
+    item?.synced_at
+    || item?.created_at
+    || item?.updated_at
+    || item?.timestamp
+    || 0;
+  const parsed = new Date(raw).getTime();
+  return Number.isFinite(parsed) ? parsed : 0;
 }
 
 export default function RecentUpdatesBanner({ regNumber, type, variant = 'subpage', refreshTrigger }) {
@@ -17,6 +24,7 @@ export default function RecentUpdatesBanner({ regNumber, type, variant = 'subpag
   const [dismissed, setDismissed] = useState(false);
 
   const isDashboard = variant === 'dashboard';
+  const days = 7;
 
   useEffect(() => {
     if (!regNumber || !type) {
@@ -39,9 +47,7 @@ export default function RecentUpdatesBanner({ regNumber, type, variant = 'subpag
       setError('');
       try {
         const cleanReg = String(regNumber).trim().toUpperCase();
-        // 7-day window for better visibility of weekly updates
-        const days = '7';
-        const params = new URLSearchParams({ regNumber: cleanReg, days });
+        const params = new URLSearchParams({ regNumber: cleanReg, days: String(days) });
         const res = await fetch(apiUrl(`/recent-updates?${params.toString()}`), {
           headers: {
             Authorization: `Bearer ${currentToken}`,
@@ -90,7 +96,7 @@ export default function RecentUpdatesBanner({ regNumber, type, variant = 'subpag
       return updates.filter((u) => {
         const conducted = Number(u?.hours_conducted);
         const absent = Number(u?.hours_absent);
-        return looksLikeCourseCode(u?.course_code)
+        return hasUsableCourseCode(u?.course_code)
           && Number.isFinite(conducted)
           && Number.isFinite(absent)
           && conducted > 0;
@@ -101,7 +107,7 @@ export default function RecentUpdatesBanner({ regNumber, type, variant = 'subpag
       return updates.filter((u) => {
         const obtained = Number(u?.marks_obtained);
         const max = Number(u?.max_marks);
-        return looksLikeCourseCode(u?.course_code)
+        return hasUsableCourseCode(u?.course_code)
           && String(u?.assessment_type || '').trim().length > 0
           && Number.isFinite(obtained)
           && Number.isFinite(max)
@@ -119,18 +125,20 @@ export default function RecentUpdatesBanner({ regNumber, type, variant = 'subpag
 
   const latestUpdateMs = useMemo(() => {
     const latest = visibleUpdates.reduce((max, item) => {
-      const t = new Date(item?.synced_at || 0).getTime();
-      return Number.isFinite(t) ? Math.max(max, t) : max;
+      const t = getUpdateTimestampMs(item);
+      return Math.max(max, t);
     }, 0);
     return Number.isFinite(latest) ? latest : 0;
   }, [visibleUpdates]);
 
   const hasNewUpdates = useMemo(() => {
     if (isDashboard) return true; // On dashboard, we show the recent summary regardless of "seen" state
-    if (!lastSeenKey || latestUpdateMs <= 0) return false;
-    const seenMs = Number(localStorage.getItem(lastSeenKey) || 0);
+    if (!lastSeenKey || visibleUpdates.length === 0) return false;
+    const seenRaw = Number(localStorage.getItem(lastSeenKey) || 0);
+    const seenMs = Number.isFinite(seenRaw) ? seenRaw : 0;
+    if (latestUpdateMs <= 0) return seenMs <= 0;
     return latestUpdateMs > seenMs;
-  }, [lastSeenKey, latestUpdateMs, isDashboard]);
+  }, [lastSeenKey, latestUpdateMs, isDashboard, visibleUpdates.length]);
 
   const previewUpdates = useMemo(() => visibleUpdates.slice(0, 3), [visibleUpdates]);
 
@@ -140,8 +148,9 @@ export default function RecentUpdatesBanner({ regNumber, type, variant = 'subpag
   }, [updates, visibleUpdates, hasNewUpdates, loading, error, type]);
 
   const handleDismiss = () => {
-    if (lastSeenKey && latestUpdateMs > 0) {
-      localStorage.setItem(lastSeenKey, String(latestUpdateMs));
+    if (lastSeenKey) {
+      const safeSeenValue = latestUpdateMs > 0 ? latestUpdateMs : Date.now();
+      localStorage.setItem(lastSeenKey, String(safeSeenValue));
     }
     setDismissed(true);
   };
@@ -171,7 +180,7 @@ export default function RecentUpdatesBanner({ regNumber, type, variant = 'subpag
       </div>
 
       <p className="recent-updates-meta">
-        {visibleUpdates.length} new {isMarks ? 'marks' : 'attendance'} update{visibleUpdates.length !== 1 ? 's' : ''} in the last 2 days.
+        {visibleUpdates.length} new {isMarks ? 'marks' : 'attendance'} update{visibleUpdates.length !== 1 ? 's' : ''} in the last {days} days.
       </p>
 
       <ul className="recent-updates-list">

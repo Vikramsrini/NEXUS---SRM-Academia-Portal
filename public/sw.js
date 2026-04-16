@@ -3,7 +3,7 @@
  * Handles standard caching and Push Notifications
  */
 
-const CACHE_NAME = 'nexus-v2.0.2';
+const CACHE_NAME = 'nexus-v2.0.3';
 
 const STATIC_ASSETS = [
   '/',
@@ -13,6 +13,9 @@ const STATIC_ASSETS = [
   '/icon-512.png',
   '/favicon.svg'
 ];
+
+const offlineResponse = (status = 503, statusText = 'Service Unavailable') =>
+  new Response('', { status, statusText });
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -56,7 +59,7 @@ self.addEventListener('fetch', (event) => {
         })
         .catch(async () => {
           const cached = await caches.match('/index.html');
-          return cached || Response.error();
+          return cached || offlineResponse(504, 'Offline');
         })
     );
     return;
@@ -75,7 +78,7 @@ self.addEventListener('fetch', (event) => {
         })
         .catch(async () => {
           const cached = await caches.match(request);
-          return cached || Response.error();
+          return cached || offlineResponse(504, 'Offline');
         })
     );
     return;
@@ -97,10 +100,12 @@ self.addEventListener('fetch', (event) => {
 
         return response;
       });
-    }).catch(() => {
+    }).catch(async () => {
       if (request.destination === 'document') {
-        return caches.match('/index.html');
+        const cached = await caches.match('/index.html');
+        return cached || offlineResponse(504, 'Offline');
       }
+      return offlineResponse(504, 'Offline');
     })
   );
 });
