@@ -951,8 +951,8 @@ export default function Dashboard({ children }) {
               </section>
 
               <div className="recent-updates-dashboard-group animate-fade-in-up delay-1">
-                <RecentUpdatesBanner regNumber={student.regNumber} type="attendance" variant="dashboard" />
-                <RecentUpdatesBanner regNumber={student.regNumber} type="marks" variant="dashboard" />
+                <RecentUpdatesBanner regNumber={student.regNumber} type="attendance" variant="dashboard" refreshTrigger={student.timestamp} />
+                <RecentUpdatesBanner regNumber={student.regNumber} type="marks" variant="dashboard" refreshTrigger={student.timestamp} />
               </div>
 
               <div className="home-alerts-row animate-fade-in-up delay-2">

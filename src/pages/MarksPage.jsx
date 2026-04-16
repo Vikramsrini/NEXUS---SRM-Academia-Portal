@@ -470,7 +470,7 @@ export default function MarksPage() {
         </button>
       </div>
 
-      <RecentUpdatesBanner regNumber={regNumber} type="marks" />
+      <RecentUpdatesBanner regNumber={regNumber} type="marks" refreshTrigger={student.timestamp} />
 
       {marksInsights && (
         <section className="marks-insights-row animate-fade-in-up" aria-label="Marks highlights">

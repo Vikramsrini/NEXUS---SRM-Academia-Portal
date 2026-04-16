@@ -62,20 +62,21 @@ export function parseAttendance(decodedHtml) {
           conductedNum = 0;
           absentNum = 0;
         }
-        const slotCodes = extractSlotCodes(slot);
-        const slotType = detectSlotType(slotCodes, courseCode, rawTitle);
+      }
 
-        if (courseCode && looksLikeCourseCode(courseCode) && courseTitle && courseTitle.toLowerCase() !== 'null') {
-          attendance.push({
-            courseCode,
-            courseTitle,
-            slot,
-            slotType,
-            hoursConducted: String(conductedNum),
-            hoursAbsent: String(absentNum),
-            attendancePercentage: percentage.toFixed(2),
-          });
-        }
+      const slotCodes = extractSlotCodes(slot);
+      const slotType = detectSlotType(slotCodes, courseCode, rawTitle);
+
+      if (courseCode && looksLikeCourseCode(courseCode) && courseTitle && courseTitle.toLowerCase() !== 'null') {
+        attendance.push({
+          courseCode,
+          courseTitle,
+          slot,
+          slotType,
+          hoursConducted: String(conductedNum),
+          hoursAbsent: String(absentNum),
+          attendancePercentage: percentage.toFixed(2),
+        });
       }
     });
   }

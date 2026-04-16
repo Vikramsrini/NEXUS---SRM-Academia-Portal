@@ -713,7 +713,7 @@ export default function AttendancePage() {
         </div>
       </div>
 
-      <RecentUpdatesBanner regNumber={regNumber} type="attendance" />
+      <RecentUpdatesBanner regNumber={regNumber} type="attendance" refreshTrigger={student.timestamp} />
 
       {FILTERED_ATTENDANCE.length > 0 ? (
         <div className="attendance-groups-wrap stagger-children">

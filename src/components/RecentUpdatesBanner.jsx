@@ -10,7 +10,7 @@ function looksLikeCourseCode(value) {
   return /^[A-Z]{2,}\d[A-Z0-9-]*$/.test(withoutPrefix);
 }
 
-export default function RecentUpdatesBanner({ regNumber, type, variant = 'subpage' }) {
+export default function RecentUpdatesBanner({ regNumber, type, variant = 'subpage', refreshTrigger }) {
   const [updates, setUpdates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -39,8 +39,8 @@ export default function RecentUpdatesBanner({ regNumber, type, variant = 'subpag
       setError('');
       try {
         const cleanReg = String(regNumber).trim().toUpperCase();
-        // Use a very short window for high relevance
-        const days = isDashboard ? '2' : '2';
+        // 7-day window for better visibility of weekly updates
+        const days = '7';
         const params = new URLSearchParams({ regNumber: cleanReg, days });
         const res = await fetch(apiUrl(`/recent-updates?${params.toString()}`), {
           headers: {
@@ -81,7 +81,7 @@ export default function RecentUpdatesBanner({ regNumber, type, variant = 'subpag
     return () => {
       aborted = true;
     };
-  }, [regNumber, type, isDashboard]);
+  }, [regNumber, type, isDashboard, refreshTrigger]);
 
   const visibleUpdates = useMemo(() => {
     if (!Array.isArray(updates)) return [];
