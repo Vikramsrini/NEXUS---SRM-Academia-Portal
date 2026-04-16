@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { fetchTimetableState, saveTimetableState } from '../lib/api';
 import './SubPages.css';
 
@@ -120,7 +121,8 @@ function downloadTimetableImage(timetable, studentName) {
 }
 
 export default function TimetablePage() {
-  const student = getStudentData();
+  const context = useOutletContext() || {};
+  const student = context.student || getStudentData();
   const rawTimetable = useMemo(() => student.timetable || [], [student.timetable]);
   
   const [activeDay, setActiveDay] = useState(() => {

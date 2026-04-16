@@ -348,6 +348,9 @@ export default function Dashboard({ children }) {
       if (typeof window.__loadThought === 'function') {
         window.__loadThought().catch(() => { });
       }
+
+      // If manual, we don't reload the whole page to avoid navigation loss, 
+      // but ensure state is fresh. The student state update above handles this.
     } catch (err) {
       console.error('Refresh error:', err);
       setSyncError(true);
@@ -1113,7 +1116,7 @@ export default function Dashboard({ children }) {
             </div>
           ) : (
             <div className="subpage-viewport">
-              <Outlet />
+              <Outlet context={{ student }} />
             </div>
           )}
         </div>

@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import RecentUpdatesBanner from '../components/RecentUpdatesBanner';
 import './SubPages.css';
 
@@ -366,7 +367,8 @@ function SgpaPredictor({ courses, nameByCode, creditsByCode, onClose }) {
 
 export default function MarksPage() {
   const [isPredictorOpen, setIsPredictorOpen] = useState(false);
-  const student = getStudentData();
+  const context = useOutletContext() || {};
+  const student = context.student || getStudentData();
   const regNumber = String(student.regNumber || '').trim();
   const marks = student.marks || [];
   const attendance = student.attendance || [];

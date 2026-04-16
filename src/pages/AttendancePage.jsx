@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { useOutletContext } from 'react-router-dom';
 import { fetchOdState, saveOdState } from '../lib/api';
 import { normalizeCourseCode } from '../lib/slotTypes';
 import RecentUpdatesBanner from '../components/RecentUpdatesBanner';
@@ -174,7 +175,8 @@ function MiniCalendar({ startDate, endDate, onRangeSelect }) {
 }
 
 export default function AttendancePage() {
-  const student = getStudentData();
+  const context = useOutletContext() || {};
+  const student = context.student || getStudentData();
   const token = localStorage.getItem('academia_token') || '';
   const regNumber = (student.regNumber || '').trim();
   const attendance = student.attendance || [];
