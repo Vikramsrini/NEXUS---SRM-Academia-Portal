@@ -32,6 +32,16 @@ router.get('/day-order', verifyCronAuth, async (req, res) => {
       return res.json({ sent: false, reason: 'No calendar data' });
     }
 
+    // Support both legacy array shape and current object shape { calendar: [...] }.
+    const calendarMonths = Array.isArray(calendarData.data)
+      ? calendarData.data
+      : Array.isArray(calendarData.data?.calendar)
+        ? calendarData.data.calendar
+        : [];
+    if (!calendarMonths.length) {
+      return res.json({ sent: false, reason: 'Calendar format invalid' });
+    }
+
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     
@@ -42,7 +52,7 @@ router.get('/day-order', verifyCronAuth, async (req, res) => {
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const searchMonth = `${monthNames[monthIdx]} ${year}`;
     
-    const monthObj = calendarData.data.find(m => m.month === searchMonth);
+    const monthObj = calendarMonths.find(m => m.month === searchMonth);
     if (!monthObj) {
       return res.json({ sent: false, reason: 'Month not found' });
     }

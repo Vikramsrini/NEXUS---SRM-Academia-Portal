@@ -76,6 +76,14 @@ export function initNotificationCrons() {
       const { data: calendarData } = await supabase.from('global_calendar').select('data').eq('id', 1).maybeSingle();
       if (!calendarData?.data) return;
 
+      // Support both legacy array shape and current object shape { calendar: [...] }.
+      const calendarMonths = Array.isArray(calendarData.data)
+        ? calendarData.data
+        : Array.isArray(calendarData.data?.calendar)
+          ? calendarData.data.calendar
+          : [];
+      if (!calendarMonths.length) return;
+
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       
@@ -87,7 +95,7 @@ export function initNotificationCrons() {
       const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
       const searchMonth = `${monthNames[monthIdx]} ${year}`;
       
-      const monthObj = calendarData.data.find(m => m.month === searchMonth);
+      const monthObj = calendarMonths.find(m => m.month === searchMonth);
       if (!monthObj) return;
 
       const dayObj = monthObj.days.find(d => parseInt(d.date) === day);
