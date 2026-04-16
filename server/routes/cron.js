@@ -8,17 +8,17 @@ const router = Router();
 function verifyCronAuth(req, res, next) {
   const authHeader = req.headers.authorization;
   const expectedSecret = process.env.CRON_SECRET;
-  
+
   if (!expectedSecret) {
     return res.status(500).json({ error: 'CRON_SECRET not configured' });
   }
-  
+
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
-  
+
   if (token !== expectedSecret) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
-  
+
   next();
 }
 
@@ -44,14 +44,14 @@ router.get('/day-order', verifyCronAuth, async (req, res) => {
 
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
-    
+
     const day = tomorrow.getDate();
     const monthIdx = tomorrow.getMonth();
     const year = tomorrow.getFullYear();
 
     const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     const searchMonth = `${monthNames[monthIdx]} ${year}`;
-    
+
     const monthObj = calendarMonths.find(m => m.month === searchMonth);
     if (!monthObj) {
       return res.json({ sent: false, reason: 'Month not found' });
@@ -66,7 +66,7 @@ router.get('/day-order', verifyCronAuth, async (req, res) => {
     let body = '';
 
     if (dayObj.dayOrder) {
-      body = `Tomorrow is ${dayObj.dayOrder}. Don't forget to pack according to your timetable!`;
+      body = `Tomorrow is Day Order ${dayObj.dayOrder}. Don't forget to pack according to your timetable!`;
     } else if (dayObj.event) {
       body = `Tomorrow is a Holiday: ${dayObj.event}. Enjoy!`;
     } else {
