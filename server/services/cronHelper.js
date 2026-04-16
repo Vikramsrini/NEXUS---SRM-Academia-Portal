@@ -55,18 +55,22 @@ export async function broadcastPushNotification(payload) {
  * Verify cron request authorization
  */
 export function verifyCronAuth(req, res) {
-  const authHeader = req.headers.authorization;
+  // Vercel uses lowercase headers
+  const authHeader = req.headers['authorization'] || req.headers['Authorization'];
   const expectedSecret = process.env.CRON_SECRET;
   
+  console.log('[Cron Auth] Checking auth, CRON_SECRET exists:', !!expectedSecret);
+  console.log('[Cron Auth] Auth header received:', authHeader ? 'Yes' : 'No');
+  
   if (!expectedSecret) {
-    res.status(500).json({ error: 'CRON_SECRET not configured' });
+    res.status(500).json({ error: 'CRON_SECRET not configured', debug: 'env var missing' });
     return false;
   }
   
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
   
   if (token !== expectedSecret) {
-    res.status(401).json({ error: 'Unauthorized' });
+    res.status(401).json({ error: 'Unauthorized', debug: 'token mismatch' });
     return false;
   }
   
