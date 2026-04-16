@@ -252,27 +252,22 @@ router.get('/leaderboard', requireAuth, async (req, res) => {
     const supabase = getSupabaseAdmin();
     if (!supabase) return res.status(500).json({ error: 'DB unavailable' });
 
-    const weekKey = getWeekKey();
-
-    // Get weekly leaderboard - filter by week_key to ensure we only show current week scores
-    const { data: weeklyData } = await supabase
+    // Get leaderboard by total_score - removing week_key filter to show global ranking
+    const { data } = await supabase
       .from('wordle_scores')
-      .select('name, total_score, streak, week_key')
-      .eq('week_key', weekKey)
+      .select('name, total_score, streak')
       .order('total_score', { ascending: false })
       .limit(10);
 
-    // Map to expected format
-    const weeklyLeaderboard = (weeklyData || []).map(item => ({
+    const leaderboard = (data || []).map(item => ({
       name: item.name,
       points: item.total_score,
       streak: item.streak
     }));
 
     res.json({ 
-      weeklyLeaderboard, 
-      weekKey,
-      leaderboard: weeklyLeaderboard // backward compat
+      leaderboard,
+      weekKey: getWeekKey()
     });
   } catch (err) {
     res.status(500).json({ error: 'Internal server error' });

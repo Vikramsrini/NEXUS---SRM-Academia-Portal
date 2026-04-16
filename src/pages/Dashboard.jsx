@@ -357,19 +357,31 @@ export default function Dashboard({ children }) {
     }
   }, []); // Stable callback
 
-  // ── Automatic Sync (On Load & Periodic) ───────────────────────────
+  // ── Automatic Sync (On Load, Visibility Change & Periodic) ───────────
   useEffect(() => {
-    // 1. Sync immediately on mount (covers initial load and browser refresh)
+    // 1. Sync immediately on mount
     console.log('[Auto Sync] Dashboard mounted. Triggering data sync...');
     handleSync();
 
-    // 2. Periodic heartbeat sync (every 40 minutes as requested)
+    // 2. Sync on visibility change (when user returns to the app)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('[Auto Sync] App became visible. Checking for updates...');
+        handleSync();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // 3. Periodic heartbeat sync (every 40 minutes)
     const autoSyncInterval = setInterval(() => {
       console.log('[Auto Sync] 40-minute heartbeat triggered.');
       handleSync();
     }, 40 * 60 * 1000);
 
-    return () => clearInterval(autoSyncInterval);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearInterval(autoSyncInterval);
+    };
   }, [handleSync]);
 
   useEffect(() => {

@@ -436,7 +436,7 @@ export default function WordlePage() {
         <div className="wordle-leaderboard-side">
           <div className="lb-section">
             <div className="lb-header">
-              <h3>Weekly Leaderboard</h3>
+              <h3>Leaderboard</h3>
               <span className="lb-badge">Top 10</span>
             </div>
             <div className="lb-list">
