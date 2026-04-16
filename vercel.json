@@ -6,7 +6,7 @@
     },
     {
       "path": "/api/cron/wordle",
-      "schedule": "31 18 * * *"
+      "schedule": "40 5 * * *"
     },
     {
       "path": "/api/cron/day-order",
