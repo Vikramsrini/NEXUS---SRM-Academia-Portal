@@ -3,7 +3,7 @@
  * Handles standard caching and Push Notifications
  */
 
-const CACHE_NAME = 'nexus-v2.0.1';
+const CACHE_NAME = 'nexus-v2.0.2';
 
 const STATIC_ASSETS = [
   '/',
@@ -36,10 +36,50 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   const { request } = event;
+  const url = new URL(request.url);
 
   if (request.method !== 'GET') return;
   if (request.url.startsWith('chrome-extension://')) return;
   if (request.url.includes('/api/')) return;
+  if (url.origin !== self.location.origin) return;
+
+  // Always prefer fresh HTML for SPA navigation to avoid stale UI in production.
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put('/index.html', clone));
+          }
+          return response;
+        })
+        .catch(async () => {
+          const cached = await caches.match('/index.html');
+          return cached || Response.error();
+        })
+    );
+    return;
+  }
+
+  // For Vite build assets, use network-first so new deployments update immediately.
+  if (url.pathname.startsWith('/assets/')) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+          }
+          return response;
+        })
+        .catch(async () => {
+          const cached = await caches.match(request);
+          return cached || Response.error();
+        })
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(request).then(cached => {
