@@ -278,7 +278,7 @@ function SgpaPredictor({ courses, nameByCode, creditsByCode, onClose }) {
                     <input
                       type="checkbox"
                       checked={isEnabled}
-                      onChange={() => setEnabledCourses(p => ({ ...p, [id]: !p[id] }))}
+                      onChange={() => setEnabledCourses(p => ({ ...p, [id]: p[id] === false }))}
                     />
                     <span className="slider"></span>
                   </label>

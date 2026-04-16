@@ -211,16 +211,8 @@ router.post('/submit', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'Already played today' });
     }
 
-    // Check if this is a new week - if so, reset total_score to 0
-    const currentWeekKey = current?.week_key || '';
-    let newScore;
-    if (currentWeekKey !== weekKey) {
-      // New week - start fresh with just today's points
-      newScore = pointsWon;
-    } else {
-      // Same week - add to existing score
-      newScore = (current?.total_score || 0) + pointsWon;
-    }
+    // Total score never resets - always accumulate
+    const newScore = (current?.total_score || 0) + pointsWon;
     
     // Cumulative score always adds up (never resets)
     const newCumulativeScore = (current?.cumulative_score || 0) + pointsWon;
