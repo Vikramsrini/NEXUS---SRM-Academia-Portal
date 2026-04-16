@@ -8,16 +8,47 @@ export default function NotificationManager() {
   const [status, setStatus] = useState('default'); // 'default', 'granted', 'denied'
   const [error, setError] = useState(null);
   const [isSubscribing, setIsSubscribing] = useState(false);
-  const [token, setToken] = useState(localStorage.getItem('academia_token'));
+  const [isChecking, setIsChecking] = useState(false);
+
+  const token = localStorage.getItem('academia_token');
+
+  const refreshPermissionStatus = async () => {
+    if (!('Notification' in window)) {
+      setError('Notifications not supported in this browser');
+      return;
+    }
+
+    setStatus(Notification.permission);
+    if (Notification.permission === 'denied') {
+      setError('Browser notifications are blocked. Enable them in browser/site settings, then retry.');
+    } else {
+      setError(null);
+    }
+  };
 
   useEffect(() => {
-    if ('Notification' in window) {
-      setStatus(Notification.permission);
-      console.log('[NotificationManager] Notification permission:', Notification.permission);
-    } else {
-      console.warn('[NotificationManager] Notifications not supported in this browser');
-      setError('Notifications not supported in this browser');
-    }
+    refreshPermissionStatus();
+  }, []);
+
+  // Keep status in sync if browser permission changes while the app is open
+  useEffect(() => {
+    if (!('permissions' in navigator) || !('Notification' in window)) return;
+
+    let permissionStatus;
+    let active = true;
+
+    navigator.permissions.query({ name: 'notifications' }).then((result) => {
+      if (!active) return;
+      permissionStatus = result;
+      permissionStatus.onchange = () => {
+        refreshPermissionStatus();
+      };
+    }).catch(() => {});
+
+    return () => {
+      active = false;
+      if (permissionStatus) permissionStatus.onchange = null;
+    };
   }, []);
 
   const subscribeUser = async () => {
@@ -34,35 +65,37 @@ export default function NotificationManager() {
       console.log('[NotificationManager] Getting service worker ready...');
       const registration = await navigator.serviceWorker.ready;
       console.log('[NotificationManager] Service worker ready, checking existing subscription...');
-      
-      // Check for existing subscription and unsubscribe if it exists
+
+      // If already subscribed, reuse it and avoid churn.
       const existingSubscription = await registration.pushManager.getSubscription();
+      let subscription = existingSubscription;
+
       if (existingSubscription) {
-        console.log('[NotificationManager] Found existing subscription, unsubscribing...');
-        await existingSubscription.unsubscribe();
-        console.log('[NotificationManager] Unsubscribed from existing subscription');
+        console.log('[NotificationManager] Existing subscription found, reusing it...');
       }
-      
-      console.log('[NotificationManager] Fetching VAPID key...');
-      // Get VAPID public key from backend
-      const keyRes = await fetch(apiUrl('/push/key'), {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      
-      if (!keyRes.ok) {
-        const errorData = await keyRes.json().catch(() => ({}));
-        throw new Error(errorData.error || `Failed to fetch VAPID key (${keyRes.status})`);
+
+      if (!subscription) {
+        console.log('[NotificationManager] Fetching VAPID key...');
+        // Get VAPID public key from backend
+        const keyRes = await fetch(apiUrl('/push/key'), {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (!keyRes.ok) {
+          const errorData = await keyRes.json().catch(() => ({}));
+          throw new Error(errorData.error || `Failed to fetch VAPID key (${keyRes.status})`);
+        }
+        
+        const { publicKey } = await keyRes.json();
+
+        if (!publicKey) throw new Error('No public key received from server');
+
+        console.log('[NotificationManager] VAPID key received, subscribing to push...');
+        subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicKey)
+        });
       }
-      
-      const { publicKey } = await keyRes.json();
-
-      if (!publicKey) throw new Error('No public key received from server');
-
-      console.log('[NotificationManager] VAPID key received, subscribing to push...');
-      const subscription = await registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(publicKey)
-      });
 
       console.log('[NotificationManager] Push subscription created, sending to backend...');
       // Send subscription to backend
@@ -113,6 +146,16 @@ export default function NotificationManager() {
     });
   };
 
+  const handleRetryAfterSettings = async () => {
+    setIsChecking(true);
+    setError(null);
+    await refreshPermissionStatus();
+    if (Notification.permission === 'granted') {
+      await subscribeUser();
+    }
+    setIsChecking(false);
+  };
+
   // If already granted, ensure we are subscribed (background task)
   useEffect(() => {
     if (status === 'granted' && token) {
@@ -123,9 +166,6 @@ export default function NotificationManager() {
 
   // Don't show anything if already subscribed successfully
   if (status === 'granted' && !error) return null;
-
-  // Don't show if denied
-  if (status === 'denied') return null;
 
   return (
     <div className="notification-prompt glass-card" style={{
@@ -161,11 +201,11 @@ export default function NotificationManager() {
       
       <button 
         className="apple-btn" 
-        onClick={requestPermission}
-        disabled={isSubscribing}
-        style={{ width: '100%', opacity: isSubscribing ? 0.6 : 1 }}
+        onClick={status === 'denied' ? handleRetryAfterSettings : requestPermission}
+        disabled={isSubscribing || isChecking}
+        style={{ width: '100%', opacity: (isSubscribing || isChecking) ? 0.6 : 1 }}
       >
-        {isSubscribing ? 'Enabling...' : 'Enable Notifications'}
+        {isSubscribing ? 'Enabling...' : isChecking ? 'Checking...' : status === 'denied' ? 'I Enabled It, Retry' : 'Enable Notifications'}
       </button>
     </div>
   );
