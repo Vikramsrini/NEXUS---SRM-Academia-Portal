@@ -66,7 +66,7 @@ async function generateDailyWord(excludeWords = []) {
       messages: [
         {
           role: 'system',
-          content: `You are a Wordle word generator. Generate exactly one 5-letter English word. Output it in JSON format: {"word": "APPLE"}. The word MUST be extremely common, simple, and easy to guess (e.g., HEART, WATER, SMILE, CLOUD). Avoid obscure, rare, or complex words.${excludeList}`
+          content: `You are a Wordle word generator. Generate exactly one 5-letter English word. Output it in JSON format: {"word": "APPLE"}. The word should be of medium difficulty - not too common/easy (avoid words like APPLE, WATER, SMILE) but not extremely obscure. Use words that require some thought but are still valid English words (e.g., CRANE, SLATE, GHOST, BRAIN, FLASK).${excludeList}`
         },
         {
           role: 'user',
