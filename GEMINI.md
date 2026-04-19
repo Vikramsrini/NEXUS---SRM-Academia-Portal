@@ -1,6 +1,6 @@
 # Academia Portal — Developer Guide
 
-This document provides essential context and instructions for developers working on the Academia Portal project.
+This document provides essential context and instructions for developers working on the Academia Portal project.lalal
 
 ## Project Overview
 
