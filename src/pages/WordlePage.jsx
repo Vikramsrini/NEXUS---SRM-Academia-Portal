@@ -452,8 +452,7 @@ export default function WordlePage() {
                       <span className="lb-name">{lb.name}</span>
                     </div>
                     <div className="lb-score">
-                      {lb.streak > 0 && <span className="lb-streak-box">{WordleIcons.streak} {lb.streak}</span>}
-                      {' '}{lb.points} pts
+                      {lb.points} pts
                     </div>
                   </div>
                 ))

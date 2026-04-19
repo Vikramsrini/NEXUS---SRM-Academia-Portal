@@ -350,15 +350,28 @@
   color: var(--text-primary);
 }
 
+.lb-score-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
 .lb-score {
   font-weight: 800;
   font-size: 0.9rem;
   color: var(--text-primary);
 }
 
-.lb-streak-box {
+.lb-streak-pill {
   font-size: 0.75rem;
+  font-weight: 700;
   color: #ff9f0a;
+  background: rgba(255, 159, 10, 0.15);
+  padding: 2px 7px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 159, 10, 0.3);
+  white-space: nowrap;
 }
 
 .lb-empty {
