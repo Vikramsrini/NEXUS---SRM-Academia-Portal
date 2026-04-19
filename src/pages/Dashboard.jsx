@@ -159,7 +159,6 @@ export default function Dashboard({ children }) {
   const [thoughtLoading, setThoughtLoading] = useState(true);
   const [syncError, setSyncError] = useState(false);
   const [student, setStudent] = useState(getStudentData);
-  const [weeklyWinners, setWeeklyWinners] = useState([]);
   const displayName = student.name || 'User';
 
   useEffect(() => {
@@ -168,20 +167,6 @@ export default function Dashboard({ children }) {
     }
   }, [student.name, student.regNumber, syncing]);
 
-  // Fetch weekly winners
-  useEffect(() => {
-    const loadWinners = async () => {
-      try {
-        const result = await fetchWeeklyWinners();
-        if (result.winners && result.winners.length > 0) {
-          setWeeklyWinners(result.winners);
-        }
-      } catch (err) {
-        console.error('Failed to load weekly winners', err);
-      }
-    };
-    loadWinners();
-  }, []);
   const compactDisplayName = getShortDisplayName(displayName, 18);
   const compactWelcomeName = getShortDisplayName(displayName, 24);
   const activePath = location.pathname === '/dashboard/' ? '/dashboard' : location.pathname;
@@ -984,26 +969,6 @@ export default function Dashboard({ children }) {
                 </div>
               </div>
 
-              {weeklyWinners.length > 0 && (
-                <section className="weekly-winners-section animate-fade-in-up delay-2">
-                  <div className="section-header">
-                    <div>
-                      <h3>Last Week's Winners</h3>
-                      <p className="section-subhead">Wordle Champions</p>
-                    </div>
-                    <span className="trophy-icon">{Icons.trophy}</span>
-                  </div>
-                  <div className="winners-podium">
-                    {weeklyWinners.map((winner, idx) => (
-                      <div key={idx} className={`winner-card rank-${idx + 1}`}>
-                        <div className="winner-rank">{idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'}</div>
-                        <div className="winner-name">{winner.name}</div>
-                        <div className="winner-score">{winner.points} pts</div>
-                      </div>
-                    ))}
-                  </div>
-                </section>
-              )}
 
               <div className="today-schedule-section animate-fade-in-up delay-3">
                 <div className="section-header">

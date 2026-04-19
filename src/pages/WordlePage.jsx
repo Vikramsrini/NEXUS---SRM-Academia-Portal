@@ -462,23 +462,44 @@ export default function WordlePage() {
           </div>
 
           {weeklyWinners.length > 0 && (
-            <div className="lb-section winners-section animate-slide-up">
+            <div className="lb-section winners-podium-section">
               <div className="lb-header">
                 <h3>Last Week's Champions</h3>
-                <span className="lb-badge gold">Hall of Fame</span>
+                <div className="medal-badge">
+                  <span className="medal-icon">🏆</span>
+                  <span className="medal-text">Hall of Fame</span>
+                </div>
               </div>
-              <div className="lb-list winners-list">
-                {weeklyWinners.map((lb, idx) => (
-                  <div key={idx} className={`lb-item winner-rank-${idx+1}`}>
-                    <div className="lb-rank">{idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'}</div>
-                    <div className="lb-info">
-                      <span className="lb-name">{lb.name}</span>
-                    </div>
-                    <div className="lb-score">{lb.points} pts</div>
+              <div className="champions-podium">
+                {/* Silver - Rank 2 */}
+                {weeklyWinners[1] && (
+                  <div className="podium-item rank-2">
+                    <div className="podium-rank">2</div>
+                    <div className="podium-avatar">🥈</div>
+                    <div className="podium-name">{weeklyWinners[1].name.split(' ')[0]}</div>
+                    <div className="podium-score">{weeklyWinners[1].points}</div>
                   </div>
-                ))}
+                )}
+                {/* Gold - Rank 1 */}
+                {weeklyWinners[0] && (
+                  <div className="podium-item rank-1">
+                    <div className="podium-rank">1</div>
+                    <div className="podium-avatar">🥇</div>
+                    <div className="podium-name">{weeklyWinners[0].name.split(' ')[0]}</div>
+                    <div className="podium-score">{weeklyWinners[0].points}</div>
+                  </div>
+                )}
+                {/* Bronze - Rank 3 */}
+                {weeklyWinners[2] && (
+                  <div className="podium-item rank-3">
+                    <div className="podium-rank">3</div>
+                    <div className="podium-avatar">🥉</div>
+                    <div className="podium-name">{weeklyWinners[2].name.split(' ')[0]}</div>
+                    <div className="podium-score">{weeklyWinners[2].points}</div>
+                  </div>
+                )}
               </div>
-              <div className="lb-footer-info">Finished on {lastWeekKey}</div>
+              <div className="podium-footer">Finished on {lastWeekKey}</div>
             </div>
           )}
         </div>
