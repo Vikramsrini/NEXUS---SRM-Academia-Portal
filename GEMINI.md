@@ -2,7 +2,7 @@
 
 This document provides essential context and instructions for developers working on the Academia Portal project.lalal
 
-## Project Overview
+## Project Overvieweffw 
 
 **Academia Portal** is a full-stack student information system designed for SRM University students. It scrapes academic data (attendance, marks, timetable, etc.) from the official SRM portal and provides a modern, responsive dashboard with persistent user state.
 
