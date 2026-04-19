@@ -499,7 +499,6 @@ export default function WordlePage() {
                   </div>
                 )}
               </div>
-              <div className="podium-footer">Finished on {lastWeekKey}</div>
             </div>
           )}
         </div>

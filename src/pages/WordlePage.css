@@ -447,8 +447,8 @@
 
 .podium-name {
   font-size: 0.8rem;
-  font-weight: 800;
-  color: var(--text-primary);
+  font-weight: 900;
+  color: #18181b;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
@@ -457,6 +457,10 @@
   padding: 0 6px;
   margin-bottom: 2px;
   letter-spacing: -0.01em;
+}
+
+[data-theme="dark"] .podium-name {
+  color: #e4e4e7;
 }
 
 .podium-score {
@@ -490,20 +494,14 @@
 [data-theme="dark"] .rank-1 .podium-score { color: #facc15; }
 
 .rank-2 { height: 118px; border-color: rgba(161, 161, 170, 0.35); }
-.rank-2 .podium-name {
-  color: #3f3f46;
-  font-weight: 800;
-}
+.rank-2 .podium-name { color: #18181b; font-weight: 900; }
 .rank-2 .podium-score { color: #52525b; }
 
 [data-theme="dark"] .rank-2 .podium-name { color: #e4e4e7; }
 [data-theme="dark"] .rank-2 .podium-score { color: #a1a1aa; }
 
 .rank-3 { height: 108px; border-color: rgba(217, 119, 6, 0.35); }
-.rank-3 .podium-name {
-  color: #78350f;
-  font-weight: 800;
-}
+.rank-3 .podium-name { color: #18181b; font-weight: 900; }
 .rank-3 .podium-score { color: #d97706; }
 
 [data-theme="dark"] .rank-3 .podium-name { color: #fbbf24; }
@@ -561,17 +559,27 @@
 
   /* Header */
   .wordle-header-top {
-    padding: 10px 14px;
+    padding: 12px 14px;
     border-radius: 18px;
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: stretch;
     gap: 12px;
   }
   .wordle-banner-icon { width: 32px; height: 32px; border-radius: 8px; }
   .wordle-banner-text h2 { font-size: 0.95rem; }
-  .wordle-stats-bar { gap: 6px; flex-wrap: wrap; }
-  .wordle-stat-box { min-width: 0; padding: 5px 10px; border-radius: 10px; }
-  .stat-value { font-size: 0.9rem; }
-  .wordle-howto-btn { padding: 6px 12px; font-size: 0.75rem; }
+
+  /* Stats bar: How to Play | Total Score | Streak — in one even row */
+  .wordle-stats-bar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+  .wordle-howto-btn { flex: 1; text-align: center; padding: 8px 6px; font-size: 0.8rem; }
+  .wordle-stat-box  { flex: 1; min-width: 0; padding: 6px 4px; border-radius: 10px; text-align: center; }
+  .stat-value { font-size: 0.95rem; }
 
   /* Main split → single col */
   .wordle-main-split {
