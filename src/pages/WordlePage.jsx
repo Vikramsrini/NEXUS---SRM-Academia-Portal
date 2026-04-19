@@ -445,12 +445,16 @@ export default function WordlePage() {
               ) : (
                 leaderboard.map((lb, idx) => (
                   <div key={idx} className={`lb-item ${idx < 3 ? `top-${idx+1}` : ''}`}>
-                    <div className="lb-rank">{idx + 1}</div>
+                    <div className="lb-rank">
+                      {idx === 0 ? '👑' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : idx + 1}
+                    </div>
                     <div className="lb-info">
                       <span className="lb-name">{lb.name}</span>
-                      <span className="lb-streak-box">{lb.streak > 0 ? WordleIcons.streak : ''}</span>
                     </div>
-                    <div className="lb-score">{lb.points} pts</div>
+                    <div className="lb-score">
+                      {lb.streak > 0 && <span className="lb-streak-box">{WordleIcons.streak} {lb.streak}</span>}
+                      {' '}{lb.points} pts
+                    </div>
                   </div>
                 ))
               )}
@@ -461,12 +465,12 @@ export default function WordlePage() {
             <div className="lb-section winners-section animate-slide-up">
               <div className="lb-header">
                 <h3>Last Week's Champions</h3>
-                <span className="lb-badge gold">Winners</span>
+                <span className="lb-badge gold">Hall of Fame</span>
               </div>
               <div className="lb-list winners-list">
                 {weeklyWinners.map((lb, idx) => (
                   <div key={idx} className={`lb-item winner-rank-${idx+1}`}>
-                    <div className="lb-rank">{idx === 0 ? '🏆' : idx === 1 ? '🥈' : '🥉'}</div>
+                    <div className="lb-rank">{idx === 0 ? '🥇' : idx === 1 ? '🥈' : '🥉'}</div>
                     <div className="lb-info">
                       <span className="lb-name">{lb.name}</span>
                     </div>
@@ -474,7 +478,7 @@ export default function WordlePage() {
                   </div>
                 ))}
               </div>
-              <div className="lb-footer-info">Week of {lastWeekKey}</div>
+              <div className="lb-footer-info">Finished on {lastWeekKey}</div>
             </div>
           )}
         </div>

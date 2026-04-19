@@ -243,10 +243,11 @@ router.get('/leaderboard', requireAuth, async (req, res) => {
     const supabase = getSupabaseAdmin();
     if (!supabase) return res.status(500).json({ error: 'DB unavailable' });
 
-    // Get leaderboard by total_score - removing week_key filter to show global ranking
+    // Get leaderboard by total_score - only showing active players with points > 0
     const { data } = await supabase
       .from('wordle_scores')
       .select('name, total_score, streak')
+      .gt('total_score', 0)
       .order('total_score', { ascending: false })
       .limit(10);
 

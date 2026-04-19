@@ -151,23 +151,13 @@ router.get('/wordle-weekly-reset', verifyCronAuth, async (req, res) => {
       .order('total_score', { ascending: false })
       .limit(3);
 
-    // 2. Perform global reset: Move total_score to cumulative_score and reset total_score
+    // 3. Perform global reset: Move total_score to cumulative_score and reset total_score
     // We use a Postgres RPC function to do this atomically for all users.
     const { error: sqlError } = await supabase.rpc('reset_wordle_weekly_scores');
     
     if (sqlError) {
       console.error('[Cron] RPC reset failed:', sqlError);
       return res.status(500).json({ error: 'Failed to perform reset in DB' });
-    }
-
-    // 3. Announce winners if any
-    if (winners && winners.length > 0) {
-      const winnerName = winners[0].name;
-      await broadcastPushNotification({
-        title: 'Weekly Wordle Champions!',
-        body: `Congratulations to ${winnerName} and all our weekly winners! The leaderboard has been reset for a new week.`,
-        url: '/dashboard/wordle'
-      });
     }
 
     res.json({ success: true, winnersFound: winners?.length || 0 });
