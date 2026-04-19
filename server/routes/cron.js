@@ -120,7 +120,7 @@ router.get('/quote', verifyCronAuth, async (req, res) => {
   }
 });
 
-// Wordle Refresh - 12:01 AM
+// Wordle Daily - 12:01 AM (Daily Word Available)
 router.get('/wordle', verifyCronAuth, async (req, res) => {
   try {
     console.log('[Cron] New Wordle word notification...');
@@ -136,5 +136,45 @@ router.get('/wordle', verifyCronAuth, async (req, res) => {
   }
 });
 
+// Wordle Weekly Reset & Winners Announcement - Monday 12:05 AM
+router.get('/wordle-weekly-reset', verifyCronAuth, async (req, res) => {
+  try {
+    console.log('[Cron] Performing weekly Wordle reset...');
+    const supabase = getSupabaseAdmin();
+    if (!supabase) return res.status(500).json({ error: 'DB unavailable' });
+
+    // 1. Snapshot the current top players for the announcement
+    const { data: winners } = await supabase
+      .from('wordle_scores')
+      .select('name, total_score')
+      .gt('total_score', 0)
+      .order('total_score', { ascending: false })
+      .limit(3);
+
+    // 2. Perform global reset: Move total_score to cumulative_score and reset total_score
+    // We use a Postgres RPC function to do this atomically for all users.
+    const { error: sqlError } = await supabase.rpc('reset_wordle_weekly_scores');
+    
+    if (sqlError) {
+      console.error('[Cron] RPC reset failed:', sqlError);
+      return res.status(500).json({ error: 'Failed to perform reset in DB' });
+    }
+
+    // 3. Announce winners if any
+    if (winners && winners.length > 0) {
+      const winnerName = winners[0].name;
+      await broadcastPushNotification({
+        title: 'Weekly Wordle Champions!',
+        body: `Congratulations to ${winnerName} and all our weekly winners! The leaderboard has been reset for a new week.`,
+        url: '/dashboard/wordle'
+      });
+    }
+
+    res.json({ success: true, winnersFound: winners?.length || 0 });
+  } catch (err) {
+    console.error('[Cron] Weekly Reset error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 export default router;

@@ -211,11 +211,11 @@ router.post('/submit', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'Already played today' });
     }
 
-    // Total score never resets - always accumulate
+    // Current weekly score updates
     const newScore = (current?.total_score || 0) + pointsWon;
     
-    // Cumulative score always adds up (never resets)
-    const newCumulativeScore = (current?.cumulative_score || 0) + pointsWon;
+    // We no longer update cumulative_score here as it's now used to store
+    // the PREVIOUS week's final score (updated via the weekly reset cron).
     
     let newStreak = won ? (current?.streak || 0) + 1 : 0;
 
@@ -225,7 +225,6 @@ router.post('/submit', requireAuth, async (req, res) => {
         netid,
         name: name || current?.name || 'Anonymous',
         total_score: newScore,
-        cumulative_score: newCumulativeScore,
         streak: newStreak,
         last_played_date: dateKey,
         last_played_at: new Date().toISOString(),
@@ -318,18 +317,19 @@ router.get('/weekly-winners', requireAuth, async (req, res) => {
     prevMonday.setUTCDate(currentMonday.getUTCDate() - 7);
     const lastWeekKey = `${prevMonday.getUTCFullYear()}-${String(prevMonday.getUTCMonth() + 1).padStart(2, '0')}-${String(prevMonday.getUTCDate()).padStart(2, '0')}`;
 
-    // Get top 3 from last week using wordle_scores
+    // Get top 3 from last week using cumulative_score
+    // (This column is populated with the previous week's final total_score during the reset)
     const { data } = await supabase
       .from('wordle_scores')
-      .select('name, total_score, streak')
-      .eq('week_key', lastWeekKey)
-      .order('total_score', { ascending: false })
+      .select('name, cumulative_score, streak')
+      .gt('cumulative_score', 0)
+      .order('cumulative_score', { ascending: false })
       .limit(3);
 
     // Map to expected format
     const winners = (data || []).map(item => ({
       name: item.name,
-      points: item.total_score,
+      points: item.cumulative_score,
       streak: item.streak
     }));
 
