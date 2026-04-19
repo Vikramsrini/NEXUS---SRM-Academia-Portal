@@ -62,6 +62,11 @@
   animation: float 4s ease-in-out infinite;
 }
 
+[data-theme="light"] .wordle-banner-icon {
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  box-shadow: 0 8px 16px rgba(37, 99, 235, 0.3);
+}
+
 .wordle-banner-text h2 {
   font-size: 1.25rem;
   font-weight: 800;
@@ -441,16 +446,17 @@
 }
 
 .podium-name {
-  font-size: 0.72rem;
-  font-weight: 700;
+  font-size: 0.8rem;
+  font-weight: 800;
   color: var(--text-primary);
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%;
-  padding: 0 4px;
+  padding: 0 6px;
   margin-bottom: 2px;
+  letter-spacing: -0.01em;
 }
 
 .podium-score {
@@ -468,22 +474,40 @@
   box-shadow: 0 8px 20px -5px rgba(250, 204, 21, 0.15);
 }
 .rank-1 .podium-avatar { font-size: 2.2rem; }
-.rank-1 .podium-name { color: #92400e; font-size: 0.82rem; font-weight: 800; }
-.rank-1 .podium-score { color: #92400e; font-size: 1rem; }
+.rank-1 .podium-name {
+  color: #78350f;
+  font-size: 0.88rem;
+  font-weight: 900;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+.rank-1 .podium-score { color: #92400e; font-size: 1rem; font-weight: 900; }
 .rank-1 .podium-rank { background: #facc15; border-color: #facc15; color: #000; font-weight: 900; }
 
-[data-theme="dark"] .rank-1 .podium-name { color: #facc15; }
+[data-theme="dark"] .rank-1 .podium-name {
+  color: #fde68a;
+  text-shadow: 0 0 12px rgba(250, 204, 21, 0.5);
+}
 [data-theme="dark"] .rank-1 .podium-score { color: #facc15; }
 
 .rank-2 { height: 118px; border-color: rgba(161, 161, 170, 0.35); }
-.rank-2 .podium-name { color: var(--text-secondary); }
-.rank-2 .podium-score { color: var(--text-secondary); }
+.rank-2 .podium-name {
+  color: #3f3f46;
+  font-weight: 800;
+}
+.rank-2 .podium-score { color: #52525b; }
+
+[data-theme="dark"] .rank-2 .podium-name { color: #e4e4e7; }
+[data-theme="dark"] .rank-2 .podium-score { color: #a1a1aa; }
 
 .rank-3 { height: 108px; border-color: rgba(217, 119, 6, 0.35); }
-.rank-3 .podium-name { color: #92400e; }
+.rank-3 .podium-name {
+  color: #78350f;
+  font-weight: 800;
+}
 .rank-3 .podium-score { color: #d97706; }
 
-[data-theme="dark"] .rank-3 .podium-name { color: #d97706; }
+[data-theme="dark"] .rank-3 .podium-name { color: #fbbf24; }
+[data-theme="dark"] .rank-3 .podium-score { color: #d97706; }
 
 .podium-footer {
   text-align: center;
