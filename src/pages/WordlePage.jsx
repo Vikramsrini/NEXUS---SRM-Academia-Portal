@@ -357,7 +357,7 @@ export default function WordlePage() {
           <div className="wordle-stat-box">
             <span className="stat-label">Streak</span>
             <span className="stat-value streak-val">
-              {WordleIcons.streak} {userStats.streak}
+              {userStats.streak}
             </span>
           </div>
         </div>
@@ -471,30 +471,27 @@ export default function WordlePage() {
                 </div>
               </div>
               <div className="champions-podium">
-                {/* Silver - Rank 2 */}
-                {weeklyWinners[1] && (
-                  <div className="podium-item rank-2">
-                    <div className="podium-rank">2</div>
-                    <div className="podium-avatar">🥈</div>
-                    <div className="podium-name">{weeklyWinners[1].name.split(' ')[0]}</div>
-                    <div className="podium-score">{weeklyWinners[1].points}</div>
-                  </div>
-                )}
                 {/* Gold - Rank 1 */}
                 {weeklyWinners[0] && (
                   <div className="podium-item rank-1">
-                    <div className="podium-rank">1</div>
-                    <div className="podium-avatar">🥇</div>
-                    <div className="podium-name">{weeklyWinners[0].name.split(' ')[0]}</div>
+                    <div className="podium-rank">🥇</div>
+                    <div className="podium-name">{weeklyWinners[0].name}</div>
                     <div className="podium-score">{weeklyWinners[0].points}</div>
+                  </div>
+                )}
+                {/* Silver - Rank 2 */}
+                {weeklyWinners[1] && (
+                  <div className="podium-item rank-2">
+                    <div className="podium-rank">🥈</div>
+                    <div className="podium-name">{weeklyWinners[1].name}</div>
+                    <div className="podium-score">{weeklyWinners[1].points}</div>
                   </div>
                 )}
                 {/* Bronze - Rank 3 */}
                 {weeklyWinners[2] && (
                   <div className="podium-item rank-3">
-                    <div className="podium-rank">3</div>
-                    <div className="podium-avatar">🥉</div>
-                    <div className="podium-name">{weeklyWinners[2].name.split(' ')[0]}</div>
+                    <div className="podium-rank">🥉</div>
+                    <div className="podium-name">{weeklyWinners[2].name}</div>
                     <div className="podium-score">{weeklyWinners[2].points}</div>
                   </div>
                 )}

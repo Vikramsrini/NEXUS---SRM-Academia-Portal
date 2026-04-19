@@ -98,7 +98,7 @@
 
 .wordle-howto-btn {
   padding: 8px 16px;
-  border-radius: 12px;
+  border-radius: 14px;
   border: 1px solid var(--border-secondary);
   background: var(--surface-secondary);
   color: var(--text-secondary);
@@ -106,6 +106,11 @@
   font-size: 0.8rem;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 120px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .wordle-howto-btn:hover {
@@ -119,8 +124,12 @@
   padding: 8px 16px;
   border-radius: 14px;
   border: 1px solid var(--border-secondary);
-  min-width: 80px;
-  text-align: center;
+  width: 120px;
+  height: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .stat-label {
@@ -145,7 +154,7 @@
 /* ── Split Layout ── */
 .wordle-main-split {
   display: grid;
-  grid-template-columns: 1fr 340px;
+  grid-template-columns: 1fr 380px;
   gap: 32px;
 }
 
@@ -395,107 +404,80 @@
 
 .champions-podium {
   display: flex;
-  align-items: flex-end;
-  justify-content: center;
+  flex-direction: column;
   gap: 10px;
   margin: 20px 0 10px;
-  padding-bottom: 8px;
 }
 
 .podium-item {
-  flex: 1;
-  min-width: 88px;
   display: flex;
-  flex-direction: column;
   align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
   background: var(--surface-secondary);
   border-radius: 16px;
-  padding: 16px 6px 12px;
-  position: relative;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  border: 1px solid var(--border-secondary);
+  border: 1px solid transparent;
+  transition: all 0.3s;
 }
 
 .podium-item:hover {
-  transform: translateY(-5px);
   background: var(--surface-tertiary);
+  border-color: var(--border-secondary);
+  transform: scale(1.02);
 }
 
 .podium-rank {
-  position: absolute;
-  top: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 22px;
-  height: 22px;
-  background: var(--surface-primary);
-  border-radius: 50%;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.65rem;
   font-weight: 900;
-  color: var(--text-primary);
+  font-size: 1.4rem;
+  border-radius: 50%;
+  background: var(--surface-tertiary);
   border: 1px solid var(--border-secondary);
 }
 
 .podium-avatar {
-  font-size: 1.8rem;
-  margin-bottom: 6px;
+  font-size: 1.2rem;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
 }
 
 .podium-name {
-  font-size: 0.8rem;
-  font-weight: 900;
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 600;
   color: var(--text-primary);
-  text-align: center;
-  white-space: normal;
-  word-break: break-word;
-  width: 100%;
-  padding: 0 6px;
-  margin-bottom: 2px;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .podium-score {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   font-weight: 800;
-  color: var(--text-secondary);
-  margin-top: 2px;
+  color: var(--text-primary);
 }
 
 /* Rank Specific Enhancements */
-.rank-1 {
-  height: 140px;
-  background: linear-gradient(to top, rgba(250, 204, 21, 0.12), rgba(250, 204, 21, 0.04));
-  border-color: rgba(250, 204, 21, 0.4);
-  box-shadow: 0 8px 20px -5px rgba(250, 204, 21, 0.15);
+.rank-1 .podium-rank {
+  background: linear-gradient(135deg, #facc15 0%, #eab308 100%);
+  border-color: #ca8a04;
 }
-.rank-1 .podium-avatar { font-size: 2.2rem; }
-.rank-1 .podium-name {
-  color: #78350f;
-  font-size: 0.88rem;
-  font-weight: 900;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.4);
+
+.rank-2 .podium-rank {
+  background: linear-gradient(135deg, #d1d5db 0%, #9ca3af 100%);
+  border-color: #6b7280;
 }
-.rank-1 .podium-score { color: #92400e; font-size: 1rem; font-weight: 900; }
-.rank-1 .podium-rank { background: #facc15; border-color: #facc15; color: #000; font-weight: 900; }
 
-[data-theme="dark"] .rank-1 .podium-name {
-  color: #fde68a;
-  text-shadow: 0 0 12px rgba(250, 204, 21, 0.5);
+.rank-3 .podium-rank {
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  border-color: #92400e;
 }
-[data-theme="dark"] .rank-1 .podium-score { color: #facc15; }
 
-.rank-2 { height: 118px; border-color: rgba(161, 161, 170, 0.35); }
-.rank-2 .podium-name { color: var(--text-primary); font-weight: 900; }
-.rank-2 .podium-score { color: var(--text-secondary); }
-
-.rank-3 { height: 108px; border-color: rgba(217, 119, 6, 0.35); }
-.rank-3 .podium-name { color: var(--text-primary); font-weight: 900; }
-.rank-3 .podium-score { color: #d97706; }
+.rank-1 { background: linear-gradient(to right, rgba(250, 204, 21, 0.1), transparent); border-color: rgba(250, 204, 21, 0.2) !important; }
 
 .podium-footer {
   text-align: center;
@@ -558,17 +540,28 @@
   .wordle-banner-icon { width: 32px; height: 32px; border-radius: 8px; }
   .wordle-banner-text h2 { font-size: 0.95rem; }
 
-  /* Stats bar: How to Play | Total Score | Streak — in one even row */
+  /* Stats bar: How to Play | Total Score | Streak — all equal size */
   .wordle-stats-bar {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
-    align-items: center;
+    align-items: stretch;
     gap: 8px;
     width: 100%;
   }
-  .wordle-howto-btn { flex: 1; text-align: center; padding: 8px 6px; font-size: 0.8rem; }
-  .wordle-stat-box  { flex: 1; min-width: 0; padding: 6px 4px; border-radius: 10px; text-align: center; }
+  .wordle-howto-btn,
+  .wordle-stat-box {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 10px 6px;
+    border-radius: 12px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    box-sizing: border-box;
+  }
   .stat-value { font-size: 0.95rem; }
 
   /* Main split → single col */
@@ -607,22 +600,22 @@
   /* Leaderboard sidebar */
   .wordle-leaderboard-side { gap: 16px; }
 
-  /* Podium */
+  /* Champions — vertical list on mobile */
+  .winners-podium-section {
+    padding: 20px 12px;
+    border-radius: 20px;
+    width: 100%;
+    box-sizing: border-box;
+  }
   .champions-podium { gap: 8px; margin: 15px 0 8px; }
   .podium-item {
-    min-width: 0;
-    height: auto !important;
-    padding: 14px 4px 10px;
+    padding: 10px 12px;
     border-radius: 12px;
   }
-  .rank-1 { box-shadow: none; }
-  .podium-avatar { font-size: 1.5rem; margin-bottom: 4px; }
-  .rank-1 .podium-avatar { font-size: 1.8rem; }
-  .podium-name { font-size: 0.65rem; padding: 0 2px; }
-  .rank-1 .podium-name { font-size: 0.7rem; }
-  .podium-score { font-size: 0.72rem; }
-  .rank-1 .podium-score { font-size: 0.85rem; }
-  .podium-rank { width: 18px; height: 18px; font-size: 0.6rem; top: -8px; }
+  .podium-rank { width: 24px; height: 24px; font-size: 0.8rem; }
+  .podium-avatar { font-size: 1rem; }
+  .podium-name { font-size: 0.85rem; }
+  .podium-score { font-size: 0.85rem; }
 }
 
 @keyframes animate-glow {
