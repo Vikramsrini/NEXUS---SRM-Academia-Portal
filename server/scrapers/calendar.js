@@ -28,6 +28,13 @@ export function getCalendarUrls() {
     urls.push(`${base}${yearStr}_EVEN`);
   }
 
+  // Explicitly add 2026-27 planners
+  const futureOdd = `${base}2026_27_ODD`;
+  const futureEven = `${base}2026_27_EVEN`;
+  
+  if (!urls.includes(futureOdd)) urls.push(futureOdd);
+  if (!urls.includes(futureEven)) urls.push(futureEven);
+
   return urls;
 }
 
@@ -208,15 +215,30 @@ export function parseSrmCalendar(rawResponse) {
     });
   });
 
-  // Build year from header text
-  const yearMatch = months[0]?.label.match(/'(\d{2})/) || months[0]?.label.match(/(\d{4})/);
-  const yearStr = yearMatch ? (yearMatch[1].length === 2 ? '20' + yearMatch[1] : yearMatch[1]) : String(new Date().getFullYear());
+  // Format output with correct year for each month
+  const calendar = months.map(m => {
+    // Extract year from this specific month's label
+    const yearMatch = m.label.match(/'(\d{2})/) || m.label.match(/(\d{4})/);
+    let monthYear = String(new Date().getFullYear());
+    
+    if (yearMatch) {
+      monthYear = yearMatch[1].length === 2 ? '20' + yearMatch[1] : yearMatch[1];
+    } else {
+      // Fallback: If no year in label, try to infer from surrounding months
+      const firstYearMatch = months[0].label.match(/'(\d{2})/) || months[0].label.match(/(\d{4})/);
+      if (firstYearMatch) {
+        let baseYear = parseInt(firstYearMatch[1].length === 2 ? '20' + firstYearMatch[1] : firstYearMatch[1]);
+        // If current month index is less than first month index, it's likely next year
+        if (m.monthIdx < months[0].monthIdx) baseYear++;
+        monthYear = String(baseYear);
+      }
+    }
 
-  // Format output
-  const calendar = months.map(m => ({
-    month: `${m.fullName} ${yearStr}`,
-    days: m.days,
-  }));
+    return {
+      month: `${m.fullName} ${monthYear}`,
+      days: m.days,
+    };
+  });
 
   const totalDays = calendar.reduce((s, m) => s + m.days.length, 0);
   console.log(`[Calendar] Parsed ${calendar.length} months, ${totalDays} days total`);

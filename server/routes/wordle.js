@@ -20,13 +20,6 @@ function getDateKey() {
 
 function getWeekKey() {
   const now = new Date();
-  const fmt = new Intl.DateTimeFormat('en-CA', {
-    timeZone: TIMEZONE,
-    year: 'numeric',
-  });
-  const year = fmt.format(now);
-  
-  // Get current date in IST
   const istDateStr = new Intl.DateTimeFormat('en-CA', {
     timeZone: TIMEZONE,
     year: 'numeric',
@@ -36,14 +29,14 @@ function getWeekKey() {
   const [y, m, d] = istDateStr.split('-').map(Number);
   const istDate = new Date(Date.UTC(y, m - 1, d));
   
-  // Find Monday of current week (week starts Monday 12 AM IST)
+  // Find Sunday of current week (week starts Sunday 12 AM IST)
   const dayOfWeek = istDate.getUTCDay(); // 0 = Sunday, 1 = Monday, ...
-  const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-  const monday = new Date(istDate);
-  monday.setUTCDate(istDate.getUTCDate() - daysSinceMonday);
+  const daysSinceSunday = dayOfWeek;
+  const sunday = new Date(istDate);
+  sunday.setUTCDate(istDate.getUTCDate() - daysSinceSunday);
   
-  // Format as YYYY-MM-DD of Monday
-  const weekStart = `${monday.getUTCFullYear()}-${String(monday.getUTCMonth() + 1).padStart(2, '0')}-${String(monday.getUTCDate()).padStart(2, '0')}`;
+  // Format as YYYY-MM-DD of Sunday
+  const weekStart = `${sunday.getUTCFullYear()}-${String(sunday.getUTCMonth() + 1).padStart(2, '0')}-${String(sunday.getUTCDate()).padStart(2, '0')}`;
   
   return weekStart;
 }
@@ -296,7 +289,7 @@ router.get('/weekly-winners', requireAuth, async (req, res) => {
     const supabase = getSupabaseAdmin();
     if (!supabase) return res.status(500).json({ error: 'DB unavailable' });
 
-    // Get last completed week (previous Monday)
+    // Get last completed week (previous Sunday)
     const now = new Date();
     const istDateStr = new Intl.DateTimeFormat('en-CA', {
       timeZone: TIMEZONE,
@@ -307,16 +300,15 @@ router.get('/weekly-winners', requireAuth, async (req, res) => {
     const [y, m, d] = istDateStr.split('-').map(Number);
     const istDate = new Date(Date.UTC(y, m - 1, d));
     
-    // Find Monday of current week
+    // Find Sunday of current week
     const dayOfWeek = istDate.getUTCDay();
-    const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-    const currentMonday = new Date(istDate);
-    currentMonday.setUTCDate(istDate.getUTCDate() - daysSinceMonday);
+    const currentSunday = new Date(istDate);
+    currentSunday.setUTCDate(istDate.getUTCDate() - dayOfWeek);
     
-    // Get previous Monday (last week's start)
-    const prevMonday = new Date(currentMonday);
-    prevMonday.setUTCDate(currentMonday.getUTCDate() - 7);
-    const lastWeekKey = `${prevMonday.getUTCFullYear()}-${String(prevMonday.getUTCMonth() + 1).padStart(2, '0')}-${String(prevMonday.getUTCDate()).padStart(2, '0')}`;
+    // Get previous Sunday (last week's start)
+    const prevSunday = new Date(currentSunday);
+    prevSunday.setUTCDate(currentSunday.getUTCDate() - 7);
+    const lastWeekKey = `${prevSunday.getUTCFullYear()}-${String(prevSunday.getUTCMonth() + 1).padStart(2, '0')}-${String(prevSunday.getUTCDate()).padStart(2, '0')}`;
 
     // Get top 3 from last week using cumulative_score
     // (This column is populated with the previous week's final total_score during the reset)

@@ -21,12 +21,25 @@ function parseMonthYear(monthStr) {
   const cleaned = monthStr.replace(/[–—-]/g, ' ').trim();
   const parts = cleaned.split(/\s+/);
   let monthName = parts[0];
-  let year = parts.find(p => /^\d{4}$/.test(p));
-  const monthIdx = MONTH_NAMES.findIndex(m => m.toLowerCase() === monthName.toLowerCase());
+  let yearPart = parts.find(p => /^\d{4}$/.test(p) || /^'\d{2}$/.test(p) || /^\d{2}$/.test(p));
+  
+  let year = new Date().getFullYear();
+  if (yearPart) {
+    if (yearPart.startsWith("'")) {
+      year = 2000 + parseInt(yearPart.slice(1));
+    } else if (yearPart.length === 2) {
+      year = 2000 + parseInt(yearPart);
+    } else {
+      year = parseInt(yearPart);
+    }
+  }
+
+  const monthIdx = MONTH_NAMES.findIndex(m => m.toLowerCase().startsWith(monthName.toLowerCase().slice(0, 3)));
   return {
     monthIdx: monthIdx >= 0 ? monthIdx : 0,
-    year: year ? parseInt(year) : new Date().getFullYear(),
+    year,
     label: monthName.charAt(0).toUpperCase() + monthName.slice(1).toLowerCase(),
+    fullLabel: `${monthName.charAt(0).toUpperCase() + monthName.slice(1).toLowerCase()} ${year}`
   };
 }
 
@@ -39,10 +52,12 @@ export default function CalendarPage() {
   const [error, setError] = useState('');
   const [selectedMonthIdx, setSelectedMonthIdx] = useState(() => {
     if (!hasCachedCalendar) return 0;
-    const curMonth = new Date().getMonth();
+    const now = new Date();
+    const curMonth = now.getMonth();
+    const curYear = now.getFullYear();
     const idx = cachedStudent.calendar.findIndex(m => {
       const parsed = parseMonthYear(m.month);
-      return parsed.monthIdx === curMonth;
+      return parsed.monthIdx === curMonth && parsed.year === curYear;
     });
     return idx >= 0 ? idx : 0;
   });
@@ -51,16 +66,22 @@ export default function CalendarPage() {
 
   const currentMonthIdx = useMemo(() => {
     if (!calendarData.length) return -1;
-    const curMonth = new Date().getMonth();
-    return calendarData.findIndex((m) => parseMonthYear(m.month).monthIdx === curMonth);
+    const now = new Date();
+    const curMonth = now.getMonth();
+    const curYear = now.getFullYear();
+    return calendarData.findIndex((m) => {
+      const parsed = parseMonthYear(m.month);
+      return parsed.monthIdx === curMonth && parsed.year === curYear;
+    });
   }, [calendarData]);
 
   function selectCurrentMonth(data) {
     const now = new Date();
     const curMonth = now.getMonth();
+    const curYear = now.getFullYear();
     const idx = data.findIndex(m => {
       const parsed = parseMonthYear(m.month);
-      return parsed.monthIdx === curMonth;
+      return parsed.monthIdx === curMonth && parsed.year === curYear;
     });
     setSelectedMonthIdx(idx >= 0 ? idx : 0);
   }
@@ -76,10 +97,16 @@ export default function CalendarPage() {
         const res = await fetch(apiUrl('/calendar'), { headers: { Authorization: `Bearer ${token}` } });
         const data = await res.json();
         if (data.calendar?.length) {
-          setCalendarData(data.calendar);
+          // Sort calendar data by date to ensure correct order
+          const sortedCalendar = [...data.calendar].sort((a, b) => {
+            const pa = parseMonthYear(a.month);
+            const pb = parseMonthYear(b.month);
+            return (pa.year * 12 + pa.monthIdx) - (pb.year * 12 + pb.monthIdx);
+          });
+          setCalendarData(sortedCalendar);
           setSource('live');
-          selectCurrentMonth(data.calendar);
-          updateStoredStudentData({ ...getStudentData(), calendar: data.calendar });
+          selectCurrentMonth(sortedCalendar);
+          updateStoredStudentData({ ...getStudentData(), calendar: sortedCalendar });
         }
       } catch {
         if (!hasCachedCalendar) setError('Failed to fetch calendar');
@@ -144,7 +171,7 @@ export default function CalendarPage() {
       events: monthEvents.length,
       workingDays,
       todayOrder: todayEntry?.dayOrder || 'No day order',
-      monthLabel: `${parsedMonth.label} ${parsedMonth.year}`,
+      monthLabel: parsedMonth.fullLabel,
     };
   }, [calendarGrid, monthEvents.length, parsedMonth, selectedMonth]);
 
@@ -167,11 +194,19 @@ export default function CalendarPage() {
     );
   }
 
+  // Determine if we should show years in pills (if calendar data spans multiple years)
+  const showYearsInPills = useMemo(() => {
+    if (calendarData.length < 2) return false;
+    const firstYear = parseMonthYear(calendarData[0].month).year;
+    const lastYear = parseMonthYear(calendarData[calendarData.length - 1].month).year;
+    return firstYear !== lastYear;
+  }, [calendarData]);
+
   return (
     <div className="apple-page-container cal-page-apple">
       <div className="subpage-header">
         <div className="subpage-title-group">
-          <h1 className="subpage-title">{parsedMonth ? `${parsedMonth.label} ${parsedMonth.year}` : 'Calendar'}</h1>
+          <h1 className="subpage-title">{parsedMonth ? parsedMonth.fullLabel : 'Calendar'}</h1>
           <p className="subpage-desc">Academic schedule {source === 'live' ? '• Live' : '• Synced'}</p>
         </div>
         
@@ -189,9 +224,12 @@ export default function CalendarPage() {
           <div className="cal-pills-wrap" ref={pillsRef}>
             {calendarData.map((m, i) => {
               const pm = parseMonthYear(m.month);
+              const pillLabel = showYearsInPills 
+                ? `${pm.label.slice(0, 3)} '${String(pm.year).slice(-2)}`
+                : pm.label.slice(0, 3);
               return (
                 <button key={i} className={`cal-pill ${i === selectedMonthIdx ? 'active' : ''}`} onClick={() => setSelectedMonthIdx(i)}>
-                  {pm.label.slice(0, 3)}
+                  {pillLabel}
                 </button>
               );
             })}

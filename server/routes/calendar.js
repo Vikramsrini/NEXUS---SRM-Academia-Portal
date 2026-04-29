@@ -5,7 +5,7 @@ import { getCalendarUrls, parseSrmCalendar } from '../scrapers/calendar.js';
 import { getSupabaseAdmin } from '../lib/supabase.js';
 
 const router = Router();
-const SYNC_THRESHOLD_MS = 1000 * 60 * 60 * 24 * 1; // Monthly refresh
+const SYNC_THRESHOLD_MS = 1000 * 60 * 60 * 1; // 1 hour refresh cycle
 
 /**
  * Fetch calendar with multiple strategies
@@ -75,7 +75,8 @@ router.get('/calendar', requireAuth, async (req, res) => {
 
   // 2. Fetch Fresh Data (Scraper)
   const urls = getCalendarUrls();
-  let freshParsed = null;
+  let mergedCalendar = [];
+  let fetchedAny = false;
 
   for (const url of urls) {
     try {
@@ -84,8 +85,14 @@ router.get('/calendar', requireAuth, async (req, res) => {
 
       const parsed = parseSrmCalendar(rawData);
       if (parsed.calendar?.length > 0) {
-        freshParsed = parsed;
-        break;
+        // Merge without duplicates and ONLY keep 2026+ data
+        parsed.calendar.forEach(newMo => {
+          const is2026OrLater = newMo.month.includes('2026') || newMo.month.includes('2027');
+          if (is2026OrLater && !mergedCalendar.some(m => m.month === newMo.month)) {
+            mergedCalendar.push(newMo);
+          }
+        });
+        fetchedAny = true;
       }
     } catch (e) {
       console.log('[Calendar Scraper Error]', url, e.message);
@@ -93,7 +100,8 @@ router.get('/calendar', requireAuth, async (req, res) => {
   }
 
   // 3. Sync to Shared Cache and Return
-  if (freshParsed) {
+  if (fetchedAny && mergedCalendar.length > 0) {
+    const freshParsed = { calendar: mergedCalendar };
     if (supabase) {
       try {
         await supabase.from('global_calendar').upsert({
@@ -101,7 +109,7 @@ router.get('/calendar', requireAuth, async (req, res) => {
           data: freshParsed,
           updated_at: new Date().toISOString()
         }, { onConflict: 'id' });
-        console.log('[Calendar] Shared global cache updated');
+        console.log('[Calendar] Shared global cache updated with', mergedCalendar.length, 'months');
       } catch (saveErr) {
         console.error('[Calendar DB Sync Error]', saveErr.message);
       }

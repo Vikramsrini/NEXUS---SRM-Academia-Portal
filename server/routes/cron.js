@@ -136,14 +136,14 @@ router.get('/wordle', verifyCronAuth, async (req, res) => {
   }
 });
 
-// Wordle Weekly Reset & Winners Announcement - Monday 12:05 AM
+// Wordle Weekly Reset & Winners Announcement - Sunday 12:00 AM IST
 router.get('/wordle-weekly-reset', verifyCronAuth, async (req, res) => {
   try {
     console.log('[Cron] Performing weekly Wordle reset...');
     const supabase = getSupabaseAdmin();
     if (!supabase) return res.status(500).json({ error: 'DB unavailable' });
 
-    // 1. Snapshot the current top players for the announcement
+    // 1. Snapshot the current top players for the response/log
     const { data: winners } = await supabase
       .from('wordle_scores')
       .select('name, total_score')
@@ -151,13 +151,30 @@ router.get('/wordle-weekly-reset', verifyCronAuth, async (req, res) => {
       .order('total_score', { ascending: false })
       .limit(3);
 
-    // 3. Perform global reset: Move total_score to cumulative_score and reset total_score
-    // We use a Postgres RPC function to do this atomically for all users.
+    // 2. Perform global reset: Move total_score to cumulative_score and reset total_score
+    // Try calling the RPC first (most efficient)
     const { error: sqlError } = await supabase.rpc('reset_wordle_weekly_scores');
     
     if (sqlError) {
-      console.error('[Cron] RPC reset failed:', sqlError);
-      return res.status(500).json({ error: 'Failed to perform reset in DB' });
+      console.warn('[Cron] RPC reset failed, falling back to manual update:', sqlError.message);
+      
+      // Manual fallback: Fetch all users with scores and update them
+      const { data: allScores } = await supabase
+        .from('wordle_scores')
+        .select('netid, total_score')
+        .gt('total_score', 0);
+
+      if (allScores && allScores.length > 0) {
+        for (const user of allScores) {
+          await supabase
+            .from('wordle_scores')
+            .update({
+              cumulative_score: user.total_score,
+              total_score: 0
+            })
+            .eq('netid', user.netid);
+        }
+      }
     }
 
     res.json({ success: true, winnersFound: winners?.length || 0 });
