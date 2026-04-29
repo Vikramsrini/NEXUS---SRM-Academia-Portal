@@ -163,6 +163,7 @@ export function buildTimetable(courses, batch) {
           const last = timetable[timetable.length - 1];
           if (last.day === day) {
             last.time = last.time.split(' - ')[0] + ' - ' + SLOT_TIMES[pIdx].split(' - ')[1];
+            last.hours = (last.hours || 1) + 1;
             continue;
           }
         }
@@ -170,6 +171,7 @@ export function buildTimetable(courses, batch) {
           day,
           dayOrder,
           time: SLOT_TIMES[pIdx],
+          hours: 1,
           subject: course.title,
           room: course.room,
           courseCode: course.code,

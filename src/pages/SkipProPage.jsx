@@ -155,19 +155,67 @@ export default function SkipProPage() {
   const getFutureClassesCount = (courseCode, slotType) => {
     const timetable = student.timetable || [];
     const norm = normalizeSlot(slotType);
-    if (!timetable.length) return 0;
-    let sum = 0;
-    timetable.forEach(cls => {
+    const { limitDate } = predictionRange;
+    if (!timetable.length || !limitDate) return 0;
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+
+    let hidden = [];
+    try { hidden = JSON.parse(localStorage.getItem('academia_hidden_classes') || '[]'); } catch { hidden = []; }
+
+    const parseTime = (timeStr) => {
+      try {
+        const [s, e] = timeStr.split(' - ');
+        const p = (str) => {
+          let [h, m] = str.split(':').map(Number);
+          if (h < 8) h += 12;
+          return h * 60 + m;
+        };
+        return p(e);
+      } catch { return 0; }
+    };
+
+    const courseSessions = timetable.filter(cls => {
       const clsNorm = normalizeSlot(cls.slotType);
-      if (cls.courseCode === courseCode && clsNorm.label === norm.label) {
-         let order = cls.dayOrder;
-         if (order) {
-           if (!order.startsWith('DO') && order.match(/^\d+$/)) order = `DO${order}`;
-           sum += (futureDayOrderTallies[order] || 0);
-         }
-      }
+      return cls.courseCode === courseCode && clsNorm.label === norm.label;
     });
-    return sum;
+
+    let totalHours = 0;
+    const calendar = student.calendar || [];
+
+    calendar.forEach(calMonth => {
+      const pm = parseMonthYear(calMonth.month);
+      calMonth.days?.forEach(d => {
+        if (!d.dayOrder) return;
+        const dateNum = parseInt(d.date);
+        if (!dateNum) return;
+        const dateObj = new Date(pm.year, pm.monthIdx, dateNum);
+        
+        if (dateObj < today || dateObj > limitDate) return;
+
+        const isToday = dateObj.getTime() === today.getTime();
+        let order = d.dayOrder;
+        if (!order.startsWith('DO') && order.match(/^\d+$/)) order = `DO${order}`;
+
+        courseSessions.forEach(cls => {
+          let clsOrder = cls.dayOrder;
+          if (clsOrder && !clsOrder.startsWith('DO') && clsOrder.match(/^\d+$/)) clsOrder = `DO${clsOrder}`;
+
+          if (clsOrder === order) {
+            const id = `${cls.courseCode}_${cls.time}_${cls.dayOrder || cls.day}`;
+            if (hidden.includes(id)) return;
+
+            if (isToday && cls.time && currentMinutes >= parseTime(cls.time)) return;
+
+            totalHours += (parseInt(cls.hours) || 1);
+          }
+        });
+      });
+    });
+
+    return totalHours;
   };
 
   const predictionRange = useMemo(() => {
@@ -186,15 +234,13 @@ export default function SkipProPage() {
       });
     });
 
-    if (!allDays.length) return { limitDate: null, tallies: {} };
+    if (!allDays.length) return { limitDate: null };
 
     allDays.sort((a, b) => a.date - b.date);
 
-    // Find the start of future classes
     let startIndex = allDays.findIndex(d => d.date >= now);
-    if (startIndex === -1) return { limitDate: null, tallies: {} };
+    if (startIndex === -1) return { limitDate: null };
 
-    // Detect the end of the current semester block (first gap > 15 days)
     let limitDate = allDays[allDays.length - 1].date;
     for (let i = startIndex; i < allDays.length - 1; i++) {
       const gap = (allDays[i + 1].date - allDays[i].date) / (1000 * 60 * 60 * 24);
@@ -204,19 +250,8 @@ export default function SkipProPage() {
       }
     }
 
-    const tallies = {};
-    allDays.forEach(item => {
-      if (item.date >= now && item.date <= limitDate) {
-        let order = item.order;
-        if (!order.startsWith('DO') && order.match(/^\d+$/)) order = `DO${order}`;
-        tallies[order] = (tallies[order] || 0) + 1;
-      }
-    });
-
-    return { tallies, limitDate };
+    return { limitDate };
   }, [student.calendar]);
-
-  const futureDayOrderTallies = predictionRange.tallies;
 
   const lastWorkingDay = useMemo(() => {
     const { limitDate } = predictionRange;
@@ -267,7 +302,7 @@ export default function SkipProPage() {
     });
     return { safe, caution, risk };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [FILTERED_ATTENDANCE, manualAdjs, targetPct, odDayOrders, futureDayOrderTallies, student.timetable]);
+  }, [FILTERED_ATTENDANCE, manualAdjs, targetPct, odDayOrders, predictionRange, student.timetable, student.calendar]);
 
   return (
     <div className="apple-page-container skippro-page">
