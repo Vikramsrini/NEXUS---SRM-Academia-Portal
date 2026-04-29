@@ -152,25 +152,6 @@ export default function SkipProPage() {
     return sum;
   };
 
-  const futureDayOrderTallies = useMemo(() => {
-    const calendar = student.calendar || [];
-    const tallies = {};
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    calendar.forEach(calMonth => {
-      const pm = parseMonthYear(calMonth.month);
-      calMonth.days?.forEach(d => {
-        if (!d.dayOrder) return;
-        let dateNum = parseInt(d.date);
-        if (!dateNum || new Date(pm.year, pm.monthIdx, dateNum).getTime() < now.getTime()) return;
-        let order = d.dayOrder;
-        if (!order.startsWith('DO') && order.match(/^\d+$/)) order = `DO${order}`;
-        tallies[order] = (tallies[order] || 0) + 1;
-      });
-    });
-    return tallies;
-  }, [student.calendar]);
-
   const getFutureClassesCount = (courseCode, slotType) => {
     const timetable = student.timetable || [];
     const norm = normalizeSlot(slotType);
@@ -189,22 +170,59 @@ export default function SkipProPage() {
     return sum;
   };
 
-  const lastWorkingDay = useMemo(() => {
-    if (!student.calendar?.length) return 'Unknown';
-    let lastDate = null;
-    let lastMonthName = '';
-    for (let i = student.calendar.length - 1; i >= 0; i--) {
-      const calMonth = student.calendar[i];
-      if (!calMonth.days) continue;
+  const predictionRange = useMemo(() => {
+    const calendar = student.calendar || [];
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    const allDays = [];
+    calendar.forEach(calMonth => {
       const pm = parseMonthYear(calMonth.month);
-      for (let j = calMonth.days.length - 1; j >= 0; j--) {
-         const d = calMonth.days[j];
-         if (d.dayOrder && parseInt(d.date)) { lastDate = d.date; lastMonthName = MONTH_NAMES[pm.monthIdx]; break; }
+      calMonth.days?.forEach(d => {
+        if (!d.dayOrder) return;
+        const dateNum = parseInt(d.date);
+        if (!dateNum) return;
+        allDays.push({ date: new Date(pm.year, pm.monthIdx, dateNum), order: d.dayOrder });
+      });
+    });
+
+    if (!allDays.length) return { limitDate: null, tallies: {} };
+
+    allDays.sort((a, b) => a.date - b.date);
+
+    // Find the start of future classes
+    let startIndex = allDays.findIndex(d => d.date >= now);
+    if (startIndex === -1) return { limitDate: null, tallies: {} };
+
+    // Detect the end of the current semester block (first gap > 15 days)
+    let limitDate = allDays[allDays.length - 1].date;
+    for (let i = startIndex; i < allDays.length - 1; i++) {
+      const gap = (allDays[i + 1].date - allDays[i].date) / (1000 * 60 * 60 * 24);
+      if (gap > 15) {
+        limitDate = allDays[i].date;
+        break;
       }
-      if (lastDate) break;
     }
-    return lastDate ? `${lastMonthName} ${lastDate}` : 'Unknown';
+
+    const tallies = {};
+    allDays.forEach(item => {
+      if (item.date >= now && item.date <= limitDate) {
+        let order = item.order;
+        if (!order.startsWith('DO') && order.match(/^\d+$/)) order = `DO${order}`;
+        tallies[order] = (tallies[order] || 0) + 1;
+      }
+    });
+
+    return { tallies, limitDate };
   }, [student.calendar]);
+
+  const futureDayOrderTallies = predictionRange.tallies;
+
+  const lastWorkingDay = useMemo(() => {
+    const { limitDate } = predictionRange;
+    if (!limitDate) return 'Unknown';
+    return `${MONTH_NAMES[limitDate.getMonth()]} ${limitDate.getDate()}`;
+  }, [predictionRange]);
 
   const FILTERED_ATTENDANCE = useMemo(() => {
     return attendance.filter(a => {
