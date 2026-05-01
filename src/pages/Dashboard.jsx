@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState, useMemo, useCallback } fr
 import { createPortal } from 'react-dom';
 import { useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { useTheme } from '../ThemeContext';
-import { fetchThoughtOfDay, fetchOdState, saveOdState, fetchWeeklyWinners } from '../lib/api';
+import { API_BASE, fetchThoughtOfDay, fetchOdState, saveOdState, fetchWeeklyWinners } from '../lib/api';
 import { normalizeCourseCode } from '../lib/slotTypes';
 import FeaturesModal from '../components/FeaturesModal';
 import NotificationManager from '../components/NotificationManager';
@@ -292,8 +292,6 @@ export default function Dashboard({ children }) {
     }
 
     try {
-      const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000/api';
-
       // Try Fast Sync first
       const res = await fetch(`${API_BASE}/auth/sync-fast`, {
         method: 'POST',

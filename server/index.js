@@ -33,11 +33,48 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ── Middleware ─────────────────────────────────────────────────────────
+const configuredOrigins = (process.env.FRONTEND_URL || '')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const allowedOrigins = new Set([
+  'http://localhost:5173',
+  'http://127.0.0.1:5173',
+  'https://nexus-srm-academia-portal.vercel.app',
+  'https://nexus-vikramsrinis-projects.vercel.app',
+  'https://nexus-git-main-vikramsrinis-projects.vercel.app',
+  ...configuredOrigins,
+]);
+
+function isAllowedVercelOrigin(origin) {
+  try {
+    const { hostname, protocol } = new URL(origin);
+    if (protocol !== 'https:') return false;
+
+    return (
+      hostname === 'nexus-srm-academia-portal.vercel.app' ||
+      hostname === 'nexus-vikramsrinis-projects.vercel.app' ||
+      /^nexus-[a-z0-9-]+-vikramsrinis-projects\.vercel\.app$/.test(hostname)
+    );
+  } catch {
+    return false;
+  }
+}
+
 const corsOptions = {
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.has(origin) || isAllowedVercelOrigin(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error(`Not allowed by CORS: ${origin}`));
+  },
   credentials: true
 };
 app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json());
 
 // ── Routes ────────────────────────────────────────────────────────────

@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:3000/api';
+const API_BASE = import.meta.env.VITE_API_BASE || (import.meta.env.DEV ? 'http://localhost:3000/api' : '/api');
 
 export function apiUrl(path) {
   return `${API_BASE}${path}`;
@@ -205,4 +205,3 @@ export async function fetchAllTimeLeaderboard() {
 }
 
 export { API_BASE };
-
