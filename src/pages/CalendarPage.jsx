@@ -161,19 +161,12 @@ export default function CalendarPage() {
     return events.sort((a, b) => (parseInt(a.date) || 0) - (parseInt(b.date) || 0));
   }, [selectedMonth]);
 
-  const calendarInsights = useMemo(() => {
-    if (!selectedMonth || !parsedMonth) return null;
-
-    const workingDays = (selectedMonth.days || []).filter(day => day.dayOrder).length;
-    const todayEntry = calendarGrid.find(cell => cell.isToday && !cell.blank);
-
-    return {
-      events: monthEvents.length,
-      workingDays,
-      todayOrder: todayEntry?.dayOrder || 'No day order',
-      monthLabel: parsedMonth.fullLabel,
-    };
-  }, [calendarGrid, monthEvents.length, parsedMonth, selectedMonth]);
+  const showYearsInPills = useMemo(() => {
+    if (calendarData.length < 2) return false;
+    const firstYear = parseMonthYear(calendarData[0].month).year;
+    const lastYear = parseMonthYear(calendarData[calendarData.length - 1].month).year;
+    return firstYear !== lastYear;
+  }, [calendarData]);
 
   if (loading && calendarData.length === 0) {
     return (
@@ -193,14 +186,6 @@ export default function CalendarPage() {
       </div>
     );
   }
-
-  // Determine if we should show years in pills (if calendar data spans multiple years)
-  const showYearsInPills = useMemo(() => {
-    if (calendarData.length < 2) return false;
-    const firstYear = parseMonthYear(calendarData[0].month).year;
-    const lastYear = parseMonthYear(calendarData[calendarData.length - 1].month).year;
-    return firstYear !== lastYear;
-  }, [calendarData]);
 
   return (
     <div className="apple-page-container cal-page-apple">
