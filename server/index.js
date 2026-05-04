@@ -42,6 +42,7 @@ const allowedOrigins = new Set([
   'http://localhost:5173',
   'http://127.0.0.1:5173',
   'https://nexus-srm-academia-portal.vercel.app',
+  'https://nexus-srm-academia-portal-pi.vercel.app',
   'https://nexus-vikramsrinis-projects.vercel.app',
   'https://nexus-git-main-vikramsrinis-projects.vercel.app',
   ...configuredOrigins,
@@ -54,7 +55,9 @@ function isAllowedVercelOrigin(origin) {
 
     return (
       hostname === 'nexus-srm-academia-portal.vercel.app' ||
+      hostname === 'nexus-srm-academia-portal-pi.vercel.app' ||
       hostname === 'nexus-vikramsrinis-projects.vercel.app' ||
+      /^nexus-srm-academia-portal(?:-[a-z0-9-]+)?\.vercel\.app$/.test(hostname) ||
       /^nexus-[a-z0-9-]+-vikramsrinis-projects\.vercel\.app$/.test(hostname)
     );
   } catch {

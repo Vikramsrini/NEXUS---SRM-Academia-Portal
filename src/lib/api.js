@@ -1,4 +1,30 @@
-const API_BASE = import.meta.env.VITE_API_BASE || (import.meta.env.DEV ? 'http://localhost:3000/api' : '/api');
+function resolveApiBase() {
+  const configuredBase = import.meta.env.VITE_API_BASE;
+
+  if (import.meta.env.DEV) {
+    return configuredBase || 'http://localhost:3000/api';
+  }
+
+  if (!configuredBase) {
+    return '/api';
+  }
+
+  try {
+    const configuredUrl = new URL(configuredBase, window.location.origin);
+    const isVercelApi = configuredUrl.hostname.endsWith('.vercel.app');
+    const isVercelApp = window.location.hostname.endsWith('.vercel.app');
+
+    if (isVercelApi && isVercelApp) {
+      return configuredUrl.pathname.replace(/\/$/, '') || '/api';
+    }
+  } catch {
+    return configuredBase;
+  }
+
+  return configuredBase;
+}
+
+const API_BASE = resolveApiBase();
 
 export function apiUrl(path) {
   return `${API_BASE}${path}`;
