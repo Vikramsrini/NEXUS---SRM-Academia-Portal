@@ -171,7 +171,7 @@ function filterAttendanceRows(attendance) {
 /**
  * Enrolled courses with faculty and room from the last Academia sync.
  */
-export function getMyFacultyEnrollments(student) {
+function getMyFacultyEnrollments(student) {
   const attendance = student.attendance || [];
   const timetableMapping = buildTimetableMapping(student);
   const filtered = filterAttendanceRows(attendance);
@@ -204,7 +204,7 @@ export function getMyFacultyEnrollments(student) {
     .filter(Boolean);
 }
 
-export function extractFacultyIdFromPortal(raw) {
+function extractFacultyIdFromPortal(raw) {
   const m = /\((\d{4,})\)\s*$/.exec(String(raw || '').trim());
   return m ? m[1] : null;
 }
@@ -218,7 +218,7 @@ function stripForNameMatch(s) {
 }
 
 /** Match bundled GradeX directory row to portal faculty string (id or fuzzy name). */
-export function gradexStaffMatchesFacultyRaw(facultyRaw, gradexStaff) {
+function gradexStaffMatchesFacultyRaw(facultyRaw, gradexStaff) {
   const raw = String(facultyRaw || '').trim();
   if (!raw || raw === 'N/A') return false;
 
@@ -232,16 +232,24 @@ export function gradexStaffMatchesFacultyRaw(facultyRaw, gradexStaff) {
   return normRaw.includes(normName) || normName.includes(normRaw);
 }
 
-export function gradexStaffIsMine(gradexStaff, enrollments) {
+function gradexStaffIsMine(gradexStaff, enrollments) {
   if (!enrollments?.length) return false;
   return enrollments.some((row) => gradexStaffMatchesFacultyRaw(row.facultyRaw, gradexStaff));
 }
 
 /** First bundled directory row that matches a portal faculty string, or null. */
-export function findGradexStaffForEnrollment(facultyRaw, staffList) {
+function findGradexStaffForEnrollment(facultyRaw, staffList) {
   if (!staffList?.length) return null;
   for (const s of staffList) {
     if (gradexStaffMatchesFacultyRaw(facultyRaw, s)) return s;
   }
   return null;
 }
+
+export {
+  getMyFacultyEnrollments,
+  extractFacultyIdFromPortal,
+  gradexStaffMatchesFacultyRaw,
+  gradexStaffIsMine,
+  findGradexStaffForEnrollment,
+};
