@@ -9,6 +9,10 @@
       "schedule": "40 5 * * *"
     },
     {
+      "path": "/api/cron/wordle-weekly-reset",
+      "schedule": "30 18 * * 6"
+    },
+    {
       "path": "/api/cron/day-order",
       "schedule": "30 14 * * *"
     }

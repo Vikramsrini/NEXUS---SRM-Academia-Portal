@@ -1,6 +1,7 @@
 import webPush from 'web-push';
 import cron from 'node-cron';
 import { getSupabaseAdmin } from '../lib/supabase.js';
+import { performWordleWeeklyReset } from './wordleWeeklyReset.js';
 
 /**
  * Sends a notification to all subscribed devices for a specific user
@@ -161,6 +162,28 @@ export function initNotificationCrons() {
       url: '/dashboard/wordle'
     });
   });
+
+  // 6. Wordle weekly leaderboard reset — Sunday 00:00 Asia/Kolkata (non-Vercel prod only;
+  //    Vercel uses vercel.json hitting GET /api/cron/wordle-weekly-reset to avoid double-reset).
+  const internalWeeklyReset =
+    process.env.NODE_ENV === 'production' &&
+    !process.env.VERCEL &&
+    process.env.DISABLE_WORDLE_WEEKLY_INTERNAL_CRON !== 'true';
+
+  if (internalWeeklyReset) {
+    cron.schedule(
+      '0 0 * * 0',
+      async () => {
+        console.log('[Cron] Wordle weekly reset (internal IST)...');
+        try {
+          await performWordleWeeklyReset();
+        } catch (err) {
+          console.error('[Cron] Wordle weekly reset error:', err.message);
+        }
+      },
+      { timezone: 'Asia/Kolkata' }
+    );
+  }
 
   console.log('[Push Service] Notification crons initialized');
 }

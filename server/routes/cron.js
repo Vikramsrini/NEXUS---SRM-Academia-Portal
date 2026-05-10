@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { getSupabaseAdmin } from '../lib/supabase.js';
 import { broadcastPushNotification } from '../services/notificationService.js';
+import { performWordleWeeklyReset } from '../services/wordleWeeklyReset.js';
 
 const router = Router();
 
@@ -151,27 +152,7 @@ router.get('/wordle-weekly-reset', verifyCronAuth, async (req, res) => {
       .order('total_score', { ascending: false })
       .limit(3);
 
-    // 2. Perform global reset: Move total_score to cumulative_score and reset total_score
-    // Try calling the RPC first (most efficient)
-    const { error: sqlError } = await supabase.rpc('reset_wordle_weekly_scores');
-    
-    if (sqlError) {
-      console.warn('[Cron] RPC reset failed, falling back to manual update:', sqlError.message);
-
-      const { data: allScores } = await supabase.from('wordle_scores').select('netid, total_score');
-
-      if (allScores && allScores.length > 0) {
-        for (const user of allScores) {
-          await supabase
-            .from('wordle_scores')
-            .update({
-              cumulative_score: user.total_score ?? 0,
-              total_score: 0,
-            })
-            .eq('netid', user.netid);
-        }
-      }
-    }
+    await performWordleWeeklyReset();
 
     res.json({ success: true, winnersFound: winners?.length || 0 });
   } catch (err) {
