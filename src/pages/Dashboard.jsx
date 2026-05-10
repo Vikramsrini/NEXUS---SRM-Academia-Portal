@@ -4,7 +4,6 @@ import { useLocation, useNavigate, Outlet } from 'react-router-dom';
 import { useTheme } from '../ThemeContext';
 import { fetchThoughtOfDay, fetchOdState, saveOdState, fetchWeeklyWinners } from '../lib/api';
 import { normalizeCourseCode } from '../lib/slotTypes';
-import FeaturesModal from '../components/FeaturesModal';
 import NotificationManager from '../components/NotificationManager';
 import './Dashboard.css';
 
@@ -25,6 +24,7 @@ const Icons = {
   more: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" /></svg>,
   close: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.7" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12" /></svg>,
   resources: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" /><path d="M12 7h4" /><path d="M12 11h4" /><path d="M12 15h4" /></svg>,
+  faculty: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>,
   cgpa: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" /><path d="M8 6h8" /><path d="M8 12h1M12 12h1M16 12h.01" /><path d="M8 16h1M12 16h1M16 16h.01" /></svg>,
   warning: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>,
   instagram: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5" /><path d="M16 11.37a4 4 0 1 1-7.75 1.25 4 4 0 0 1 7.75-1.25z" /><line x1="17.5" y1="6.5" x2="17.5" y2="6.5" /></svg>,
@@ -49,6 +49,7 @@ const NAV_ITEMS = [
   { id: 'skippro', label: 'Skip Now', icon: Icons.skippro, path: '/dashboard/skippro' },
   { id: 'cgpa', label: 'CGPA', icon: Icons.cgpa, path: '/dashboard/cgpa' },
   { id: 'resources', label: 'Resources', icon: Icons.resources, path: '/dashboard/resources' },
+  { id: 'faculty', label: 'Faculty', icon: Icons.faculty, path: '/dashboard/faculty' },
   { id: 'minigames', label: 'Mini Games', icon: Icons.game, path: '/dashboard/wordle' },
 ];
 
@@ -856,7 +857,6 @@ export default function Dashboard({ children }) {
 
   return (
     <div className={`dashboard-layout ${!isMobile && !sidebarOpen ? 'sidebar-collapsed' : ''} ${isMobile ? 'mobile-layout' : ''}`}>
-      <FeaturesModal />
       {syncError && createPortal(renderSessionModal(), document.body)}
       <div className={`sidebar-overlay ${sidebarOpen ? 'show' : ''}`} onClick={() => setSidebarOpen(false)} />
       {isMobile && <div className={`mobile-sheet-overlay ${mobileSheetOpen ? 'show' : ''}`} onClick={closeMobilePanels} />}

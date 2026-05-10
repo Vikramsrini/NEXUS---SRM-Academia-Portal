@@ -9,6 +9,7 @@ import CoursesPage from './pages/CoursesPage';
 import CalendarPage from './pages/CalendarPage';
 import SkipProPage from './pages/SkipProPage';
 import ResourcesPage from './pages/ResourcesPage';
+import FacultyFinderPage from './pages/FacultyFinderPage';
 import CgpaPage from './pages/CgpaPage';
 import WordlePage from './pages/WordlePage';
 
@@ -48,6 +49,7 @@ export default function App() {
           <Route path="courses" element={<CoursesPage />} />
           <Route path="calendar" element={<CalendarPage />} />
           <Route path="resources" element={<ResourcesPage />} />
+          <Route path="faculty" element={<FacultyFinderPage />} />
           <Route path="cgpa" element={<CgpaPage />} />
           <Route path="wordle" element={<WordlePage />} />
         </Route>

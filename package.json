@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "server": "node server/index.js"
+    "server": "node server/index.js",
+    "fetch:gradex-faculty": "node scripts/fetch-gradex-faculty.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.4",
