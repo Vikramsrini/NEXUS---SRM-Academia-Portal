@@ -193,8 +193,7 @@ export default function FacultyFinderPage() {
         <div className="subpage-title-group">
           <h1 className="subpage-title">Faculty</h1>
           <p className="subpage-desc">
-            Browse the staff directory by department, or open <strong>My faculty</strong> for a short list of your
-            courses and who's teaching them.
+            Search by department, or open <strong>My faculty</strong> for your courses and instructors.
           </p>
         </div>
       </div>
