@@ -157,20 +157,16 @@ router.get('/wordle-weekly-reset', verifyCronAuth, async (req, res) => {
     
     if (sqlError) {
       console.warn('[Cron] RPC reset failed, falling back to manual update:', sqlError.message);
-      
-      // Manual fallback: Fetch all users with scores and update them
-      const { data: allScores } = await supabase
-        .from('wordle_scores')
-        .select('netid, total_score')
-        .gt('total_score', 0);
+
+      const { data: allScores } = await supabase.from('wordle_scores').select('netid, total_score');
 
       if (allScores && allScores.length > 0) {
         for (const user of allScores) {
           await supabase
             .from('wordle_scores')
             .update({
-              cumulative_score: user.total_score,
-              total_score: 0
+              cumulative_score: user.total_score ?? 0,
+              total_score: 0,
             })
             .eq('netid', user.netid);
         }

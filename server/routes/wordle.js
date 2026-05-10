@@ -41,6 +41,37 @@ function getWeekKey() {
   return weekStart;
 }
 
+/** Sunday YYYY-MM-DD → readable Sun–Sat range label (IST calendar dates). */
+function formatWeekRangeLabel(sundayYmd) {
+  if (!sundayYmd || !/^\d{4}-\d{2}-\d{2}$/.test(sundayYmd)) return '';
+  const [y, m, d] = sundayYmd.split('-').map(Number);
+  const start = new Date(Date.UTC(y, m - 1, d));
+  const end = new Date(start);
+  end.setUTCDate(start.getUTCDate() + 6);
+  const opts = { month: 'short', day: 'numeric', timeZone: 'UTC' };
+  const a = start.toLocaleDateString('en-IN', opts);
+  const b = end.toLocaleDateString('en-IN', opts);
+  return `${a} – ${b}, ${y}`;
+}
+
+function getPreviousWeekSundayKey() {
+  const now = new Date();
+  const istDateStr = new Intl.DateTimeFormat('en-CA', {
+    timeZone: TIMEZONE,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(now);
+  const [y, m, d] = istDateStr.split('-').map(Number);
+  const istDate = new Date(Date.UTC(y, m - 1, d));
+  const dayOfWeek = istDate.getUTCDay();
+  const currentSunday = new Date(istDate);
+  currentSunday.setUTCDate(istDate.getUTCDate() - dayOfWeek);
+  const prevSunday = new Date(currentSunday);
+  prevSunday.setUTCDate(currentSunday.getUTCDate() - 7);
+  return `${prevSunday.getUTCFullYear()}-${String(prevSunday.getUTCMonth() + 1).padStart(2, '0')}-${String(prevSunday.getUTCDate()).padStart(2, '0')}`;
+}
+
 async function generateDailyWord(excludeWords = []) {
   const apiKey = process.env.MISTRAL_API_KEY;
   if (!apiKey) throw new Error('Mistral API Key missing.');
@@ -250,9 +281,11 @@ router.get('/leaderboard', requireAuth, async (req, res) => {
       streak: item.streak
     }));
 
-    res.json({ 
+    const weekKey = getWeekKey();
+    res.json({
       leaderboard,
-      weekKey: getWeekKey()
+      weekKey,
+      weekRangeLabel: formatWeekRangeLabel(weekKey),
     });
   } catch (err) {
     res.status(500).json({ error: 'Internal server error' });
@@ -289,29 +322,9 @@ router.get('/weekly-winners', requireAuth, async (req, res) => {
     const supabase = getSupabaseAdmin();
     if (!supabase) return res.status(500).json({ error: 'DB unavailable' });
 
-    // Get last completed week (previous Sunday)
-    const now = new Date();
-    const istDateStr = new Intl.DateTimeFormat('en-CA', {
-      timeZone: TIMEZONE,
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    }).format(now);
-    const [y, m, d] = istDateStr.split('-').map(Number);
-    const istDate = new Date(Date.UTC(y, m - 1, d));
-    
-    // Find Sunday of current week
-    const dayOfWeek = istDate.getUTCDay();
-    const currentSunday = new Date(istDate);
-    currentSunday.setUTCDate(istDate.getUTCDate() - dayOfWeek);
-    
-    // Get previous Sunday (last week's start)
-    const prevSunday = new Date(currentSunday);
-    prevSunday.setUTCDate(currentSunday.getUTCDate() - 7);
-    const lastWeekKey = `${prevSunday.getUTCFullYear()}-${String(prevSunday.getUTCMonth() + 1).padStart(2, '0')}-${String(prevSunday.getUTCDate()).padStart(2, '0')}`;
+    const lastWeekKey = getPreviousWeekSundayKey();
 
-    // Get top 3 from last week using cumulative_score
-    // (This column is populated with the previous week's final total_score during the reset)
+    // Top 3 from last completed week: cumulative_score is set from total_score when weekly reset runs
     const { data } = await supabase
       .from('wordle_scores')
       .select('name, cumulative_score, streak')
@@ -319,17 +332,17 @@ router.get('/weekly-winners', requireAuth, async (req, res) => {
       .order('cumulative_score', { ascending: false })
       .limit(3);
 
-    // Map to expected format
     const winners = (data || []).map(item => ({
       name: item.name,
       points: item.cumulative_score,
       streak: item.streak
     }));
 
-    res.json({ 
-      winners, 
+    res.json({
+      winners,
       weekKey: lastWeekKey,
-      currentWeek: getWeekKey()
+      weekRangeLabel: formatWeekRangeLabel(lastWeekKey),
+      currentWeek: getWeekKey(),
     });
   } catch (err) {
     res.status(500).json({ error: 'Internal server error' });

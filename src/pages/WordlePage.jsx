@@ -44,8 +44,8 @@ export default function WordlePage() {
   const [userStats, setUserStats] = useState({ score: 0, streak: 0 });
   const [leaderboard, setLeaderboard] = useState([]);
   const [weeklyWinners, setWeeklyWinners] = useState([]);
-  const [weekKey, setWeekKey] = useState('');
-  const [lastWeekKey, setLastWeekKey] = useState('');
+  const [leaderboardWeekLabel, setLeaderboardWeekLabel] = useState('');
+  const [winnersWeekLabel, setWinnersWeekLabel] = useState('');
   
   const showMessage = (msg) => {
     setMessage(msg);
@@ -63,13 +63,13 @@ export default function WordlePage() {
       if (lbRes.ok) {
         const data = await lbRes.json();
         setLeaderboard(data.leaderboard || []);
-        setWeekKey(data.weekKey || '');
+        setLeaderboardWeekLabel(data.weekRangeLabel || '');
       }
 
       if (winnersRes.ok) {
         const data = await winnersRes.json();
         setWeeklyWinners(data.winners || []);
-        setLastWeekKey(data.weekKey || '');
+        setWinnersWeekLabel(data.weekRangeLabel || '');
       }
     } catch (err) {
       console.error('Failed to fetch leaderboard or winners', err);
@@ -320,6 +320,7 @@ export default function WordlePage() {
                 <li><span><strong>Yellow</strong> means the letter exists but in a different position.</span></li>
                 <li><span><strong>Gray</strong> means the letter is not in the word.</span></li>
                 <li><span>You can play once per day and faster wins score higher.</span></li>
+                <li><span>The leaderboard resets each week (Sunday midnight IST); last week&apos;s top players appear under Weekly winners.</span></li>
               </ul>
             </div>
 
@@ -351,7 +352,7 @@ export default function WordlePage() {
             How to Play
           </button>
           <div className="wordle-stat-box">
-            <span className="stat-label">Total Score</span>
+            <span className="stat-label">Weekly score</span>
             <span className="stat-value">{userStats.score}</span>
           </div>
           <div className="wordle-stat-box">
@@ -377,6 +378,7 @@ export default function WordlePage() {
               <h3>You've played today!</h3>
               <p>Come back tomorrow for the next challenge.</p>
               <div className="huge-score">{userStats.score} pts</div>
+              <p className="wordle-done-sub">Your running total this IST week. Rankings reset Sunday midnight.</p>
             </div>
           ) : (
             <>
@@ -435,9 +437,14 @@ export default function WordlePage() {
 
         <div className="wordle-leaderboard-side">
           <div className="lb-section">
-            <div className="lb-header">
-              <h3>Leaderboard</h3>
-              <span className="lb-badge">Top 10</span>
+            <div className="lb-header lb-header-stack">
+              <div>
+                <h3>This week</h3>
+                {leaderboardWeekLabel ? (
+                  <p className="lb-week-range">{leaderboardWeekLabel}</p>
+                ) : null}
+              </div>
+              <span className="lb-badge">Top 10 · resets Sun IST</span>
             </div>
             <div className="lb-list">
               {leaderboard.length === 0 ? (
@@ -460,43 +467,54 @@ export default function WordlePage() {
             </div>
           </div>
 
-          {weeklyWinners.length > 0 && (
-            <div className="lb-section winners-podium-section">
-              <div className="lb-header">
-                <h3>Last Week's Champions</h3>
-                <div className="medal-badge">
-                  <span className="medal-icon">🏆</span>
-                  <span className="medal-text">Hall of Fame</span>
-                </div>
+          <div className="lb-section winners-podium-section">
+            <div className="lb-header lb-header-stack">
+              <div>
+                <h3>Weekly winners</h3>
+                {winnersWeekLabel ? (
+                  <p className="lb-week-range">Last completed week · {winnersWeekLabel}</p>
+                ) : (
+                  <p className="lb-week-range">Last completed IST week</p>
+                )}
               </div>
+              <div className="medal-badge">
+                <span className="medal-icon">🏆</span>
+                <span className="medal-text">Top 3</span>
+              </div>
+            </div>
+            {weeklyWinners.length === 0 ? (
+              <div className="winners-empty">
+                <p>No podium yet for this period.</p>
+                <p className="winners-empty-hint">
+                  Winners are saved when the weekly job runs (Sunday midnight IST). Play during the week to compete for next Sunday&apos;s results.
+                </p>
+              </div>
+            ) : (
               <div className="champions-podium">
-                {/* Gold - Rank 1 */}
                 {weeklyWinners[0] && (
                   <div className="podium-item rank-1">
                     <div className="podium-rank">🥇</div>
                     <div className="podium-name">{weeklyWinners[0].name}</div>
-                    <div className="podium-score">{weeklyWinners[0].points}</div>
+                    <div className="podium-score">{weeklyWinners[0].points} pts</div>
                   </div>
                 )}
-                {/* Silver - Rank 2 */}
                 {weeklyWinners[1] && (
                   <div className="podium-item rank-2">
                     <div className="podium-rank">🥈</div>
                     <div className="podium-name">{weeklyWinners[1].name}</div>
-                    <div className="podium-score">{weeklyWinners[1].points}</div>
+                    <div className="podium-score">{weeklyWinners[1].points} pts</div>
                   </div>
                 )}
-                {/* Bronze - Rank 3 */}
                 {weeklyWinners[2] && (
                   <div className="podium-item rank-3">
                     <div className="podium-rank">🥉</div>
                     <div className="podium-name">{weeklyWinners[2].name}</div>
-                    <div className="podium-score">{weeklyWinners[2].points}</div>
+                    <div className="podium-score">{weeklyWinners[2].points} pts</div>
                   </div>
                 )}
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>
