@@ -112,11 +112,15 @@ function MyCourseCard({ row, directory }) {
   );
 }
 
+/** Directory mode renders ~400 cards; paginate + avoid GPU-heavy stacks on mobile WebKit. */
+const DIRECTORY_PAGE_SIZE = 48;
+
 export default function FacultyFinderPage() {
   const { staff, departments } = gradexFaculty;
   const [deptFilter, setDeptFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [dataTick, setDataTick] = useState(0);
+  const [directoryLimit, setDirectoryLimit] = useState(DIRECTORY_PAGE_SIZE);
 
   useEffect(() => {
     const bump = () => setDataTick((n) => n + 1);
@@ -180,12 +184,27 @@ export default function FacultyFinderPage() {
     });
   }, [staff, deptFilter, searchQuery]);
 
+  const visibleDirectory = useMemo(
+    () => filteredDirectory.slice(0, directoryLimit),
+    [filteredDirectory, directoryLimit]
+  );
+
   const listCount = deptFilter === 'mine' ? mineRows.length : filteredDirectory.length;
 
   const searchPlaceholder =
     deptFilter === 'mine'
       ? 'Search course or faculty…'
       : 'Search by name, faculty ID, room…';
+
+  const bumpDeptFilter = (id) => {
+    setDirectoryLimit(DIRECTORY_PAGE_SIZE);
+    setDeptFilter(id);
+  };
+
+  const bumpSearchQuery = (value) => {
+    setDirectoryLimit(DIRECTORY_PAGE_SIZE);
+    setSearchQuery(value);
+  };
 
   return (
     <div className="apple-page-container faculty-finder-page">
@@ -205,7 +224,7 @@ export default function FacultyFinderPage() {
               key={f.id}
               type="button"
               className={`faculty-app-chip ${deptFilter === f.id ? 'faculty-app-chip--active' : ''}`}
-              onClick={() => setDeptFilter(f.id)}
+              onClick={() => bumpDeptFilter(f.id)}
             >
               {f.label}
             </button>
@@ -219,13 +238,13 @@ export default function FacultyFinderPage() {
               type="search"
               placeholder={searchPlaceholder}
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => bumpSearchQuery(e.target.value)}
               autoComplete="off"
               spellCheck={false}
             />
           </div>
           {searchQuery.trim() ? (
-            <button type="button" className="apple-btn secondary faculty-app-clear" onClick={() => setSearchQuery('')}>
+            <button type="button" className="apple-btn secondary faculty-app-clear" onClick={() => bumpSearchQuery('')}>
               Clear
             </button>
           ) : null}
@@ -237,7 +256,9 @@ export default function FacultyFinderPage() {
           ? 'Sync attendance on the dashboard to use My faculty.'
           : deptFilter === 'mine'
             ? `${mineRows.length} entr${mineRows.length === 1 ? 'y' : 'ies'}`
-            : `${filteredDirectory.length} shown`}
+            : directoryLimit < filteredDirectory.length
+              ? `${visibleDirectory.length} of ${filteredDirectory.length} shown`
+              : `${filteredDirectory.length} shown`}
       </p>
 
       <section className="faculty-app-list-panel" aria-label={deptFilter === 'mine' ? 'My faculty' : 'Faculty directory'}>
@@ -246,7 +267,7 @@ export default function FacultyFinderPage() {
           <span className="faculty-app-list-count">{listCount}</span>
         </div>
 
-        <div className="faculty-app-list-body stagger-children">
+        <div className={`faculty-app-list-body${deptFilter === 'mine' ? ' stagger-children' : ''}`}>
           {deptFilter === 'mine' ? (
             <>
               {enrollments.length === 0 && (
@@ -275,7 +296,7 @@ export default function FacultyFinderPage() {
                   <p>No entries match your filters or search.</p>
                 </div>
               )}
-              {filteredDirectory.map((s, idx) => {
+              {visibleDirectory.map((s, idx) => {
                 const isMine = myDirectoryIds.has(s.id);
                 const des = (s.designation || '').toUpperCase();
                 const hasContact = !!(s.email || s.mobile || s.expertise);
@@ -320,6 +341,17 @@ export default function FacultyFinderPage() {
                   </article>
                 );
               })}
+              {filteredDirectory.length > directoryLimit ? (
+                <div className="faculty-app-load-more">
+                  <button
+                    type="button"
+                    className="apple-btn secondary"
+                    onClick={() => setDirectoryLimit((n) => n + DIRECTORY_PAGE_SIZE)}
+                  >
+                    Load more ({filteredDirectory.length - directoryLimit} left)
+                  </button>
+                </div>
+              ) : null}
             </>
           )}
         </div>

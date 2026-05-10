@@ -4397,6 +4397,20 @@
   background: var(--glass-bg-card);
 }
 
+/* Hundreds of stacked blurred cards exhaust GPU memory on iOS / narrow WebKit viewports. */
+@media (max-width: 1024px) {
+  .faculty-finder-page .faculty-app-card {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+.faculty-app-load-more {
+  display: flex;
+  justify-content: center;
+  padding: 10px 4px 6px;
+}
+
 .faculty-app-card-top {
   display: flex;
   align-items: flex-start;
