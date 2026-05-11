@@ -8843,6 +8843,107 @@
             ]
           }
         ]
+      },
+      {
+        "name": "FOG",
+        "sections": [
+          {
+            "key": "ppts",
+            "label": "Notes & PPTs",
+            "items": [
+              {
+                "title": "Unit 1",
+                "url": "/resources/fog/unit-1-fog-computing.pdf"
+              },
+              {
+                "title": "Unit 2",
+                "url": "/resources/fog/unit-2-fog-computing.pdf"
+              },
+              {
+                "title": "Unit 3",
+                "url": "/resources/fog/unit-3-fog-computing.pdf"
+              },
+              {
+                "title": "Unit 4",
+                "url": "/resources/fog/unit-4-fog-computing.pdf"
+              },
+              {
+                "title": "Unit 5",
+                "url": "/resources/fog/unit-5-fog-computing.pdf"
+              }
+            ]
+          },
+          {
+            "key": "pyqs",
+            "label": "Previous Year Questions",
+            "items": [
+              {
+                "title": "PYQs folder",
+                "url": "https://drive.google.com/drive/folders/12RoZYWtRn-ZF3WPYG1xqz6tqoi6qvWTZ"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "IRT",
+        "sections": [
+          {
+            "key": "pyqs",
+            "label": "Previous Year Questions",
+            "items": [
+              {
+                "title": "PYQs folder",
+                "url": "https://drive.google.com/drive/folders/12RoZYWtRn-ZF3WPYG1xqz6tqoi6qvWTZ"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Municipal Solid Waste",
+        "sections": [
+          {
+            "key": "pyqs",
+            "label": "Previous Year Questions",
+            "items": [
+              {
+                "title": "PYQs folder",
+                "url": "https://drive.google.com/drive/folders/12RoZYWtRn-ZF3WPYG1xqz6tqoi6qvWTZ"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Natural Language Processing (NLP)",
+        "sections": [
+          {
+            "key": "pyqs",
+            "label": "Previous Year Questions",
+            "items": [
+              {
+                "title": "PYQs folder",
+                "url": "https://drive.google.com/drive/folders/12RoZYWtRn-ZF3WPYG1xqz6tqoi6qvWTZ"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "NWIOT",
+        "sections": [
+          {
+            "key": "pyqs",
+            "label": "Previous Year Questions",
+            "items": [
+              {
+                "title": "PYQs folder",
+                "url": "https://drive.google.com/drive/folders/12RoZYWtRn-ZF3WPYG1xqz6tqoi6qvWTZ"
+              }
+            ]
+          }
+        ]
       }
     ]
   }
