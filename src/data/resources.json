@@ -8763,33 +8763,6 @@
         ]
       },
       {
-        "name": "Software Engineering & Project Management (SEPM)",
-        "sections": [
-          {
-            "key": "pyqs",
-            "label": "Previous Year Questions",
-            "items": [
-              {
-                "title": "May 2024",
-                "url": "https://drive.google.com/file/d/10sTGEwRDUZFGzMDvXddM9eon-MYAE-8Q/view?usp=sharing"
-              },
-              {
-                "title": "Dec 2024",
-                "url": "https://drive.google.com/file/d/1ZgbIKUQIq-sr-5UraA748WopuzuMGTpi/view?usp=sharing"
-              },
-              {
-                "title": "May  2025",
-                "url": "https://drive.google.com/file/d/1VL5J72HdZmcKdRnSa_1maR7X0FeUbG9M/view?usp=sharing"
-              },
-              {
-                "title": "Nov  2025",
-                "url": "https://drive.google.com/file/d/1YF6E93f2eQOH9JFIP5GdLHCjdOoeiWZt/view?usp=sharing"
-              }
-            ]
-          }
-        ]
-      },
-      {
         "name": "Software Engineering And Project Management (SEPM)",
         "sections": [
           {
@@ -8823,12 +8796,28 @@
             "label": "Previous Year Questions",
             "items": [
               {
-                "title": "2024_DEC",
+                "title": "PYQ May 2024",
+                "url": "https://drive.google.com/file/d/16R2zpndtIrVx0wUYeagr9JQIGoaJRxst/view?usp=drive_link"
+              },
+              {
+                "title": "PYQ May 2024",
+                "url": "https://drive.google.com/file/d/10sTGEwRDUZFGzMDvXddM9eon-MYAE-8Q/view?usp=drive_link"
+              },
+              {
+                "title": "PYQ Dec 2024",
                 "url": "https://drive.google.com/file/d/1IVM-Pi-6IxzY9IKu_ObLVPk4AA_058oy/view?usp=drive_link"
               },
               {
-                "title": "2024_MAY",
-                "url": "https://drive.google.com/file/d/16R2zpndtIrVx0wUYeagr9JQIGoaJRxst/view?usp=drive_link"
+                "title": "PYQ Dec 2024",
+                "url": "https://drive.google.com/file/d/1ZgbIKUQIq-sr-5UraA748WopuzuMGTpi/view?usp=drive_link"
+              },
+              {
+                "title": "PYQ May 2025",
+                "url": "https://drive.google.com/file/d/1VL5J72HdZmcKdRnSa_1maR7X0FeUbG9M/view?usp=drive_link"
+              },
+              {
+                "title": "PYQ Nov 2025",
+                "url": "https://drive.google.com/file/d/1YF6E93f2eQOH9JFIP5GdLHCjdOoeiWZt/view?usp=drive_link"
               }
             ]
           },
