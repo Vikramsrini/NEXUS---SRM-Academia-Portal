@@ -235,12 +235,9 @@ router.post('/submit', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'Already played today' });
     }
 
-    // Current weekly score updates
+    // Current IST-week totals only — weekly reset snapshots total_score → cumulative_score
     const newScore = (current?.total_score || 0) + pointsWon;
-    
-    // We no longer update cumulative_score here as it's now used to store
-    // the PREVIOUS week's final score (updated via the weekly reset cron).
-    
+
     let newStreak = won ? (current?.streak || 0) + 1 : 0;
 
     await supabase
@@ -324,7 +321,8 @@ router.get('/weekly-winners', requireAuth, async (req, res) => {
 
     const lastWeekKey = getPreviousWeekSundayKey();
 
-    // Top 3 from last completed week: cumulative_score is set from total_score when weekly reset runs
+    // After Sunday cron: cumulative_score is each user’s finalized IST-week total just ended;
+    // total_score starts the new week at 0 (see reset_wordle_weekly_scores).
     const { data } = await supabase
       .from('wordle_scores')
       .select('name, cumulative_score, streak')
@@ -335,7 +333,7 @@ router.get('/weekly-winners', requireAuth, async (req, res) => {
     const winners = (data || []).map(item => ({
       name: item.name,
       points: item.cumulative_score,
-      streak: item.streak
+      streak: item.streak,
     }));
 
     res.json({

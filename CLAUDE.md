@@ -19,7 +19,7 @@ Academia Portal is a full-stack application for SRM University students to view 
 - Entry: `server/index.js` mounts all routes under `/api`
 - Routes in `server/routes/`: auth, academics, calendar, userinfo, thought, cgpa, od, timetable-state, recent-updates, wordle, push
 - Scrapers in `server/scrapers/`: Cheerio-based scrapers for SRM portal (auth, attendance, marks, timetable, calendar, cgpa)
-- Services in `server/services/`: notificationService.js (push + cron), syncService.js, snapshots.js
+- Services in `server/services/`: notificationService.js (push), syncService.js, snapshots.js; scheduled jobs via `api/cron/*` (Vercel Cron)
 - Lib in `server/lib/`: supabase.js (client), srmSession.js (session management)
 
 **Database (Supabase PostgreSQL)**
@@ -105,6 +105,6 @@ PORT=3000
 
 ## Deployment
 
-- **Frontend**: Configured for Vercel (`vercel.json` with API rewrites)
-- **Backend**: Configured for Railway (`railway.json` with Nixpacks builder)
+- **Full stack on Vercel**: React frontend + Express API via `api/index.js` (`vercel.json` rewrites `/api/*` to the server)
+- **Scheduled jobs**: Vercel Cron → `api/cron/*` (auth via `CRON_SECRET`)
 - **Database**: Supabase (run `server/supabase/schema.sql` to initialize)

@@ -73,6 +73,6 @@ VITE_API_BASE=http://localhost:3000/api
 - **Testing:** Currently, the project lacks a formal JS testing suite. For new features, consider adding manual validation scripts or implementing `vitest`.
 
 ## Deployment
-- **Frontend:** Vercel (configured via `vercel.json`).
-- **Backend:** Railway (configured via `railway.json`).
+- **App + API:** Vercel (`vercel.json` — frontend build + `/api/*` rewrites to Express).
+- **Cron:** Vercel Cron → `api/cron/*` (see root `vercel.json`).
 - **Database:** Supabase (SQL schema in `server/supabase/schema.sql`).

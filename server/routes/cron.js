@@ -137,14 +137,13 @@ router.get('/wordle', verifyCronAuth, async (req, res) => {
   }
 });
 
-// Wordle Weekly Reset & Winners Announcement - Sunday 12:00 AM IST
+// Wordle weekly reset — Sunday 12:00 AM IST (snapshot total → cumulative, then announce / fresh week)
 router.get('/wordle-weekly-reset', verifyCronAuth, async (req, res) => {
   try {
     console.log('[Cron] Performing weekly Wordle reset...');
     const supabase = getSupabaseAdmin();
     if (!supabase) return res.status(500).json({ error: 'DB unavailable' });
 
-    // 1. Snapshot the current top players for the response/log
     const { data: winners } = await supabase
       .from('wordle_scores')
       .select('name, total_score')
@@ -152,9 +151,9 @@ router.get('/wordle-weekly-reset', verifyCronAuth, async (req, res) => {
       .order('total_score', { ascending: false })
       .limit(3);
 
-    await performWordleWeeklyReset();
+    const { weekKey, ran } = await performWordleWeeklyReset();
 
-    res.json({ success: true, winnersFound: winners?.length || 0 });
+    res.json({ success: true, weekKey, ran, winnersFound: winners?.length || 0 });
   } catch (err) {
     console.error('[Cron] Weekly Reset error:', err);
     res.status(500).json({ error: err.message });
