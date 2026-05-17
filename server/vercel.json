@@ -1,5 +1,4 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
   "crons": [
     {
       "path": "/api/cron/quote",
@@ -16,16 +15,6 @@
     {
       "path": "/api/cron/day-order",
       "schedule": "30 14 * * *"
-    }
-  ],
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/index.js"
-    },
-    {
-      "source": "/((?!api/|assets/|.*\\.).*)",
-      "destination": "/index.html"
     }
   ]
 }
