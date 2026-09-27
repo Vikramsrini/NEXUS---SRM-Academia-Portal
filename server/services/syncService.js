@@ -42,14 +42,18 @@ export async function performFullSync(authCookie, sessionId, sendStatus = () => 
     try {
       const attHtml = await fetchAcademicPage(authCookie, 'https://academia.srmist.edu.in/srm_university/academia-academic-services/page/My_Attendance');
       const attResult = parseAttendance(attHtml);
-      result.attendance = attResult.attendance;
+      result.attendance = attResult.attendance || [];
       result.marks = parseMarks(attHtml, result.attendance);
 
-      sendStatus(sessionId, 'attendance', `Synced ${result.attendance.length} courses and ${result.marks.length} marks`);
+      if (result.attendance.length > 0) {
+        sendStatus(sessionId, 'attendance', `Synced ${result.attendance.length} courses and ${result.marks.length} marks`);
+      }
     } catch (e) {
       console.warn('[Sync Service] Attendance/Marks sync from Academia failed:', e.message);
+    }
 
-      // Fallback: try to load previously imported attendance from Student Portal
+    // Fallback: If Academia has no attendance (SRM moved it to Student Portal), load from Supabase attendance_imports
+    if (!result.attendance || result.attendance.length === 0) {
       try {
         const regNumber = result.userInfo?.regNumber || result.userInfo?.registrationNumber || '';
         if (regNumber) {
@@ -57,24 +61,46 @@ export async function performFullSync(authCookie, sessionId, sendStatus = () => 
           if (supabase) {
             const { data: imported } = await supabase
               .from('attendance_imports')
-              .select('attendance_data, imported_at')
+              .select('attendance_data, imported_at, source')
               .eq('reg_number', regNumber)
               .single();
 
             if (imported?.attendance_data?.length > 0) {
               result.attendance = imported.attendance_data;
-              result.attendanceSource = 'student_portal_import';
-              sendStatus(sessionId, 'attendance', `Loaded ${result.attendance.length} courses from Student Portal import (${new Date(imported.imported_at).toLocaleDateString()})`);
+              result.attendanceSource = imported.source || 'student_portal_direct';
+              result.attendanceImportedAt = imported.imported_at;
+              sendStatus(sessionId, 'attendance', `Loaded ${result.attendance.length} courses from Student Portal (${new Date(imported.imported_at).toLocaleDateString()})`);
             } else {
-              sendStatus(sessionId, 'attendance', 'Attendance unavailable — use the NEXUS extension to sync from Student Portal');
+              sendStatus(sessionId, 'attendance', 'Attendance unavailable — connect Student Portal to sync');
             }
           }
-        } else {
-          sendStatus(sessionId, 'attendance', 'Attendance unavailable — use the NEXUS extension to sync from Student Portal');
         }
       } catch (fallbackErr) {
-        console.warn('[Sync Service] Imported attendance fallback also failed:', fallbackErr.message);
-        sendStatus(sessionId, 'attendance', 'Attendance unavailable — use the NEXUS extension to sync from Student Portal');
+        console.warn('[Sync Service] Imported attendance fallback failed:', fallbackErr.message);
+      }
+    }
+
+    // Fallback: If Academia has no marks, load saved marks from Supabase marks_user_state
+    if (!result.marks || result.marks.length === 0) {
+      try {
+        const regNumber = result.userInfo?.regNumber || result.userInfo?.registrationNumber || '';
+        if (regNumber) {
+          const supabase = getSupabaseAdmin();
+          if (supabase) {
+            const { data: savedMarks } = await supabase
+              .from('marks_user_state')
+              .select('marks_data')
+              .eq('reg_number', regNumber)
+              .single();
+
+            if (savedMarks?.marks_data?.length > 0) {
+              result.marks = savedMarks.marks_data;
+              sendStatus(sessionId, 'marks', `Loaded ${result.marks.length} course marks from saved state`);
+            }
+          }
+        }
+      } catch (mErr) {
+        console.warn('[Sync Service] Saved marks fallback failed:', mErr.message);
       }
     }
 

@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useOutletContext } from 'react-router-dom';
 import { fetchOdState, saveOdState, importAttendance, fetchImportedAttendance, fetchSpCaptcha, submitSpLogin, refreshSpAttendance } from '../lib/api';
@@ -259,6 +259,13 @@ export default function AttendancePage() {
   const [spPassword, setSpPassword] = useState('');
   const [spError, setSpError] = useState('');
   const [spLoading, setSpLoading] = useState(false);
+  const captchaInputRef = useRef(null);
+
+  useEffect(() => {
+    if (showSpModal && spStep === 'form' && captchaInputRef.current) {
+      setTimeout(() => captchaInputRef.current?.focus(), 100);
+    }
+  }, [showSpModal, spStep, spCaptchaSvg]);
 
   const openSpModal = async () => {
     setShowSpModal(true);
@@ -303,11 +310,21 @@ export default function AttendancePage() {
       if (result.attendance?.length > 0) {
         const stored = getStudentData();
         stored.attendance = result.attendance;
+        if (result.marks?.length > 0) {
+          stored.marks = result.marks;
+        }
         stored.attendanceSource = 'student_portal_direct';
         stored.attendanceImportedAt = result.timestamp;
         localStorage.setItem('academia_student', JSON.stringify(stored));
+        localStorage.setItem('academia_last_sync_time', Date.now().toString());
+        if (typeof context.setStudent === 'function') {
+          context.setStudent(stored);
+        }
         setSpStep('done');
-        setTimeout(() => { setShowSpModal(false); window.location.reload(); }, 1500);
+        setTimeout(() => {
+          setShowSpModal(false);
+          window.location.reload();
+        }, 1200);
       }
     } catch (err) {
       setSpError(err.message || 'Login failed');
@@ -333,9 +350,16 @@ export default function AttendancePage() {
       if (result.attendance?.length > 0) {
         const stored = getStudentData();
         stored.attendance = result.attendance;
+        if (result.marks?.length > 0) {
+          stored.marks = result.marks;
+        }
         stored.attendanceSource = 'student_portal_direct';
         stored.attendanceImportedAt = result.refreshedAt;
         localStorage.setItem('academia_student', JSON.stringify(stored));
+        localStorage.setItem('academia_last_sync_time', Date.now().toString());
+        if (typeof context.setStudent === 'function') {
+          context.setStudent(stored);
+        }
         window.location.reload();
       }
     } catch (err) {
@@ -984,7 +1008,15 @@ export default function AttendancePage() {
                         <img
                           src={spCaptchaSvg}
                           alt="Captcha"
-                          style={{ maxHeight: 42, maxWidth: '100%', objectFit: 'contain', display: 'block' }}
+                          style={{
+                            maxHeight: 44,
+                            maxWidth: '100%',
+                            objectFit: 'contain',
+                            display: 'block',
+                            filter: 'contrast(1.2) brightness(1.02)',
+                            imageRendering: '-webkit-optimize-contrast',
+                            userSelect: 'none',
+                          }}
                         />
                       ) : (
                         <div dangerouslySetInnerHTML={{ __html: spCaptchaSvg }} />
@@ -992,6 +1024,7 @@ export default function AttendancePage() {
                     </div>
 
                     <input
+                      ref={captchaInputRef}
                       type="text"
                       placeholder="Type the characters above"
                       value={spCaptchaInput}

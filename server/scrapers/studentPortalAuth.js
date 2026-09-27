@@ -1,10 +1,13 @@
 import axios from 'axios';
 import crypto from 'crypto';
+import * as cheerio from 'cheerio';
 
 const SP_BASE = 'https://sp.srmist.edu.in/srmiststudentportal';
 const LOGIN_URL = `${SP_BASE}/students/loginManager/youLogin.jsp`;
 const LOGIN_SERVLET_URL = `${SP_BASE}/LoginServlet`;
 const ATTENDANCE_URL = `${SP_BASE}/students/report/studentAttendanceDetails.jsp`;
+const MARKS_URL = `${SP_BASE}/students/report/studentInternalMarkDetails.jsp`;
+const MARKS_INNER_URL = `${SP_BASE}/students/report/studentInternalMarkDetailsInner.jsp`;
 const HRD_URL = `${SP_BASE}/students/template/HRDSystem.jsp`;
 
 const BROWSER_HEADERS = {
@@ -282,6 +285,136 @@ export async function fetchAttendanceWithSession(jsessionid, workerCookieOrAllCo
   }
 
   return html;
+}
+
+/**
+ * Step 4: Fetches internal marks HTML using the authenticated cookies.
+ */
+export async function fetchMarksWithSession(jsessionid, workerCookieOrAllCookies, regNumber) {
+  let cookieHeader = workerCookieOrAllCookies;
+  if (!cookieHeader || !cookieHeader.includes('JSESSIONID')) {
+    cookieHeader = [`JSESSIONID=${jsessionid}`, workerCookieOrAllCookies].filter(Boolean).join('; ');
+  }
+
+  try {
+    // Attempt 1: GET studentInternalMarkDetails.jsp
+    let response = await axios.get(MARKS_URL, {
+      headers: {
+        ...BROWSER_HEADERS,
+        'Cookie': cookieHeader,
+        'Referer': HRD_URL,
+      },
+      timeout: 20000,
+      validateStatus: () => true,
+    });
+
+    let html = typeof response.data === 'string' ? response.data : '';
+
+    // Attempt 2: If GET returned session loader or no table, try POST with studentid
+    if (!html.includes('<table') && !html.includes('.theGR8LoginLoader')) {
+      const postRes = await axios.post(
+        MARKS_URL,
+        new URLSearchParams({ studentid: regNumber }).toString(),
+        {
+          headers: {
+            ...BROWSER_HEADERS,
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Cookie': cookieHeader,
+            'Referer': HRD_URL,
+            'Origin': 'https://sp.srmist.edu.in',
+          },
+          timeout: 20000,
+          validateStatus: () => true,
+        }
+      );
+      if (typeof postRes.data === 'string' && postRes.data.includes('<table')) {
+        html = postRes.data;
+      }
+    }
+
+    if (response.status === 302 || html.includes('.theGR8LoginLoader') || html.includes('youLogin')) {
+      return { html: '', componentsMap: {} };
+    }
+
+    // Extract subjects and fetch component-wise breakdown (FT-I, FT-II, Assignments, etc.)
+    let componentsMap = {};
+    try {
+      const $ = cheerio.load(html);
+      const subjects = [];
+      $('table tbody tr').each((_, el) => {
+        const btn = $(el).find('button[onclick*="funViewComponentWiseMarks"]');
+        if (btn.length) {
+          const onclick = btn.attr('onclick') || '';
+          const match = onclick.match(/funViewComponentWiseMarks\s*\(\s*'([^']+)'\s*,\s*'([^']+)'\s*,\s*'([^']+)'\s*,\s*([^)]+)\)/);
+          if (match) {
+            subjects.push({
+              subjectId: match[1],
+              code: match[2].trim(),
+              title: match[3].trim(),
+              status: match[4].trim(),
+            });
+          }
+        }
+      });
+
+      if (subjects.length > 0) {
+        await Promise.allSettled(
+          subjects.map(async (s) => {
+            try {
+              const res = await axios.post(
+                MARKS_INNER_URL,
+                `iden=1&hdnSubjectId=${encodeURIComponent(s.subjectId)}&status=${encodeURIComponent(s.status || 2)}`,
+                {
+                  headers: {
+                    ...BROWSER_HEADERS,
+                    'Cookie': cookieHeader,
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                    'Referer': MARKS_URL,
+                  },
+                  timeout: 10000,
+                  validateStatus: () => true,
+                }
+              );
+
+              const innerHtml = typeof res.data === 'string' ? res.data : '';
+              if (!innerHtml.includes('<table')) return;
+
+              const inner$ = cheerio.load(innerHtml);
+              const components = [];
+              inner$('table tbody tr').each((_, row) => {
+                const tds = inner$(row).find('td');
+                if (tds.length >= 3) {
+                  const date = inner$(tds[0]).text().trim();
+                  const component = inner$(tds[1]).text().trim();
+                  const markText = inner$(tds[2]).text().trim();
+                  const parts = markText.split('/').map(p => parseFloat(p.trim()));
+                  components.push({
+                    exam: component || 'Assessment',
+                    obtained: Number.isFinite(parts[0]) ? parts[0] : 0,
+                    maxMark: Number.isFinite(parts[1]) ? parts[1] : 100,
+                    date,
+                  });
+                }
+              });
+
+              if (components.length > 0) {
+                componentsMap[s.code] = components;
+              }
+            } catch (innerErr) {
+              console.warn(`[SP Auth] Inner marks fetch failed for ${s.code}:`, innerErr.message);
+            }
+          })
+        );
+      }
+    } catch (parseErr) {
+      console.warn('[SP Auth] Failed extracting inner components:', parseErr.message);
+    }
+
+    return { html, componentsMap };
+  } catch (err) {
+    console.warn('[SP Auth] Marks fetch failed:', err.message);
+    return { html: '', componentsMap: {} };
+  }
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────

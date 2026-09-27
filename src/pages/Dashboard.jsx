@@ -313,17 +313,65 @@ export default function Dashboard({ children }) {
         });
         if (!fullRes.ok) throw new Error('Refresh failed');
         const fullData = await fullRes.json();
+        const existingStudent = getStudentData();
+        if ((fullData.student_data?.attendance || []).length === 0 && (existingStudent.attendance || []).length > 0) {
+          fullData.student_data.attendance = existingStudent.attendance;
+          fullData.student_data.attendanceSource = existingStudent.attendanceSource || 'student_portal_direct';
+          fullData.student_data.attendanceImportedAt = existingStudent.attendanceImportedAt;
+        }
+        if ((fullData.student_data?.marks || []).length === 0 && (existingStudent.marks || []).length > 0) {
+          fullData.student_data.marks = existingStudent.marks;
+        }
         localStorage.setItem('academia_token', fullData.token);
         localStorage.setItem('academia_student', JSON.stringify(fullData.student_data));
+        setStudent(fullData.student_data);
       } else if (res.ok) {
         const data = await res.json();
+        const existingStudent = getStudentData();
+        if ((data.student_data?.attendance || []).length === 0 && (existingStudent.attendance || []).length > 0) {
+          data.student_data.attendance = existingStudent.attendance;
+          data.student_data.attendanceSource = existingStudent.attendanceSource || 'student_portal_direct';
+          data.student_data.attendanceImportedAt = existingStudent.attendanceImportedAt;
+        }
+        if ((data.student_data?.marks || []).length === 0 && (existingStudent.marks || []).length > 0) {
+          data.student_data.marks = existingStudent.marks;
+        }
         localStorage.setItem('academia_student', JSON.stringify(data.student_data));
+        setStudent(data.student_data);
       } else {
         throw new Error('Session expired');
       }
 
       localStorage.setItem('academia_login_time', new Date().toISOString());
       localStorage.setItem('academia_last_sync_time', Date.now().toString());
+
+      // Seamlessly sync Student Portal (both attendance & marks) if session exists
+      try {
+        const studentData = getStudentData();
+        const reg = studentData.regNumber;
+        if (reg) {
+          const spRes = await fetch(`${API_BASE}/sp/refresh`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ regNumber: reg })
+          });
+          if (spRes.ok) {
+            const spData = await spRes.json();
+            const currentStudent = getStudentData();
+            if (spData.attendance?.length > 0) currentStudent.attendance = spData.attendance;
+            if (spData.marks?.length > 0) currentStudent.marks = spData.marks;
+            currentStudent.attendanceSource = 'student_portal_direct';
+            currentStudent.attendanceImportedAt = spData.refreshedAt;
+            localStorage.setItem('academia_student', JSON.stringify(currentStudent));
+            setStudent(currentStudent);
+          }
+        }
+      } catch (spErr) {
+        console.warn('[Auto Sync] SP auto-refresh notice:', spErr.message);
+      }
 
       // Update local state to trigger reactive updates in all components 
       const updatedStudent = getStudentData();
@@ -1076,7 +1124,7 @@ export default function Dashboard({ children }) {
             </div>
           ) : (
             <div className="subpage-viewport">
-              <Outlet context={{ student }} />
+              <Outlet context={{ student, setStudent }} />
             </div>
           )}
         </div>

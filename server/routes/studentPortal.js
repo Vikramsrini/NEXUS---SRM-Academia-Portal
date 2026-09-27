@@ -9,8 +9,10 @@ import {
   fetchSpLoginPage,
   submitSpLogin,
   fetchAttendanceWithSession,
+  fetchMarksWithSession,
 } from '../scrapers/studentPortalAuth.js';
 import { parseStudentPortalAttendance } from '../scrapers/studentPortalAttendance.js';
+import { parseStudentPortalMarks } from '../scrapers/studentPortalMarks.js';
 import { getSupabaseAdmin } from '../lib/supabase.js';
 
 const router = Router();
@@ -58,7 +60,7 @@ router.post('/sp/login', requireAuth, async (req, res) => {
       throw attErr;
     }
 
-    // 3. Parse the HTML
+    // 3. Parse attendance
     const { attendance } = parseStudentPortalAttendance(attendanceHtml);
     if (!attendance || attendance.length === 0) {
       return res.status(422).json({
@@ -67,7 +69,21 @@ router.post('/sp/login', requireAuth, async (req, res) => {
       });
     }
 
-    // 4. Persist to Supabase
+    // 4. Fetch and parse internal marks
+    let marks = [];
+    try {
+      const marksResult = await fetchMarksWithSession(jsessionid, allCookies, regNumber || username.split('@')[0]);
+      const marksHtml = typeof marksResult === 'string' ? marksResult : marksResult?.html || '';
+      const componentsMap = typeof marksResult === 'object' ? marksResult?.componentsMap || {} : {};
+      if (marksHtml) {
+        const parsedMarks = parseStudentPortalMarks(marksHtml, attendance, componentsMap);
+        marks = parsedMarks.marks || [];
+      }
+    } catch (mErr) {
+      console.warn('[SP Auth] Marks fetch failed:', mErr.message);
+    }
+
+    // 5. Persist to Supabase
     const supabase = getSupabaseAdmin();
     const reg = regNumber || '';
 
@@ -91,12 +107,25 @@ router.post('/sp/login', requireAuth, async (req, res) => {
           imported_at: new Date().toISOString(),
         }, { onConflict: 'reg_number' });
       } catch (e) { console.warn('[SP Auth] Attendance store failed:', e.message); }
+
+      // Store marks data
+      if (marks.length > 0) {
+        try {
+          await supabase.from('marks_user_state').upsert({
+            reg_number: reg,
+            marks_data: marks,
+            updated_at: new Date().toISOString(),
+          }, { onConflict: 'reg_number' });
+        } catch (e) { console.warn('[SP Auth] Marks store failed:', e.message); }
+      }
     }
 
     res.json({
       success: true,
       attendance,
+      marks,
       count: attendance.length,
+      marksCount: marks.length,
       source: 'student_portal_direct',
       timestamp: new Date().toISOString(),
     });
@@ -153,6 +182,24 @@ router.post('/sp/refresh', requireAuth, async (req, res) => {
       return res.status(422).json({ error: 'No attendance data returned', needsLogin: false });
     }
 
+    // Fetch marks on refresh too
+    let marks = [];
+    try {
+      const marksResult = await fetchMarksWithSession(
+        sessionData.jsessionid,
+        sessionData.worker_cookie || '',
+        regNumber
+      );
+      const marksHtml = typeof marksResult === 'string' ? marksResult : marksResult?.html || '';
+      const componentsMap = typeof marksResult === 'object' ? marksResult?.componentsMap || {} : {};
+      if (marksHtml) {
+        const parsedMarks = parseStudentPortalMarks(marksHtml, attendance, componentsMap);
+        marks = parsedMarks.marks || [];
+      }
+    } catch (mErr) {
+      console.warn('[SP Auth] Refresh marks failed:', mErr.message);
+    }
+
     // Update stored attendance
     await supabase.from('attendance_imports').upsert({
       reg_number: regNumber,
@@ -161,10 +208,23 @@ router.post('/sp/refresh', requireAuth, async (req, res) => {
       imported_at: new Date().toISOString(),
     }, { onConflict: 'reg_number' });
 
+    // Update stored marks
+    if (marks.length > 0) {
+      try {
+        await supabase.from('marks_user_state').upsert({
+          reg_number: regNumber,
+          marks_data: marks,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'reg_number' });
+      } catch (e) { console.warn('[SP Auth] Refresh marks store failed:', e.message); }
+    }
+
     res.json({
       success: true,
       attendance,
+      marks,
       count: attendance.length,
+      marksCount: marks.length,
       source: 'student_portal_direct',
       refreshedAt: new Date().toISOString(),
     });

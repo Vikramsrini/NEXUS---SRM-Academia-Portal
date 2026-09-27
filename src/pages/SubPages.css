@@ -872,6 +872,239 @@
   border-color: var(--border-active);
 }
 
+/* ══════════════════════════════════════════════════════════════════════
+   CAMPUS WEB STYLE MARKS CARDS (LIGHT & DARK THEME SUPPORT)
+   ══════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --marks-accent: #007AFF;
+  --marks-accent-hover: #0062cc;
+  --marks-accent-glow: rgba(0, 122, 255, 0.45);
+}
+
+[data-theme="dark"] {
+  --marks-accent: #ff3b5c;
+  --marks-accent-hover: #ff1f44;
+  --marks-accent-glow: rgba(255, 59, 92, 0.7);
+}
+
+/* Light Theme Card (Blue Accent) */
+.campus-marks-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  background: var(--surface-primary, #ffffff);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+  border: 1px solid var(--border-primary, rgba(0, 0, 0, 0.08));
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02);
+  padding: 22px 20px 18px;
+  overflow: hidden;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.campus-marks-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 122, 255, 0.35);
+  box-shadow: 0 12px 32px rgba(0, 122, 255, 0.12);
+}
+
+/* Dark Theme Card Override (Red Accent) */
+[data-theme="dark"] .campus-marks-card {
+  background: linear-gradient(180deg, rgba(26, 16, 22, 0.92) 0%, rgba(14, 10, 14, 0.98) 100%);
+  border: 1px solid rgba(220, 20, 60, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .campus-marks-card:hover {
+  border-color: rgba(255, 59, 92, 0.45);
+  box-shadow: 0 14px 38px rgba(255, 59, 92, 0.18);
+}
+
+.campus-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.campus-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.campus-title-group h3 {
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--text-primary, #1d1d1f);
+  line-height: 1.35;
+  margin: 0;
+}
+
+[data-theme="dark"] .campus-title-group h3 {
+  color: #f8fafc;
+}
+
+.campus-meta {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--text-secondary, #86868b);
+}
+
+[data-theme="dark"] .campus-meta {
+  color: #94a3b8;
+}
+
+.campus-big-score {
+  display: flex;
+  align-items: baseline;
+  flex-shrink: 0;
+}
+
+.campus-score-val {
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: var(--marks-accent);
+  letter-spacing: -0.02em;
+}
+
+.campus-score-max {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--marks-accent);
+  opacity: 0.85;
+}
+
+.campus-chart-body {
+  display: flex;
+  gap: 14px;
+  align-items: stretch;
+  margin-bottom: 14px;
+}
+
+.campus-y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 110px;
+  padding: 0 0 20px 0;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-tertiary, #94a3b8);
+  text-align: right;
+  min-width: 26px;
+  user-select: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.campus-graph-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.campus-trend-svg {
+  width: 100%;
+  height: 110px;
+  display: block;
+  overflow: visible;
+}
+
+.campus-grid-line {
+  stroke: rgba(0, 0, 0, 0.06);
+  stroke-width: 0.7;
+}
+
+[data-theme="dark"] .campus-grid-line {
+  stroke: rgba(148, 163, 184, 0.13);
+}
+
+.campus-trend-line {
+  stroke: var(--marks-accent);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+}
+
+.campus-node-outer {
+  fill: var(--marks-accent);
+}
+
+.campus-node-inner {
+  fill: #ffffff;
+}
+
+.campus-x-axis {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 4px 0;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-tertiary, #94a3b8);
+  user-select: none;
+}
+
+.campus-x-axis .x-label-end {
+  letter-spacing: 0.01em;
+}
+
+.campus-components-list {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-secondary, rgba(0, 0, 0, 0.06));
+}
+
+[data-theme="dark"] .campus-components-list {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+.campus-comp-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-secondary, rgba(0, 0, 0, 0.04));
+  border: 1px solid var(--border-primary, rgba(0, 0, 0, 0.06));
+  border-radius: 8px;
+  padding: 5px 12px;
+}
+
+[data-theme="dark"] .campus-comp-item {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+.campus-comp-item .comp-name {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-primary, #1d1d1f);
+}
+
+[data-theme="dark"] .campus-comp-item .comp-name {
+  color: #e2e8f0;
+}
+
+.campus-comp-item .comp-score {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary, #64748b);
+}
+
+[data-theme="dark"] .campus-comp-item .comp-score {
+  color: #94a3b8;
+}
+
+.campus-comp-item .comp-score span {
+  opacity: 0.7;
+}
+
 /* -- Card Header -- */
 .marks-card-apple .card-header {
   display: flex;
@@ -1051,6 +1284,10 @@
   flex-wrap: wrap;
 }
 
+.marks-graph-labels.single-label {
+  justify-content: center;
+}
+
 .marks-graph-labels span {
   font-size: 0.6rem;
   font-weight: 700;
@@ -1062,6 +1299,16 @@
   background: var(--surface-secondary);
   border: 1px solid var(--border-secondary);
   white-space: nowrap;
+}
+
+.marks-graph-labels .trend-hint-badge {
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: 0.58rem;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  opacity: 0.75;
 }
 
 

@@ -1,5 +1,6 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { useOutletContext } from 'react-router-dom';
+import { refreshSpAttendance } from '../lib/api';
 import './SubPages.css';
 
 const Icons = {
@@ -86,34 +87,59 @@ function getExamWeight(name) {
   return weight;
 }
 
+function formatExamLabel(name) {
+  const s = String(name || '').trim();
+  if (s.toLowerCase().includes('mark / max') || s.toLowerCase() === 'mark / max. mark' || s.toLowerCase() === 'mark') {
+    return 'Internal Assessment';
+  }
+  return s;
+}
+
 function buildTrendChart(exams) {
   const sortedExams = (Array.isArray(exams) ? exams : [])
     .filter((exam) => String(exam?.exam || '').trim())
     .sort((a, b) => getExamWeight(a.exam) - getExamWeight(b.exam));
 
   const validExams = sortedExams.map((exam) => {
-    const name = String(exam?.exam || '').trim();
+    const name = formatExamLabel(exam?.exam);
     const obtained = parseFloat(exam?.obtained);
     const max = parseFloat(exam?.maxMark);
     const pct = max > 0 && Number.isFinite(obtained) ? (obtained / max) * 100 : 0;
     return {
       label: name || 'Test',
       pct: Math.max(0, Math.min(100, pct)),
+      obtained,
+      maxMark: max,
     };
   });
 
   if (!validExams.length) return null;
 
-  const labels = ['0', ...validExams.map((r) => r.label)];
-  const values = [0, ...validExams.map((r) => r.pct)];
-
   const top = 10;
   const bottom = 50;
   const height = bottom - top;
-  const chartLeft = 8;
-  const chartRight = 92;
+
+  // Single assessment: display clean benchmark indicator instead of fake diagonal line
+  if (validExams.length === 1) {
+    const exam = validExams[0];
+    const y = Number((bottom - (exam.pct / 100) * height).toFixed(2));
+    const point = { x: 50, y, v: exam.pct, label: exam.label };
+    return {
+      isSingle: true,
+      points: [point],
+      labels: [exam.label],
+      singleLine: { x1: 15, x2: 85, y },
+      bottom,
+    };
+  }
+
+  // Multi assessment: trend line between actual evaluations (no artificial 0 start)
+  const chartLeft = 14;
+  const chartRight = 86;
   const chartWidth = chartRight - chartLeft;
-  const step = values.length > 1 ? chartWidth / (values.length - 1) : chartWidth;
+  const labels = validExams.map((r) => r.label);
+  const values = validExams.map((r) => r.pct);
+  const step = chartWidth / (values.length - 1);
 
   const points = values.map((v, idx) => {
     const x = Number((chartLeft + idx * step).toFixed(2));
@@ -121,22 +147,14 @@ function buildTrendChart(exams) {
     return { x, y, v, label: labels[idx] };
   });
 
-  const getStraightPath = (pts) => {
-    if (pts.length < 1) return '';
-    let d = `M ${pts[0].x} ${pts[0].y}`;
-    for (let i = 1; i < pts.length; i++) {
-      d += ` L ${pts[i].x} ${pts[i].y}`;
-    }
-    return d;
-  };
-
-  const mainPath = getStraightPath(points);
-  let fillPath = '';
-  if (points.length >= 2) {
-    fillPath = `${mainPath} L ${points[points.length - 1].x} ${bottom} L ${points[0].x} ${bottom} Z`;
+  let mainPath = `M ${points[0].x} ${points[0].y}`;
+  for (let i = 1; i < points.length; i++) {
+    mainPath += ` L ${points[i].x} ${points[i].y}`;
   }
 
-  return { points, labels, mainPath, fillPath, bottom };
+  const fillPath = `${mainPath} L ${points[points.length - 1].x} ${bottom} L ${points[0].x} ${bottom} Z`;
+
+  return { isSingle: false, points, labels, mainPath, fillPath, bottom };
 }
 
 const GRADE_POINTS = { 'O': 10, 'A+': 9, 'A': 8, 'B+': 7, 'B': 6, 'C': 5, 'F': 0 };
@@ -366,11 +384,47 @@ function SgpaPredictor({ courses, nameByCode, creditsByCode, onClose }) {
 
 export default function MarksPage() {
   const [isPredictorOpen, setIsPredictorOpen] = useState(false);
+  const [spLoading, setSpLoading] = useState(false);
+  const [spError, setSpError] = useState('');
   const context = useOutletContext() || {};
   const student = context.student || getStudentData();
   const regNumber = String(student.regNumber || '').trim();
   const marks = student.marks || [];
   const attendance = student.attendance || [];
+
+  const handleRefreshMarks = async () => {
+    if (!regNumber) return;
+    setSpLoading(true);
+    setSpError('');
+    try {
+      const result = await refreshSpAttendance(regNumber);
+      if (result.marks?.length > 0 || result.attendance?.length > 0) {
+        const stored = getStudentData();
+        if (result.marks?.length > 0) stored.marks = result.marks;
+        if (result.attendance?.length > 0) stored.attendance = result.attendance;
+        localStorage.setItem('academia_student', JSON.stringify(stored));
+        localStorage.setItem('academia_last_sync_time', Date.now().toString());
+        if (typeof context.setStudent === 'function') {
+          context.setStudent(stored);
+        }
+      } else {
+        setSpError('No marks found on Student Portal');
+      }
+    } catch (err) {
+      setSpError(err.message || 'Failed to refresh marks');
+    } finally {
+      setSpLoading(false);
+    }
+  };
+
+  // Automatically sync marks on tab visit if not already loaded
+  const autoSyncedRef = useRef(false);
+  useEffect(() => {
+    if (!autoSyncedRef.current && regNumber && (!marks || marks.length === 0)) {
+      autoSyncedRef.current = true;
+      handleRefreshMarks();
+    }
+  }, [regNumber, marks]);
 
   const courseNameByCode = useMemo(() => {
     const map = {};
@@ -463,10 +517,26 @@ export default function MarksPage() {
           <h1 className="subpage-title">Marks</h1>
           <p className="subpage-desc">Track performance and predict your semester SGPA.</p>
         </div>
-        <button className="apple-btn primary" onClick={() => setIsPredictorOpen(!isPredictorOpen)}>
-          <span style={{ marginRight: '8px', display: 'flex', alignItems: 'center' }}>{Icons.calculator}</span>
-          SGPA Calculator
-        </button>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <button
+            className="apple-btn"
+            onClick={handleRefreshMarks}
+            disabled={spLoading}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 6, fontSize: 13,
+              background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.25)',
+              color: '#60a5fa', borderRadius: 8, padding: '8px 14px', cursor: spLoading ? 'not-allowed' : 'pointer'
+            }}
+            title="Sync latest marks from Student Portal"
+          >
+            <span style={{ display: 'inline-block', transform: spLoading ? 'rotate(180deg)' : 'none', transition: 'transform 0.4s' }}>↻</span>
+            {spLoading ? 'Syncing…' : 'Sync Marks'}
+          </button>
+          <button className="apple-btn primary" onClick={() => setIsPredictorOpen(!isPredictorOpen)}>
+            <span style={{ marginRight: '8px', display: 'flex', alignItems: 'center' }}>{Icons.calculator}</span>
+            SGPA Calculator
+          </button>
+        </div>
       </div>
 
 
@@ -500,94 +570,117 @@ export default function MarksPage() {
         <div className="marks-grid-apple stagger-children">
           {FILTERED_MARKS.map((m, i) => {
             const displayName = getDisplayCourseName(m, courseNameByCode);
-            const pctValue = m.total?.maxMark > 0 ? (m.total.obtained / m.total.maxMark) * 100 : 0;
+            const obtained = Number(m.total?.obtained) || 0;
+            const maxMark = Number(m.total?.maxMark) || 0;
+            const pctValue = maxMark > 0 ? (obtained / maxMark) * 100 : 0;
             const pct = Math.max(0, Math.min(100, pctValue));
             const individualMarks = (m.marks || [])
               .filter(exam => !isSystemNoise(exam.exam, true))
               .sort((a, b) => getExamWeight(a.exam) - getExamWeight(b.exam));
-            const trendChart = buildTrendChart(individualMarks);
+
+            // Chart coordinates: viewBox 0 0 100 48
+            const chartTop = 4;
+            const chartBottom = 44;
+            const chartHeight = chartBottom - chartTop;
+            const startX = 3;
+            const startY = chartBottom; // 0%
+            const endX = 97;
+            const endY = Number((chartBottom - (pct / 100) * chartHeight).toFixed(2));
+
             return (
-              <div key={i} className="marks-card-apple">
-                <div className="card-header">
-                  <div className="title-group">
+              <div key={i} className="campus-marks-card">
+                <div className="campus-card-header">
+                  <div className="campus-title-group">
                     <h3>{displayName}</h3>
-                    <span className="meta">{m.courseCode.startsWith('21') ? m.courseCode : `21${m.courseCode}`} • {m.category}</span>
+                    <span className="campus-meta">
+                      {m.courseCode.startsWith('21') ? m.courseCode : `21${m.courseCode}`} - {m.category || 'Theory'}
+                    </span>
                   </div>
-                  <div className="big-score">
-                    <div className="fraction">{m.total?.obtained}<span>/{m.total?.maxMark}</span></div>
-                    <div className="percentage">{pct.toFixed(0)}%</div>
+                  <div className="campus-big-score">
+                    <span className="campus-score-val">{obtained.toFixed(2).replace(/\.00$/, '')}</span>
+                    <span className="campus-score-max">/{maxMark}</span>
                   </div>
                 </div>
 
-                <div className="marks-graph-apple" aria-hidden="true">
-                  {trendChart ? (
-                    <>
-                      <div className="marks-graph-legend">
-                        <span className="dot" /> Performance Trend
-                      </div>
-                      <svg className="marks-trend-svg" viewBox="0 0 100 56" preserveAspectRatio="none">
-                        <defs>
-                          <linearGradient id={`gradient-${i}`} x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.18" />
-                            <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
-                          </linearGradient>
-                          <filter id={`glow-${i}`}>
-                            <feGaussianBlur stdDeviation="0.4" result="blur" />
-                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                          </filter>
-                        </defs>
+                <div className="campus-chart-body">
+                  <div className="campus-y-axis">
+                    <span>100</span>
+                    <span>80</span>
+                    <span>60</span>
+                    <span>40</span>
+                    <span>20</span>
+                    <span>0</span>
+                  </div>
 
-                        {/* Shorter Grid lines */}
-                        {[0, 20, 40, 60, 80, 100].map((v) => {
-                          const y = 50 - (v / 100) * 40;
-                          return (
-                            <g key={`h-${v}`}>
-                              <line className="marks-grid-line" x1="0" y1={y} x2="100" y2={y} strokeDasharray="1,2" />
-                              <text className="marks-axis-label" x="0.5" y={y - 1}>{v}</text>
-                            </g>
-                          );
-                        })}
+                  <div className="campus-graph-area">
+                    <svg className="campus-trend-svg" viewBox="0 0 100 48" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id={`marks-grad-${i}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stopColor="var(--marks-accent, #007AFF)" stopOpacity="0.28" />
+                          <stop offset="100%" stopColor="var(--marks-accent, #007AFF)" stopOpacity="0.0" />
+                        </linearGradient>
+                        <filter id={`marks-glow-${i}`} x="-20%" y="-20%" width="140%" height="140%">
+                          <feDropShadow dx="0" dy="1" stdDeviation="1.5" floodColor="var(--marks-accent, #007AFF)" floodOpacity="0.65" />
+                        </filter>
+                      </defs>
 
-                        {trendChart.fillPath && (
-                          <path className="marks-trend-fill" d={trendChart.fillPath} fill={`url(#gradient-${i})`} />
-                        )}
-
-                        {trendChart.dashedPath && <path className="marks-trend-line-dashed" d={trendChart.dashedPath} />}
-                        {trendChart.mainPath && (
-                          <path
-                            className="marks-trend-line"
-                            d={trendChart.mainPath}
-                            filter={`url(#glow-${i})`}
+                      {/* Horizontal Grid lines matching 100, 80, 60, 40, 20 */}
+                      {[100, 80, 60, 40, 20].map((val) => {
+                        const y = chartBottom - (val / 100) * chartHeight;
+                        return (
+                          <line
+                            key={val}
+                            className="campus-grid-line"
+                            x1="0"
+                            y1={y}
+                            x2="100"
+                            y2={y}
                           />
-                        )}
+                        );
+                      })}
 
-                        {trendChart.points.map((p, idx) => (
-                          idx > 0 && (
-                            <g key={`pt-${idx}`}>
-                              <circle className="marks-trend-point" cx={p.x} cy={p.y} r="1.2" fill="var(--accent)" />
-                            </g>
-                          )
-                        ))}
-                      </svg>
-                      <div className="marks-graph-labels">
-                        {trendChart.labels.map((label, idx) => (
-                          <span key={`lbl-${idx}`}>{label}</span>
-                        ))}
-                      </div>
-                    </>
-                  ) : (
-                    <div className="marks-trend-empty">No assessments yet</div>
-                  )}
-                </div>
+                      {/* Area Fill */}
+                      <path
+                        d={`M ${startX} ${startY} L ${endX} ${endY} L ${endX} ${chartBottom} L ${startX} ${chartBottom} Z`}
+                        fill={`url(#marks-grad-${i})`}
+                      />
 
-                <div className="exams-list">
-                  {individualMarks.map((exam, j) => (
-                    <div key={j} className="exam-row">
-                      <span className="exam-name">{exam.exam}</span>
-                      <span className="exam-val">{exam.obtained} <span>/ {exam.maxMark}</span></span>
+                      {/* Trend Line */}
+                      <line
+                        className="campus-trend-line"
+                        x1={startX}
+                        y1={startY}
+                        x2={endX}
+                        y2={endY}
+                        filter={`url(#marks-glow-${i})`}
+                      />
+
+                      {/* Start Node (at 0) */}
+                      <circle className="campus-node-outer" cx={startX} cy={startY} r="3.4" />
+                      <circle className="campus-node-inner" cx={startX} cy={startY} r="1.9" fill="#ffffff" />
+
+                      {/* End Node (at score %) */}
+                      <circle className="campus-node-outer" cx={endX} cy={endY} r="3.8" filter={`url(#marks-glow-${i})`} />
+                      <circle className="campus-node-inner" cx={endX} cy={endY} r="2.2" fill="#ffffff" />
+                    </svg>
+
+                    <div className="campus-x-axis">
+                      <span className="x-label-start">0</span>
+                      <span className="x-label-end">Internal Marks</span>
                     </div>
-                  ))}
+                  </div>
                 </div>
+
+                {individualMarks.length > 0 && (
+                  <div className="campus-components-list">
+                    {individualMarks.map((exam, j) => (
+                      <div key={j} className="campus-comp-item">
+                        <span className="comp-name">{formatExamLabel(exam.exam)}</span>
+                        <span className="comp-score">{exam.obtained} <span>/ {exam.maxMark}</span></span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             );
           })}
@@ -596,7 +689,27 @@ export default function MarksPage() {
         <div className="empty-state">
           <div className="icon">{Icons.marks}</div>
           <h3>No records found</h3>
-          <p>Login to sync your academic performance.</p>
+          <p style={{ marginBottom: 18, opacity: 0.65 }}>
+            Sync your latest internal marks directly from the SRM Student Portal.
+          </p>
+          <button
+            onClick={handleRefreshMarks}
+            disabled={spLoading}
+            style={{
+              background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+              border: 'none', borderRadius: 10, padding: '12px 28px',
+              color: '#fff', fontSize: 14, fontWeight: 700, cursor: spLoading ? 'not-allowed' : 'pointer',
+              opacity: spLoading ? 0.7 : 1, transition: 'all 0.2s',
+              boxShadow: '0 4px 16px rgba(59,130,246,0.35)',
+            }}
+          >
+            {spLoading ? 'Syncing Marks…' : 'Sync Marks from Student Portal'}
+          </button>
+          {spError && (
+            <p style={{ color: '#f87171', fontSize: 13, marginTop: 12 }}>
+              {spError}. If needed, reconnect your Student Portal session on the Attendance page.
+            </p>
+          )}
         </div>
       )}
 
