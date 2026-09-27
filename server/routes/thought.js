@@ -2,7 +2,7 @@ import { Router } from 'express';
 import axios from 'axios';
 import fs from 'fs/promises';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import os from 'os';
 import { getSupabaseAdmin } from '../lib/supabase.js';
 
 const router = Router();
@@ -10,9 +10,33 @@ const router = Router();
 const MISTRAL_API_URL = 'https://api.mistral.ai/v1/chat/completions';
 const MISTRAL_MODEL = process.env.THOUGHT_OF_DAY_MISTRAL_MODEL || 'mistral-small-latest';
 const CACHE_TIMEZONE = process.env.THOUGHT_OF_DAY_TIMEZONE || 'Asia/Kolkata';
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const CACHE_FILE_PATH = path.resolve(__dirname, '../.thought-cache.json');
+// Keep the upstream call under Vercel's function timeout (default 10s) so a
+// slow Mistral response degrades to a fallback instead of crashing the function.
+const MISTRAL_TIMEOUT_MS = Number(process.env.THOUGHT_OF_DAY_TIMEOUT_MS) || 8000;
+// The deployment bundle is read-only on serverless; only the temp dir is writable.
+const CACHE_FILE_PATH = path.join(os.tmpdir(), 'nexus-thought-cache.json');
+
+// Curated fallback thoughts, served when Mistral is unreachable, slow, or the
+// API key isn't configured — so the card always shows something instead of an
+// error. One is chosen per day (by date) so it stays stable through the day.
+const FALLBACK_THOUGHTS = [
+  { thought: 'Discipline is choosing what you want most over what you want now.', author: 'Unknown' },
+  { thought: "Nobody is coming to save you. That's not sad — that's freedom.", author: 'Unknown' },
+  { thought: 'You will never always be motivated. You have to learn to be disciplined.', author: 'Unknown' },
+  { thought: 'The comfort you cling to today is the regret you carry tomorrow.', author: 'Unknown' },
+  { thought: 'Excuses sound best to the person making them.', author: 'Unknown' },
+  { thought: "Your future is decided by what you do today, not tomorrow.", author: 'Unknown' },
+  { thought: 'Hard work beats talent when talent refuses to work.', author: 'Tim Notke' },
+  { thought: 'The pain of discipline weighs ounces; the pain of regret weighs tons.', author: 'Jim Rohn' },
+  { thought: "If it's important, you'll find a way. If not, you'll find an excuse.", author: 'Unknown' },
+  { thought: 'Small habits, repeated daily, decide who you become.', author: 'Unknown' },
+];
+
+function pickFallbackThought(dateKey) {
+  let hash = 0;
+  for (const ch of String(dateKey)) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+  return FALLBACK_THOUGHTS[hash % FALLBACK_THOUGHTS.length];
+}
 
 let dailyThoughtCache = {
   dateKey: null,
@@ -163,7 +187,7 @@ async function fetchThoughtFromMistral() {
       'Authorization': `Bearer ${apiKey}`,
       'Content-Type': 'application/json',
     },
-    timeout: 15000,
+    timeout: MISTRAL_TIMEOUT_MS,
   });
 
   const content = response.data?.choices?.[0]?.message?.content || '';
@@ -275,9 +299,17 @@ router.get('/thought-of-the-day', async (req, res) => {
       });
     }
 
-    return res.status(503).json({
-      error: 'Thought of the day unavailable',
-      detail: e.message,
+    // Last resort: a curated fallback so the card always shows a thought,
+    // even when Mistral is down or MISTRAL_API_KEY isn't configured.
+    const fallback = pickFallbackThought(dateKey);
+    return res.json({
+      dateKey,
+      thought: fallback.thought,
+      author: fallback.author,
+      fetchedAt: null,
+      fromCache: false,
+      fallback: true,
+      timezone: CACHE_TIMEZONE,
     });
   }
 });
