@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useOutletContext } from 'react-router-dom';
-import { fetchOdState, saveOdState, importAttendance, fetchImportedAttendance } from '../lib/api';
+import { fetchOdState, saveOdState, importAttendance, fetchImportedAttendance, fetchSpCaptcha, submitSpLogin, refreshSpAttendance } from '../lib/api';
 import { normalizeCourseCode } from '../lib/slotTypes';
 import './SubPages.css';
 
@@ -248,6 +248,106 @@ export default function AttendancePage() {
   });
   const [odSyncReady, setOdSyncReady] = useState(false);
   const [odSyncEnabled, setOdSyncEnabled] = useState(false);
+
+  // ── Student Portal Connect (captcha login) ──────────────────────
+  const [showSpModal, setShowSpModal] = useState(false);
+  const [spStep, setSpStep] = useState('captcha'); // 'captcha' | 'form' | 'loading' | 'done'
+  const [spSessionId, setSpSessionId] = useState('');
+  const [spCaptchaSvg, setSpCaptchaSvg] = useState('');
+  const [spCaptchaInput, setSpCaptchaInput] = useState('');
+  const [spUsername, setSpUsername] = useState('');
+  const [spPassword, setSpPassword] = useState('');
+  const [spError, setSpError] = useState('');
+  const [spLoading, setSpLoading] = useState(false);
+
+  const openSpModal = async () => {
+    setShowSpModal(true);
+    setSpStep('captcha');
+    setSpError('');
+    setSpCaptchaInput('');
+    setSpPassword('');
+    const student = getStudentData();
+    const defaultUname = student.email?.split('@')[0] || student.regNumber || regNumber || '';
+    setSpUsername(defaultUname);
+    setSpLoading(true);
+    try {
+      const data = await fetchSpCaptcha();
+      setSpSessionId(data.sessionId);
+      setSpCaptchaSvg(data.captchaImg || data.captchaSvg || '');
+      setSpStep('form');
+    } catch (err) {
+      setSpError(err.message || 'Could not load captcha');
+      setSpStep('captcha');
+    } finally {
+      setSpLoading(false);
+    }
+  };
+
+  const handleSpLogin = async () => {
+    if (!spCaptchaInput.trim() || !spPassword.trim()) {
+      setSpError('Please fill in all fields');
+      return;
+    }
+    setSpLoading(true);
+    setSpError('');
+    const student = getStudentData();
+    const uname = spUsername.trim() || student.email?.split('@')[0] || student.regNumber || regNumber;
+    try {
+      const result = await submitSpLogin({
+        sessionId: spSessionId,
+        username: uname,
+        password: spPassword,
+        captcha: spCaptchaInput,
+        regNumber,
+      });
+      if (result.attendance?.length > 0) {
+        const stored = getStudentData();
+        stored.attendance = result.attendance;
+        stored.attendanceSource = 'student_portal_direct';
+        stored.attendanceImportedAt = result.timestamp;
+        localStorage.setItem('academia_student', JSON.stringify(stored));
+        setSpStep('done');
+        setTimeout(() => { setShowSpModal(false); window.location.reload(); }, 1500);
+      }
+    } catch (err) {
+      setSpError(err.message || 'Login failed');
+      // Refresh captcha on wrong captcha/credentials
+      setSpLoading(true);
+      try {
+        const data = await fetchSpCaptcha();
+        setSpSessionId(data.sessionId);
+        setSpCaptchaSvg(data.captchaImg || data.captchaSvg || '');
+        setSpCaptchaInput('');
+      } catch { /* ignore */ }
+      setSpLoading(false);
+    } finally {
+      setSpLoading(false);
+    }
+  };
+
+  const handleSpRefresh = async () => {
+    setSpLoading(true);
+    setSpError('');
+    try {
+      const result = await refreshSpAttendance(regNumber);
+      if (result.attendance?.length > 0) {
+        const stored = getStudentData();
+        stored.attendance = result.attendance;
+        stored.attendanceSource = 'student_portal_direct';
+        stored.attendanceImportedAt = result.refreshedAt;
+        localStorage.setItem('academia_student', JSON.stringify(stored));
+        window.location.reload();
+      }
+    } catch (err) {
+      if (err.needsLogin) {
+        openSpModal();
+      } else {
+        setSpError(err.message);
+      }
+    } finally {
+      setSpLoading(false);
+    }
+  };
 
   // ── Manual Paste Import ──────────────────────────────────────────
   const [showPasteModal, setShowPasteModal] = useState(false);
@@ -774,25 +874,179 @@ export default function AttendancePage() {
         document.body
       )}
 
-      {student.attendanceSource === 'student_portal' && student.attendanceImportedAt && (
+      {/* Student Portal source banner */}
+      {(student.attendanceSource === 'student_portal' || student.attendanceSource === 'student_portal_direct') && student.attendanceImportedAt && (
         <div style={{
           background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.2)',
           borderRadius: 8, padding: '8px 14px', marginBottom: 12, fontSize: 13,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
         }}>
           <span style={{ opacity: 0.8 }}>
-            Data from Student Portal — last imported {new Date(student.attendanceImportedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+            📡 Student Portal — synced {new Date(student.attendanceImportedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
           </span>
           <button
-            onClick={() => setShowPasteModal(true)}
+            onClick={handleSpRefresh}
+            disabled={spLoading}
             style={{
-              background: 'none', border: 'none', color: '#60a5fa', cursor: 'pointer',
-              fontSize: 13, textDecoration: 'underline', padding: 0,
+              background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)',
+              color: '#60a5fa', cursor: 'pointer', fontSize: 12, borderRadius: 6,
+              padding: '3px 10px', fontWeight: 600, opacity: spLoading ? 0.6 : 1,
             }}
           >
-            Update
+            {spLoading ? 'Refreshing…' : '↻ Refresh'}
           </button>
         </div>
+      )}
+
+      {/* SP Connect Modal */}
+      {showSpModal && createPortal(
+        <div className="apple-modal-overlay" onClick={e => e.target === e.currentTarget && setShowSpModal(false)}>
+          <div className="apple-modal" style={{ maxWidth: 380 }}>
+            <header className="apple-modal-header">
+              <h2 style={{ fontSize: 17, fontWeight: 700 }}>Connect Student Portal</h2>
+              <button className="apple-modal-close" onClick={() => setShowSpModal(false)}>{Icons.close}</button>
+            </header>
+            <div className="apple-modal-body" style={{ padding: '16px 20px' }}>
+              {spStep === 'captcha' && spLoading && (
+                <div style={{ textAlign: 'center', padding: '32px 0', opacity: 0.6 }}>
+                  <div style={{ fontSize: 14 }}>Loading captcha…</div>
+                </div>
+              )}
+
+              {spStep === 'form' && (
+                <>
+                  <p style={{ fontSize: 13, opacity: 0.65, marginBottom: 16, lineHeight: 1.5 }}>
+                    Sign in with your SRM Student Portal credentials to sync attendance directly.
+                  </p>
+
+                  <div style={{ marginBottom: 12 }}>
+                    <label style={{ fontSize: 12, opacity: 0.7, display: 'block', marginBottom: 5 }}>USERNAME / NETID</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. vs0436 or Register Number"
+                      value={spUsername}
+                      onChange={e => setSpUsername(e.target.value)}
+                      autoComplete="username"
+                      style={{
+                        width: '100%', background: 'rgba(255,255,255,0.07)',
+                        border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8,
+                        padding: '9px 12px', color: 'inherit', fontSize: 14, outline: 'none',
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ marginBottom: 14 }}>
+                    <label style={{ fontSize: 12, opacity: 0.7, display: 'block', marginBottom: 5 }}>SRM PASSWORD</label>
+                    <input
+                      type="password"
+                      placeholder="Your Student Portal password"
+                      value={spPassword}
+                      onChange={e => setSpPassword(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleSpLogin()}
+                      style={{
+                        width: '100%', background: 'rgba(255,255,255,0.07)',
+                        border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8,
+                        padding: '9px 12px', color: 'inherit', fontSize: 14, outline: 'none',
+                      }}
+                    />
+                  </div>
+
+                  {/* Captcha display */}
+                  <div style={{ marginBottom: 14 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                      <label style={{ fontSize: 12, opacity: 0.7 }}>CAPTCHA</label>
+                      <button
+                        type="button"
+                        onClick={openSpModal}
+                        disabled={spLoading}
+                        style={{
+                          background: 'none', border: 'none', color: '#60a5fa',
+                          fontSize: 11, cursor: 'pointer', padding: 0, opacity: 0.9
+                        }}
+                      >
+                        ↻ Refresh Image
+                      </button>
+                    </div>
+
+                    <div
+                      style={{
+                        background: '#f8fafc',
+                        borderRadius: 8, overflow: 'hidden', marginBottom: 8,
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        padding: '6px', textAlign: 'center', minHeight: 46,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        cursor: 'pointer'
+                      }}
+                      title="Click to reload captcha"
+                      onClick={openSpModal}
+                    >
+                      {spCaptchaSvg.startsWith('data:') || spCaptchaSvg.startsWith('http') ? (
+                        <img
+                          src={spCaptchaSvg}
+                          alt="Captcha"
+                          style={{ maxHeight: 42, maxWidth: '100%', objectFit: 'contain', display: 'block' }}
+                        />
+                      ) : (
+                        <div dangerouslySetInnerHTML={{ __html: spCaptchaSvg }} />
+                      )}
+                    </div>
+
+                    <input
+                      type="text"
+                      placeholder="Type the characters above"
+                      value={spCaptchaInput}
+                      onChange={e => setSpCaptchaInput(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleSpLogin()}
+                      autoComplete="off"
+                      spellCheck={false}
+                      style={{
+                        width: '100%', background: 'rgba(255,255,255,0.07)',
+                        border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8,
+                        padding: '9px 12px', color: 'inherit', fontSize: 15, outline: 'none',
+                        letterSpacing: 3, fontFamily: 'monospace', textTransform: 'none',
+                      }}
+                    />
+                  </div>
+
+                  {spError && (
+                    <div style={{
+                      background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)',
+                      borderRadius: 8, padding: '8px 12px', fontSize: 13, color: '#f87171', marginBottom: 12,
+                    }}>
+                      {spError}
+                    </div>
+                  )}
+
+                  <button
+                    onClick={handleSpLogin}
+                    disabled={spLoading}
+                    style={{
+                      width: '100%', background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+                      border: 'none', borderRadius: 10, padding: '12px', color: '#fff',
+                      fontSize: 15, fontWeight: 700, cursor: spLoading ? 'not-allowed' : 'pointer',
+                      opacity: spLoading ? 0.7 : 1, transition: 'opacity 0.2s',
+                    }}
+                  >
+                    {spLoading ? 'Signing in…' : 'Sync Attendance'}
+                  </button>
+
+                  <p style={{ fontSize: 11, opacity: 0.4, textAlign: 'center', marginTop: 12 }}>
+                    Your password is sent directly to SRM's servers — it is never stored by NEXUS.
+                  </p>
+                </>
+              )}
+
+              {spStep === 'done' && (
+                <div style={{ textAlign: 'center', padding: '24px 0' }}>
+                  <div style={{ fontSize: 36, marginBottom: 8 }}>✅</div>
+                  <div style={{ fontWeight: 700 }}>Attendance synced!</div>
+                  <div style={{ fontSize: 13, opacity: 0.6, marginTop: 4 }}>Reloading…</div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>,
+        document.body
       )}
 
       <div className="subpage-header">
@@ -944,31 +1198,28 @@ export default function AttendancePage() {
       ) : (
         <div className="empty-state">
           <div className="icon">{Icons.attendance}</div>
-          <h3>Attendance data not available</h3>
-          <p style={{ marginBottom: 12 }}>SRM has moved attendance to the Student Portal. Use one of these options:</p>
-          <div style={{ textAlign: 'left', maxWidth: 420, margin: '0 auto' }}>
-            <div style={{ background: 'var(--card-bg, rgba(255,255,255,0.04))', borderRadius: 10, padding: '14px 16px', marginBottom: 10 }}>
-              <strong style={{ fontSize: 14 }}>Option 1: Browser Extension (Recommended)</strong>
-              <p style={{ fontSize: 13, opacity: 0.75, marginTop: 4 }}>
-                Install the NEXUS extension, then open <a href="https://sp.srmist.edu.in" target="_blank" rel="noopener noreferrer" style={{ color: '#60a5fa' }}>sp.srmist.edu.in</a> and view your attendance. The extension syncs it automatically.
-              </p>
-            </div>
-            <div style={{ background: 'var(--card-bg, rgba(255,255,255,0.04))', borderRadius: 10, padding: '14px 16px' }}>
-              <strong style={{ fontSize: 14 }}>Option 2: Manual Paste</strong>
-              <p style={{ fontSize: 13, opacity: 0.75, marginTop: 4 }}>
-                Copy the attendance table from the Student Portal and{' '}
-                <button
-                  onClick={() => setShowPasteModal(true)}
-                  style={{
-                    background: 'none', border: 'none', color: '#60a5fa', cursor: 'pointer',
-                    textDecoration: 'underline', padding: 0, font: 'inherit', fontSize: 13,
-                  }}
-                >
-                  paste it here
-                </button>.
-              </p>
-            </div>
-          </div>
+          <h3>Connect Student Portal</h3>
+          <p style={{ marginBottom: 20, opacity: 0.65 }}>
+            SRM has moved attendance to sp.srmist.edu.in.<br />
+            Sign in once to sync your data directly — no extension needed.
+          </p>
+          <button
+            onClick={openSpModal}
+            style={{
+              background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+              border: 'none', borderRadius: 12, padding: '13px 32px',
+              color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer',
+              boxShadow: '0 4px 20px rgba(59,130,246,0.35)',
+              transition: 'transform 0.15s, box-shadow 0.15s',
+            }}
+            onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 24px rgba(59,130,246,0.45)'; }}
+            onMouseOut={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 4px 20px rgba(59,130,246,0.35)'; }}
+          >
+            Connect Student Portal
+          </button>
+          <p style={{ fontSize: 11, opacity: 0.35, marginTop: 16 }}>
+            Your password goes directly to SRM — NEXUS never stores it.
+          </p>
         </div>
       )}
     </div>

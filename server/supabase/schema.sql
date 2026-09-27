@@ -119,3 +119,11 @@ create table if not exists public.attendance_imports (
 
 create index if not exists attendance_imports_imported_at_idx
   on public.attendance_imports (imported_at desc);
+
+-- Student Portal (sp.srmist.edu.in) active sessions (JSESSIONID relay)
+create table if not exists public.student_portal_sessions (
+  reg_number text primary key,
+  jsessionid text not null,
+  worker_cookie text not null default '',
+  stored_at timestamptz not null default (now() at time zone 'utc' at time zone 'Asia/Kolkata')
+);

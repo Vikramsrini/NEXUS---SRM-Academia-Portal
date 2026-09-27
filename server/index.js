@@ -20,6 +20,7 @@ import wordleRoutes from './routes/wordle.js';
 import pushRoutes from './routes/push.js';
 import cronRoutes from './routes/cron.js';
 import importRoutes from './routes/import.js';
+import studentPortalRoutes from './routes/studentPortal.js';
 import { initNotificationCrons } from './services/notificationService.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -52,6 +53,7 @@ app.use('/api', odRoutes);
 app.use('/api', timetableStateRoutes);
 app.use('/api', pushRoutes);
 app.use('/api', importRoutes);
+app.use('/api', studentPortalRoutes);
 app.use('/api/wordle', wordleRoutes);
 app.use('/api/cron', cronRoutes);
 

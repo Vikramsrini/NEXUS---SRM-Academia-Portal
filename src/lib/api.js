@@ -234,5 +234,65 @@ export async function fetchImportedAttendance(regNumber) {
   return res.json();
 }
 
+// ── Student Portal Direct Login ───────────────────────────────────────
+
+/**
+ * Fetches a captcha SVG from the SP login page.
+ * Returns { sessionId, captchaSvg }
+ */
+export async function fetchSpCaptcha() {
+  const res = await fetch(apiUrl('/sp/captcha'));
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Failed to load Student Portal captcha');
+  }
+  return res.json();
+}
+
+/**
+ * Completes the SP login with user credentials + captcha answer.
+ * Returns { attendance, count, source, timestamp }
+ */
+export async function submitSpLogin({ sessionId, username, password, captcha, regNumber }) {
+  const token = localStorage.getItem('academia_token');
+  const res = await fetch(apiUrl('/sp/login'), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ sessionId, username, password, captcha, regNumber }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || 'Student Portal login failed');
+  }
+  return res.json();
+}
+
+/**
+ * Refreshes attendance using stored JSESSIONID (no re-login).
+ * Returns { attendance, refreshedAt } or throws with needsLogin=true.
+ */
+export async function refreshSpAttendance(regNumber) {
+  const token = localStorage.getItem('academia_token');
+  const res = await fetch(apiUrl('/sp/refresh'), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ regNumber }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.error || 'Failed to refresh attendance');
+    err.needsLogin = !!data.needsLogin;
+    throw err;
+  }
+  return data;
+}
+
 export { API_BASE };
+
 
