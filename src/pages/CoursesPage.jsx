@@ -127,9 +127,51 @@ export default function CoursesPage() {
     });
   }, [attendance]);
 
-  const courses = useMemo(() => {
+  // Registered courses come from Academia's My Time Table page (student.courses).
+  // Attendance now comes from the Student Portal, so it can't be the source here.
+  const coursesFromTimetable = useMemo(() => {
+    const ensure21 = (c) => {
+      const up = (c || '').trim().toUpperCase();
+      return up.startsWith('21') ? up : `21${up}`;
+    };
+
+    const seen = new Set();
+    const list = [];
+
+    coursesMetadata.forEach(course => {
+      const title = (course.title || '').trim();
+      const code = ensure21(course.code);
+      if (!title || title.length <= 2 || !code) return;
+
+      // Prefer the explicit slot type from the timetable, then the course type.
+      const rawType = !isNAType(course.slotType) ? course.slotType
+        : (!isNAType(course.courseType) ? course.courseType : 'Theory');
+      const norm = normalizeSlot(rawType);
+
+      // A course with both theory and lab components appears as two rows;
+      // keep them apart, but drop exact duplicate rows.
+      const key = `${code}|${norm.css}|${course.slot || ''}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+
+      list.push({
+        title,
+        code,
+        slot: isNASlot(course.slot) ? 'N/A' : course.slot,
+        type: norm.label,
+        css: norm.css,
+        credit: course.credit || '0',
+        faculty: course.faculty || 'N/A',
+      });
+    });
+
+    return list;
+  }, [coursesMetadata]);
+
+  // Fallback for older synced data that has attendance but no timetable courses.
+  const coursesFromAttendance = useMemo(() => {
     const normalize = (c) => (c || '').trim().toUpperCase().replace(/^21/, '');
-    
+
     return FILTERED_ATTENDANCE.map(a => {
       if (isNASlot(a.slot)) return null;
       const type = resolveType(a);
@@ -149,6 +191,8 @@ export default function CoursesPage() {
       };
     }).filter(Boolean);
   }, [FILTERED_ATTENDANCE, timetableMapping]);
+
+  const courses = coursesFromTimetable.length > 0 ? coursesFromTimetable : coursesFromAttendance;
 
   const needsResync = useMemo(() => {
     if (courses.length === 0 || !student?.timetable?.length) return false;
