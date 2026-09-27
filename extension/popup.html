@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NEXUS Attendance Sync</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      width: 340px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 16px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #1e293b;
+    }
+
+    .header h1 {
+      font-size: 16px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #60a5fa, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header .logo {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 14px;
+      color: white;
+    }
+
+    .status-card {
+      background: #1e293b;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+
+    .status-card .label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+
+    .status-card .value {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+    }
+
+    .status-dot.green { background: #22c55e; }
+    .status-dot.yellow { background: #f59e0b; }
+    .status-dot.red { background: #ef4444; }
+    .status-dot.gray { background: #64748b; }
+
+    .form-group {
+      margin-bottom: 10px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 8px 10px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      color: #e2e8f0;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .form-group input:focus {
+      border-color: #3b82f6;
+    }
+
+    .form-group input::placeholder {
+      color: #475569;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding: 8px 0;
+    }
+
+    .toggle-row span {
+      font-size: 13px;
+    }
+
+    .toggle {
+      position: relative;
+      width: 40px;
+      height: 22px;
+    }
+
+    .toggle input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #334155;
+      border-radius: 22px;
+      transition: 0.2s;
+    }
+
+    .toggle .slider::before {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      left: 3px;
+      bottom: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: 0.2s;
+    }
+
+    .toggle input:checked + .slider {
+      background: #3b82f6;
+    }
+
+    .toggle input:checked + .slider::before {
+      transform: translateX(18px);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .btn:hover { opacity: 0.9; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: #334155;
+      color: #e2e8f0;
+      margin-top: 6px;
+    }
+
+    .message {
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+
+    .message.success {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .message.error {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .message.info {
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+    }
+
+    .hint {
+      font-size: 11px;
+      color: #64748b;
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+
+    #settings-section {
+      border-top: 1px solid #1e293b;
+      padding-top: 12px;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">N</div>
+    <h1>NEXUS Attendance Sync</h1>
+  </div>
+
+  <!-- Status -->
+  <div class="status-card">
+    <div class="label">Status</div>
+    <div class="value" id="status-text">
+      <span class="status-dot gray" id="status-dot"></span>
+      <span id="status-label">Checking...</span>
+    </div>
+  </div>
+
+  <div class="status-card" id="last-sync-card" style="display:none">
+    <div class="label">Last Synced</div>
+    <div class="value" id="last-sync-text">Never</div>
+  </div>
+
+  <!-- Settings -->
+  <div id="settings-section">
+    <div class="form-group">
+      <label for="nexus-url">NEXUS Server URL</label>
+      <input type="url" id="nexus-url" placeholder="https://your-nexus-app.vercel.app" />
+    </div>
+
+    <div class="form-group">
+      <label for="nexus-token">Your Auth Token</label>
+      <input type="text" id="nexus-token" placeholder="Paste from NEXUS settings" />
+    </div>
+
+    <div class="form-group">
+      <label for="reg-number">Registration Number</label>
+      <input type="text" id="reg-number" placeholder="RA2211003XXXXXX" />
+    </div>
+
+    <div class="toggle-row">
+      <span>Auto-sync when detected</span>
+      <label class="toggle">
+        <input type="checkbox" id="auto-sync" />
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <button class="btn btn-primary" id="save-btn">Save Settings</button>
+    <button class="btn btn-secondary" id="sync-btn" disabled>Sync Now</button>
+  </div>
+
+  <div id="message-area"></div>
+
+  <p class="hint">
+    Open <strong>sp.srmist.edu.in</strong> and navigate to your attendance page.
+    The extension will detect and sync your data automatically.
+  </p>
+
+  <script src="popup.js"></script>
+</body>
+</html>

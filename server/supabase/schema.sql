@@ -108,3 +108,14 @@ create table if not exists public.push_subscriptions (
 );
 
 create index if not exists push_subscriptions_reg_number_idx on public.push_subscriptions (reg_number);
+
+-- Attendance imports from Student Portal (sp.srmist.edu.in) via browser extension or manual paste
+create table if not exists public.attendance_imports (
+  reg_number text primary key,
+  attendance_data jsonb not null default '[]'::jsonb,
+  source text not null default 'student_portal',
+  imported_at timestamptz not null default (now() at time zone 'utc' at time zone 'Asia/Kolkata')
+);
+
+create index if not exists attendance_imports_imported_at_idx
+  on public.attendance_imports (imported_at desc);

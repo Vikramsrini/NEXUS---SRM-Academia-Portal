@@ -12,6 +12,7 @@ import { parseCourses, buildTimetable } from '../scrapers/timetable.js';
 import { fetchCurrentDayOrder } from '../scrapers/dayorder.js';
 import { fetchRealUserInfo } from '../scrapers/userinfo.js';
 import { getCalendarUrls, parseSrmCalendar } from '../scrapers/calendar.js';
+import { getSupabaseAdmin } from '../lib/supabase.js';
 
 /**
  * Orchestrates a full academic record sync.
@@ -46,7 +47,35 @@ export async function performFullSync(authCookie, sessionId, sendStatus = () => 
 
       sendStatus(sessionId, 'attendance', `Synced ${result.attendance.length} courses and ${result.marks.length} marks`);
     } catch (e) {
-      console.warn('[Sync Service] Attendance/Marks sync failed:', e.message);
+      console.warn('[Sync Service] Attendance/Marks sync from Academia failed:', e.message);
+
+      // Fallback: try to load previously imported attendance from Student Portal
+      try {
+        const regNumber = result.userInfo?.regNumber || result.userInfo?.registrationNumber || '';
+        if (regNumber) {
+          const supabase = getSupabaseAdmin();
+          if (supabase) {
+            const { data: imported } = await supabase
+              .from('attendance_imports')
+              .select('attendance_data, imported_at')
+              .eq('reg_number', regNumber)
+              .single();
+
+            if (imported?.attendance_data?.length > 0) {
+              result.attendance = imported.attendance_data;
+              result.attendanceSource = 'student_portal_import';
+              sendStatus(sessionId, 'attendance', `Loaded ${result.attendance.length} courses from Student Portal import (${new Date(imported.imported_at).toLocaleDateString()})`);
+            } else {
+              sendStatus(sessionId, 'attendance', 'Attendance unavailable — use the NEXUS extension to sync from Student Portal');
+            }
+          }
+        } else {
+          sendStatus(sessionId, 'attendance', 'Attendance unavailable — use the NEXUS extension to sync from Student Portal');
+        }
+      } catch (fallbackErr) {
+        console.warn('[Sync Service] Imported attendance fallback also failed:', fallbackErr.message);
+        sendStatus(sessionId, 'attendance', 'Attendance unavailable — use the NEXUS extension to sync from Student Portal');
+      }
     }
 
     // 3. Timetable

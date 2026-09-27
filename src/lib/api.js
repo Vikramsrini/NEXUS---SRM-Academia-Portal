@@ -204,5 +204,35 @@ export async function fetchAllTimeLeaderboard() {
   return res.json();
 }
 
+export async function importAttendance({ format, data, regNumber }) {
+  const token = localStorage.getItem('academia_token');
+  const res = await fetch(apiUrl('/attendance/import'), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ format, data, regNumber }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || err.error || 'Failed to import attendance');
+  }
+  return res.json();
+}
+
+export async function fetchImportedAttendance(regNumber) {
+  const token = localStorage.getItem('academia_token');
+  const q = new URLSearchParams({ regNumber: String(regNumber) }).toString();
+  const res = await fetch(apiUrl(`/attendance/imported?${q}`), {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.detail || err.error || 'Failed to fetch imported attendance');
+  }
+  return res.json();
+}
+
 export { API_BASE };
 

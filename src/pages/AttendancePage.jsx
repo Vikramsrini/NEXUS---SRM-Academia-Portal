@@ -1,7 +1,7 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useOutletContext } from 'react-router-dom';
-import { fetchOdState, saveOdState } from '../lib/api';
+import { fetchOdState, saveOdState, importAttendance, fetchImportedAttendance } from '../lib/api';
 import { normalizeCourseCode } from '../lib/slotTypes';
 import './SubPages.css';
 
@@ -248,6 +248,42 @@ export default function AttendancePage() {
   });
   const [odSyncReady, setOdSyncReady] = useState(false);
   const [odSyncEnabled, setOdSyncEnabled] = useState(false);
+
+  // ── Manual Paste Import ──────────────────────────────────────────
+  const [showPasteModal, setShowPasteModal] = useState(false);
+  const [pasteText, setPasteText] = useState('');
+  const [pasteStatus, setPasteStatus] = useState(''); // '', 'loading', 'success', 'error'
+  const [pasteMessage, setPasteMessage] = useState('');
+
+  const handlePasteImport = useCallback(async () => {
+    if (!pasteText.trim()) return;
+    setPasteStatus('loading');
+    setPasteMessage('');
+    try {
+      const result = await importAttendance({
+        format: 'html',
+        data: pasteText.trim(),
+        regNumber,
+      });
+      if (result.success && result.attendance?.length > 0) {
+        // Update local storage with imported data
+        const stored = getStudentData();
+        stored.attendance = result.attendance;
+        stored.attendanceSource = 'student_portal';
+        stored.attendanceImportedAt = result.timestamp;
+        localStorage.setItem('academia_student', JSON.stringify(stored));
+        setPasteStatus('success');
+        setPasteMessage(`Imported ${result.count} courses! Reloading...`);
+        setTimeout(() => window.location.reload(), 1200);
+      } else {
+        setPasteStatus('error');
+        setPasteMessage(result.error || 'Could not parse attendance data. Make sure you copied the full table.');
+      }
+    } catch (err) {
+      setPasteStatus('error');
+      setPasteMessage(err.message || 'Import failed');
+    }
+  }, [pasteText, regNumber]);
 
   // ── Predict Attendance Logic ──────────────────────────────────────
   const [showPredictModal, setShowPredictModal] = useState(false);
@@ -547,6 +583,55 @@ export default function AttendancePage() {
           </filter>
         </defs>
       </svg>
+      {/* Paste Import Modal */}
+      {showPasteModal && createPortal(
+        <div className="apple-modal-overlay">
+          <div className="apple-modal-card">
+            <header className="apple-modal-header">
+              <h2>Import Attendance</h2>
+              <button className="apple-modal-close" onClick={() => { setShowPasteModal(false); setPasteText(''); setPasteStatus(''); }}>{Icons.close}</button>
+            </header>
+            <div className="apple-modal-body">
+              <p className="primary-text" style={{ marginBottom: 10 }}>
+                Copy the attendance table from <a href="https://sp.srmist.edu.in" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent, #60a5fa)' }}>sp.srmist.edu.in</a> and paste it below.
+              </p>
+              <textarea
+                value={pasteText}
+                onChange={(e) => setPasteText(e.target.value)}
+                placeholder="Select the entire attendance table on the Student Portal page (Ctrl+A works), copy it (Ctrl+C), and paste here (Ctrl+V)..."
+                style={{
+                  width: '100%', minHeight: 150, padding: 12, borderRadius: 8,
+                  background: 'var(--bg-secondary, rgba(255,255,255,0.04))',
+                  border: '1px solid var(--border, rgba(255,255,255,0.1))',
+                  color: 'inherit', fontFamily: 'monospace', fontSize: 12,
+                  resize: 'vertical',
+                }}
+              />
+              {pasteMessage && (
+                <p style={{
+                  marginTop: 8, fontSize: 13, padding: '8px 10px', borderRadius: 6,
+                  background: pasteStatus === 'success' ? 'rgba(34,197,94,0.12)' : pasteStatus === 'error' ? 'rgba(239,68,68,0.12)' : 'rgba(59,130,246,0.12)',
+                  color: pasteStatus === 'success' ? '#4ade80' : pasteStatus === 'error' ? '#f87171' : '#60a5fa',
+                }}>
+                  {pasteMessage}
+                </p>
+              )}
+            </div>
+            <footer className="apple-modal-footer">
+              <button className="apple-btn secondary" onClick={() => { setShowPasteModal(false); setPasteText(''); setPasteStatus(''); }}>Cancel</button>
+              <button
+                className="apple-btn primary"
+                onClick={handlePasteImport}
+                disabled={!pasteText.trim() || pasteStatus === 'loading'}
+              >
+                {pasteStatus === 'loading' ? 'Importing...' : 'Import'}
+              </button>
+            </footer>
+          </div>
+        </div>,
+        document.body
+      )}
+
       {/* Redesigned Disclaimer Modal — rendered via portal to escape overflow:auto */}
       {showDisclaimer && createPortal(
         <div className="apple-modal-overlay">
@@ -687,6 +772,27 @@ export default function AttendancePage() {
           </div>
         </div>,
         document.body
+      )}
+
+      {student.attendanceSource === 'student_portal' && student.attendanceImportedAt && (
+        <div style={{
+          background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.2)',
+          borderRadius: 8, padding: '8px 14px', marginBottom: 12, fontSize: 13,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        }}>
+          <span style={{ opacity: 0.8 }}>
+            Data from Student Portal — last imported {new Date(student.attendanceImportedAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+          </span>
+          <button
+            onClick={() => setShowPasteModal(true)}
+            style={{
+              background: 'none', border: 'none', color: '#60a5fa', cursor: 'pointer',
+              fontSize: 13, textDecoration: 'underline', padding: 0,
+            }}
+          >
+            Update
+          </button>
+        </div>
       )}
 
       <div className="subpage-header">
@@ -839,7 +945,30 @@ export default function AttendancePage() {
         <div className="empty-state">
           <div className="icon">{Icons.attendance}</div>
           <h3>Attendance data not available</h3>
-          <p>Complete your initial sync to view your classroom presence stats.</p>
+          <p style={{ marginBottom: 12 }}>SRM has moved attendance to the Student Portal. Use one of these options:</p>
+          <div style={{ textAlign: 'left', maxWidth: 420, margin: '0 auto' }}>
+            <div style={{ background: 'var(--card-bg, rgba(255,255,255,0.04))', borderRadius: 10, padding: '14px 16px', marginBottom: 10 }}>
+              <strong style={{ fontSize: 14 }}>Option 1: Browser Extension (Recommended)</strong>
+              <p style={{ fontSize: 13, opacity: 0.75, marginTop: 4 }}>
+                Install the NEXUS extension, then open <a href="https://sp.srmist.edu.in" target="_blank" rel="noopener noreferrer" style={{ color: '#60a5fa' }}>sp.srmist.edu.in</a> and view your attendance. The extension syncs it automatically.
+              </p>
+            </div>
+            <div style={{ background: 'var(--card-bg, rgba(255,255,255,0.04))', borderRadius: 10, padding: '14px 16px' }}>
+              <strong style={{ fontSize: 14 }}>Option 2: Manual Paste</strong>
+              <p style={{ fontSize: 13, opacity: 0.75, marginTop: 4 }}>
+                Copy the attendance table from the Student Portal and{' '}
+                <button
+                  onClick={() => setShowPasteModal(true)}
+                  style={{
+                    background: 'none', border: 'none', color: '#60a5fa', cursor: 'pointer',
+                    textDecoration: 'underline', padding: 0, font: 'inherit', fontSize: 13,
+                  }}
+                >
+                  paste it here
+                </button>.
+              </p>
+            </div>
+          </div>
         </div>
       )}
     </div>
