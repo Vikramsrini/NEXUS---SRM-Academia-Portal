@@ -30,6 +30,91 @@ function buildCourseTypeKey(courseCode, slotType) {
   return `${String(courseCode || '').trim()}_${normalizedType}`;
 }
 
+// Year of study from the semester number: sem 1-2 = year 1, 3-4 = year 2, ...
+function deriveYearOfStudy(semester) {
+  const sem = parseInt(semester, 10);
+  if (!Number.isFinite(sem) || sem < 1) return null;
+  return Math.ceil(sem / 2);
+}
+
+// Pull a degree keyword (btech / mtech / mba / bsc ...) out of the program text.
+function deriveDegreeKey(program = '') {
+  const p = program.toLowerCase().replace(/[.\s]/g, '');
+  if (p.includes('btech')) return 'btech';
+  if (p.includes('mtech')) return 'mtech';
+  if (p.includes('mba')) return 'mba';
+  if (p.includes('mca')) return 'mca';
+  if (p.includes('bba')) return 'bba';
+  if (p.includes('bca')) return 'bca';
+  if (p.includes('bsc')) return 'bsc';
+  if (p.includes('msc')) return 'msc';
+  if (p.includes('barch')) return 'barch';
+  return '';
+}
+
+const ROMAN_YEAR = { i: 1, ii: 2, iii: 3, iv: 4, v: 5 };
+const WORD_YEAR = { first: 1, second: 2, third: 3, fourth: 4, fifth: 5, final: -1 };
+
+// Extract the set of year numbers an event's text refers to, e.g.
+// "Last Working Day - II, III & IV Year" -> {2,3,4}. A "final year" token is
+// recorded as -1 and resolved against the student's own year later.
+function extractYears(text) {
+  const years = new Set();
+  const lower = text.toLowerCase();
+
+  // Tokens immediately before the word "year" (handles ranges/lists via
+  // scanning every token that looks like a year marker in the phrase).
+  const yearPhrase = lower.match(/([ivx0-9,&\s.–-]+?)(?:year|yr)s?\b/g);
+  const scanFrom = yearPhrase ? yearPhrase.join(' ') : lower;
+
+  // Roman numerals (whole-word), Arabic digits, and ordinal/relative words.
+  (scanFrom.match(/\b(i{1,3}|iv|v)\b/g) || []).forEach(r => years.add(ROMAN_YEAR[r]));
+  (scanFrom.match(/\b([1-5])(?:st|nd|rd|th)?\b/g) || []).forEach(d => years.add(parseInt(d, 10)));
+  Object.keys(WORD_YEAR).forEach(w => { if (lower.includes(w)) years.add(WORD_YEAR[w]); });
+
+  return years;
+}
+
+const LWD_PATTERN = /last\s*(?:working|instructional)\s*day|last\s*day\s*of\s*(?:class|instruction|the\s*sem|sem)|semester\s*end|end\s*of\s*(?:the\s*)?semester|\blwd\b/i;
+
+// Find the last working day that applies to this student, preferring an event
+// that names their year (and not a conflicting degree). Returns the Date and a
+// human label, or null so the caller can fall back to its own heuristic.
+function findLastWorkingDay(allDays, { year, degreeKey }) {
+  const candidates = allDays.filter(d => LWD_PATTERN.test(d.event || '') && !/exam/i.test(d.event || ''));
+  if (!candidates.length) return null;
+
+  const degreeConflicts = (text) => {
+    const t = text.toLowerCase().replace(/[.\s]/g, '');
+    const known = ['btech', 'mtech', 'mba', 'mca', 'bba', 'bca', 'bsc', 'msc', 'barch'];
+    const mentioned = known.filter(k => t.includes(k));
+    return mentioned.length > 0 && degreeKey && !mentioned.includes(degreeKey);
+  };
+
+  const scored = candidates
+    .filter(d => !degreeConflicts(d.event))
+    .map(d => {
+      const years = extractYears(d.event);
+      const namesFinal = years.has(-1);
+      const yearMatch = year != null && (years.has(year) || (namesFinal && year >= 4));
+      const generic = years.size === 0; // an LWD with no year qualifier applies to all
+      return { ...d, yearMatch, generic };
+    })
+    .filter(d => d.yearMatch || d.generic);
+
+  if (!scored.length) return null;
+
+  // Year-specific matches win over generic ones; among equals take the latest
+  // date (the true end of the student's semester block).
+  scored.sort((a, b) => {
+    if (a.yearMatch !== b.yearMatch) return a.yearMatch ? -1 : 1;
+    return b.date - a.date;
+  });
+
+  const chosen = scored[0];
+  return { date: chosen.date, label: chosen.event };
+}
+
 function parseMonthYear(monthStr) {
   const cleaned = monthStr.replace(/[–—-]/g, ' ').trim();
   const parts = cleaned.split(/\s+/);
@@ -176,31 +261,46 @@ export default function SkipProPage() {
     now.setHours(0, 0, 0, 0);
 
     const allDays = [];
+    const eventDays = [];
     calendar.forEach(calMonth => {
       const pm = parseMonthYear(calMonth.month);
       calMonth.days?.forEach(d => {
-        if (!d.dayOrder) return;
         const dateNum = parseInt(d.date);
         if (!dateNum) return;
-        allDays.push({ date: new Date(pm.year, pm.monthIdx, dateNum), order: d.dayOrder });
+        const date = new Date(pm.year, pm.monthIdx, dateNum);
+        if (d.dayOrder) allDays.push({ date, order: d.dayOrder });
+        if (d.event) eventDays.push({ date, event: d.event });
       });
     });
 
-    if (!allDays.length) return { limitDate: null, tallies: {} };
+    if (!allDays.length) return { limitDate: null, tallies: {}, lwdLabel: null };
 
     allDays.sort((a, b) => a.date - b.date);
 
     // Find the start of future classes
     let startIndex = allDays.findIndex(d => d.date >= now);
-    if (startIndex === -1) return { limitDate: null, tallies: {} };
+    if (startIndex === -1) return { limitDate: null, tallies: {}, lwdLabel: null };
 
-    // Detect the end of the current semester block (first gap > 15 days)
-    let limitDate = allDays[allDays.length - 1].date;
-    for (let i = startIndex; i < allDays.length - 1; i++) {
-      const gap = (allDays[i + 1].date - allDays[i].date) / (1000 * 60 * 60 * 24);
-      if (gap > 15) {
-        limitDate = allDays[i].date;
-        break;
+    // Preferred: the actual last working day for this student's degree + year,
+    // taken from the labelled calendar event.
+    const year = deriveYearOfStudy(student.semester);
+    const degreeKey = deriveDegreeKey(student.program || '');
+    const lwd = findLastWorkingDay(eventDays, { year, degreeKey });
+
+    let limitDate;
+    let lwdLabel = null;
+    if (lwd && lwd.date >= now) {
+      limitDate = lwd.date;
+      lwdLabel = lwd.label;
+    } else {
+      // Fallback: end of the current semester block (first gap > 15 days).
+      limitDate = allDays[allDays.length - 1].date;
+      for (let i = startIndex; i < allDays.length - 1; i++) {
+        const gap = (allDays[i + 1].date - allDays[i].date) / (1000 * 60 * 60 * 24);
+        if (gap > 15) {
+          limitDate = allDays[i].date;
+          break;
+        }
       }
     }
 
@@ -213,8 +313,8 @@ export default function SkipProPage() {
       }
     });
 
-    return { tallies, limitDate };
-  }, [student.calendar]);
+    return { tallies, limitDate, lwdLabel };
+  }, [student.calendar, student.semester, student.program]);
 
   const futureDayOrderTallies = predictionRange.tallies;
 
@@ -312,7 +412,10 @@ export default function SkipProPage() {
       <div className="subpage-header">
         <div className="subpage-title-group">
           <h1 className="subpage-title">Skip Now</h1>
-          <p className="subpage-desc">Projection analysis through {lastWorkingDay}.</p>
+          <p className="subpage-desc">
+            Projection analysis through {lastWorkingDay}
+            {predictionRange.lwdLabel ? ' (last working day for your year)' : ''}.
+          </p>
         </div>
       </div>
 
