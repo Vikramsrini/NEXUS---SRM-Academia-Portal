@@ -21,12 +21,13 @@ const BROWSER_HEADERS = {
 const pendingSessions = new Map();
 
 // Cleanup stale sessions every 5 minutes
-setInterval(() => {
+const cleanupTimer = setInterval(() => {
   const cutoff = Date.now() - 5 * 60 * 1000;
   for (const [id, session] of pendingSessions.entries()) {
     if (session.startedAt < cutoff) pendingSessions.delete(id);
   }
 }, 5 * 60 * 1000);
+if (cleanupTimer.unref) cleanupTimer.unref();
 
 /**
  * Step 1: Fetches the SP login page and the real captcha image from SCaptchaServlet.
@@ -80,7 +81,7 @@ export async function fetchSpLoginPage() {
 
   // Check for any additional cookies set by SCaptchaServlet
   const imgCookies = (imgRes.headers['set-cookie'] || []).map(c => c.split(';')[0]).filter(Boolean);
-  const allCookies = [...cookies.split('; ').filter(Boolean), ...imgCookies].join('; ');
+  const allCookies = mergeCookies(cookies, imgCookies);
 
   const mimeType = imgRes.headers['content-type'] || 'image/png';
   const captchaImg = `data:${mimeType};base64,${Buffer.from(imgRes.data).toString('base64')}`;
@@ -151,8 +152,9 @@ export async function submitSpLogin(sessionId, username, password, userCaptcha) 
   const telemetryPayload = Buffer.from(JSON.stringify(telemetry)).toString('base64');
 
   // Build form payload
+  const cleanUsername = username.trim().replace(/@srmist\.edu\.in$/i, '').split('@')[0];
   const params = new URLSearchParams();
-  params.append('username', username.trim());
+  params.append('username', cleanUsername);
   params.append('password', password);
   if (honeypotName) {
     params.append(honeypotName, '');
@@ -195,10 +197,23 @@ export async function submitSpLogin(sessionId, username, password, userCaptcha) 
 
   if (!isRedirectToApp) {
     const body = typeof loginRes.data === 'string' ? loginRes.data : '';
-    if (body.includes('Invalid Captcha') || body.includes('Enter valid Captcha')) {
+    const $ = cheerio.load(body);
+    $('.alert-heading').remove();
+    const alertText = $('.alert-danger, .alert').text().trim().replace(/\s+/g, ' ');
+
+    if (/invalid captcha/i.test(alertText)) {
       throw new Error('Invalid captcha entered. Please try again.');
     }
-    if (body.includes('Invalid') || body.includes('incorrect') || body.includes('youLogin')) {
+    if (/invalid login credentials|user ID or password entered is invalid/i.test(alertText)) {
+      throw new Error(alertText || 'Invalid username or password. Please verify your Student Portal credentials.');
+    }
+    if (alertText) {
+      throw new Error(alertText);
+    }
+    if (/invalid captcha\./i.test(body)) {
+      throw new Error('Invalid captcha entered. Please try again.');
+    }
+    if (body.includes('youLogin')) {
       throw new Error('Invalid username or password. Please verify your Student Portal credentials.');
     }
     throw new Error('Student Portal login failed. Please verify your credentials and captcha.');

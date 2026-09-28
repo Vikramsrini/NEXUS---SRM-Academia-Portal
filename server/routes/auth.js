@@ -161,11 +161,16 @@ router.post('/auth/login', async (req, res) => {
 
     sendStatus(safeSessionId, 'done', 'All set!');
 
+    const cleanNetid = username.trim().replace(/@srmist\.edu\.in$/i, '').split('@')[0];
+    const fullEmail = username.includes('@') ? username.trim() : `${cleanNetid}@srmist.edu.in`;
+
     res.json({
       token: authCookie,
       message: `Welcome ${syncData.userInfo.name.split(' ')[0]}! Logged in successfully.`,
       student_data: {
         ...syncData.userInfo,
+        email: syncData.userInfo?.email || fullEmail,
+        netid: syncData.userInfo?.netid || cleanNetid,
         timetable: syncData.timetable,
         attendance: syncData.attendance,
         marks: syncData.marks,
@@ -230,10 +235,15 @@ router.post('/auth/sync', async (req, res) => {
     const authCookie = passResult.cookies;
     const syncResult = await performFullSync(authCookie, null);
 
+    const cleanNetid = username.trim().replace(/@srmist\.edu\.in$/i, '').split('@')[0];
+    const fullEmail = username.includes('@') ? username.trim() : `${cleanNetid}@srmist.edu.in`;
+
     res.json({
       token: authCookie,
       student_data: {
         ...syncResult.userInfo,
+        email: syncResult.userInfo?.email || fullEmail,
+        netid: syncResult.userInfo?.netid || cleanNetid,
         timetable: syncResult.timetable,
         attendance: syncResult.attendance,
         marks: syncResult.marks,

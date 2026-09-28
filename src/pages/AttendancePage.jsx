@@ -34,6 +34,15 @@ function getStudentData() {
   try { return JSON.parse(localStorage.getItem('academia_student') || '{}'); } catch { return {}; }
 }
 
+function getStudentNetid(student) {
+  const fromNetid = localStorage.getItem('academia_netid') || '';
+  const cleanNetidStorage = fromNetid ? fromNetid.replace(/@srmist\.edu\.in$/i, '').split('@')[0].trim() : '';
+  const cleanStudentNetid = student?.netid ? String(student.netid).replace(/@srmist\.edu\.in$/i, '').split('@')[0].trim() : '';
+  const cleanEmail = student?.email ? String(student.email).replace(/@srmist\.edu\.in$/i, '').split('@')[0].trim() : '';
+  const cleanOfficialEmail = student?.officialEmail ? String(student.officialEmail).replace(/@srmist\.edu\.in$/i, '').split('@')[0].trim() : '';
+  return cleanStudentNetid || cleanNetidStorage || cleanEmail || cleanOfficialEmail || '';
+}
+
 function getProgressColor(statusType) {
   if (statusType === 'red') return 'progress-red';
   if (statusType === 'amber') return 'progress-amber';
@@ -274,7 +283,7 @@ export default function AttendancePage() {
     setSpCaptchaInput('');
     setSpPassword('');
     const student = getStudentData();
-    const defaultUname = student.email?.split('@')[0] || student.regNumber || regNumber || '';
+    const defaultUname = getStudentNetid(student);
     setSpUsername(defaultUname);
     setSpLoading(true);
     try {
@@ -295,10 +304,15 @@ export default function AttendancePage() {
       setSpError('Please fill in all fields');
       return;
     }
+    const student = getStudentData();
+    const fallbackUname = getStudentNetid(student);
+    const uname = (spUsername.trim() || fallbackUname).replace(/@srmist\.edu\.in$/i, '').split('@')[0].trim();
+    if (!uname) {
+      setSpError('Please enter your Student Portal username (email prefix without @srmist.edu.in)');
+      return;
+    }
     setSpLoading(true);
     setSpError('');
-    const student = getStudentData();
-    const uname = spUsername.trim() || student.email?.split('@')[0] || student.regNumber || regNumber;
     try {
       const result = await submitSpLogin({
         sessionId: spSessionId,
@@ -944,10 +958,10 @@ export default function AttendancePage() {
                   </p>
 
                   <div style={{ marginBottom: 12 }}>
-                    <label style={{ fontSize: 12, opacity: 0.7, display: 'block', marginBottom: 5 }}>USERNAME / NETID</label>
+                    <label style={{ fontSize: 12, opacity: 0.7, display: 'block', marginBottom: 5 }}>USERNAME / NETID (EMAIL WITHOUT @SRMIST.EDU.IN)</label>
                     <input
                       type="text"
-                      placeholder="e.g. vs0436 or Register Number"
+                      placeholder="e.g. vs0436 (without @srmist.edu.in)"
                       value={spUsername}
                       onChange={e => setSpUsername(e.target.value)}
                       autoComplete="username"

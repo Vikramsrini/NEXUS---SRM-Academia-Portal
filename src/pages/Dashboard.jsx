@@ -316,6 +316,13 @@ export default function Dashboard({ children }) {
         if (!fullRes.ok) throw new Error('Refresh failed');
         const fullData = await fullRes.json();
         const existingStudent = getStudentData();
+        const storedNetid = localStorage.getItem('academia_netid') || '';
+        const netidFallback = storedNetid ? storedNetid.replace(/@srmist\.edu\.in$/i, '').split('@')[0] : '';
+        const emailFallback = storedNetid ? (storedNetid.includes('@') ? storedNetid : `${storedNetid}@srmist.edu.in`) : '';
+        if (fullData.student_data) {
+          fullData.student_data.netid = fullData.student_data.netid || existingStudent.netid || netidFallback;
+          fullData.student_data.email = fullData.student_data.email || existingStudent.email || emailFallback;
+        }
         if ((fullData.student_data?.attendance || []).length === 0 && (existingStudent.attendance || []).length > 0) {
           fullData.student_data.attendance = existingStudent.attendance;
           fullData.student_data.attendanceSource = existingStudent.attendanceSource || 'student_portal_direct';
@@ -330,6 +337,13 @@ export default function Dashboard({ children }) {
       } else if (res.ok) {
         const data = await res.json();
         const existingStudent = getStudentData();
+        const storedNetid = localStorage.getItem('academia_netid') || '';
+        const netidFallback = storedNetid ? storedNetid.replace(/@srmist\.edu\.in$/i, '').split('@')[0] : '';
+        const emailFallback = storedNetid ? (storedNetid.includes('@') ? storedNetid : `${storedNetid}@srmist.edu.in`) : '';
+        if (data.student_data) {
+          data.student_data.netid = data.student_data.netid || existingStudent.netid || netidFallback;
+          data.student_data.email = data.student_data.email || existingStudent.email || emailFallback;
+        }
         if ((data.student_data?.attendance || []).length === 0 && (existingStudent.attendance || []).length > 0) {
           data.student_data.attendance = existingStudent.attendance;
           data.student_data.attendanceSource = existingStudent.attendanceSource || 'student_portal_direct';

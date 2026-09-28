@@ -95,8 +95,17 @@ export default function Login() {
         return;
       }
 
+      const rawNetid = username.trim();
+      const cleanNetid = rawNetid.replace(/@srmist\.edu\.in$/i, '').split('@')[0];
+      const fullEmail = rawNetid.includes('@') ? rawNetid : `${rawNetid}@srmist.edu.in`;
+      const studentData = {
+        ...data.student_data,
+        email: data.student_data?.email || fullEmail,
+        netid: data.student_data?.netid || cleanNetid,
+      };
+
       localStorage.setItem('academia_token', data.token);
-      localStorage.setItem('academia_student', JSON.stringify(data.student_data));
+      localStorage.setItem('academia_student', JSON.stringify(studentData));
       localStorage.setItem('academia_login_time', new Date().toISOString());
       localStorage.setItem('academia_netid', username.trim());
       localStorage.setItem('academia_password', btoa(password)); // Simple obfuscation for local storage

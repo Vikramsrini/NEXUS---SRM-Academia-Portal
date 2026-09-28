@@ -50,14 +50,15 @@ router.post('/sp/login', requireAuth, async (req, res) => {
 
   try {
     // 1. Complete the login
+    const cleanUsername = username.trim().replace(/@srmist\.edu\.in$/i, '').split('@')[0];
     const { jsessionid, workerCookie, allCookies } = await submitSpLogin(
-      sessionId, username, password, captcha
+      sessionId, cleanUsername, password, captcha
     );
 
     // 2. Fetch attendance using the new session
     let attendanceHtml;
     try {
-      attendanceHtml = await fetchAttendanceWithSession(jsessionid, allCookies, regNumber || username.split('@')[0]);
+      attendanceHtml = await fetchAttendanceWithSession(jsessionid, allCookies, regNumber || cleanUsername);
     } catch (attErr) {
       if (attErr.message === 'SESSION_EXPIRED') {
         return res.status(401).json({ error: 'Session established but attendance fetch failed. Try again.' });
