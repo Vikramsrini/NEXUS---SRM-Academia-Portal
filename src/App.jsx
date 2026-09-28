@@ -12,6 +12,7 @@ import ResourcesPage from './pages/ResourcesPage';
 import FacultyFinderPage from './pages/FacultyFinderPage';
 import CgpaPage from './pages/CgpaPage';
 import WordlePage from './pages/WordlePage';
+import PlacementPage from './pages/PlacementPage';
 
 function isLoggedIn() {
   return !!localStorage.getItem('academia_token');
@@ -51,6 +52,7 @@ export default function App() {
           <Route path="resources" element={<ResourcesPage />} />
           <Route path="faculty" element={<FacultyFinderPage />} />
           <Route path="cgpa" element={<CgpaPage />} />
+          <Route path="placements" element={<PlacementPage />} />
           <Route path="wordle" element={<WordlePage />} />
         </Route>
 

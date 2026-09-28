@@ -13,6 +13,11 @@ import {
 } from '../scrapers/studentPortalAuth.js';
 import { parseStudentPortalAttendance } from '../scrapers/studentPortalAttendance.js';
 import { parseStudentPortalMarks } from '../scrapers/studentPortalMarks.js';
+import {
+  fetchPlacementBatchWithSession,
+  fetchPlacementDetailsWithSession,
+  fetchPlacementResourcesWithSession,
+} from '../scrapers/studentPortalPlacement.js';
 import { getSupabaseAdmin } from '../lib/supabase.js';
 
 const router = Router();
@@ -242,4 +247,295 @@ router.post('/sp/refresh', requireAuth, async (req, res) => {
   }
 });
 
+// ═══════════════════════════════════════════════════════════════════════
+// Placement Insights Dashboard Endpoints
+// Restores full access to SRM's hidden Placement Insight Dashboard
+// ═══════════════════════════════════════════════════════════════════════
+
+async function getAnyActiveSession(supabase, preferredReg) {
+  if (preferredReg) {
+    const { data } = await supabase
+      .from('student_portal_sessions')
+      .select('jsessionid, worker_cookie, stored_at, reg_number')
+      .eq('reg_number', preferredReg)
+      .maybeSingle();
+    if (data?.jsessionid) return data;
+  }
+  const { data } = await supabase
+    .from('student_portal_sessions')
+    .select('jsessionid, worker_cookie, stored_at, reg_number')
+    .order('stored_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return data || null;
+}
+
+// ── GET /api/sp/placement/batches ─────────────────────────────────────
+router.get('/sp/placement/batches', (req, res) => {
+  res.json({
+    batches: [
+      { id: '26', label: 'Batch 2027', year: '2027' },
+      { id: '25', label: 'Batch 2026', year: '2026' },
+      { id: '24', label: 'Batch 2025', year: '2025' },
+      { id: '23', label: 'Batch 2024', year: '2024' },
+    ],
+  });
+});
+
+// ── GET /api/sp/placement/companies ───────────────────────────────────
+// Fetches the list of visiting companies with roles, CTC, eligibility
+router.get('/sp/placement/companies', async (req, res) => {
+  const year = req.query.year || '25';
+  const force = req.query.force === 'true' || req.query.refresh === '1';
+  const regNumber = req.query.regNumber || '';
+  const cacheKey = `batch_${year}`;
+
+  const supabase = getSupabaseAdmin();
+
+  // 1. Check cache if not forcing refresh
+  if (supabase && !force) {
+    try {
+      const { data: cached } = await supabase
+        .from('placement_insights_cache')
+        .select('data, updated_at')
+        .eq('key', cacheKey)
+        .maybeSingle();
+
+      if (cached && Array.isArray(cached.data) && cached.data.length > 0) {
+        return res.json({
+          success: true,
+          companies: cached.data,
+          count: cached.data.length,
+          batchYear: year,
+          cached: true,
+          updatedAt: cached.updated_at,
+        });
+      }
+    } catch (cErr) {
+      console.warn('[SP Placement] Cache read notice:', cErr.message);
+    }
+  }
+
+  // 2. Fetch fresh from SRM Student Portal
+  try {
+    const session = await getAnyActiveSession(supabase, regNumber);
+    if (!session?.jsessionid) {
+      // If we don't have a session, try one last check on cache even if expired
+      if (supabase) {
+        const { data: fallback } = await supabase
+          .from('placement_insights_cache')
+          .select('data, updated_at')
+          .eq('key', cacheKey)
+          .maybeSingle();
+        if (fallback?.data) {
+          return res.json({
+            success: true,
+            companies: fallback.data,
+            count: fallback.data.length,
+            batchYear: year,
+            cached: true,
+            updatedAt: fallback.updated_at,
+          });
+        }
+      }
+      return res.status(401).json({
+        error: 'Active Student Portal session required to fetch placement data. Please connect your Student Portal account.',
+        needsLogin: true,
+      });
+    }
+
+    const companies = await fetchPlacementBatchWithSession(
+      session.jsessionid,
+      session.worker_cookie || '',
+      year
+    );
+
+    // Save to cache
+    if (supabase && companies.length > 0) {
+      try {
+        await supabase.from('placement_insights_cache').upsert({
+          key: cacheKey,
+          data: companies,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'key' });
+      } catch (saveErr) {
+        console.warn('[SP Placement] Cache save failed:', saveErr.message);
+      }
+    }
+
+    res.json({
+      success: true,
+      companies,
+      count: companies.length,
+      batchYear: year,
+      cached: false,
+      updatedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.error('[SP Placement] Companies fetch failed:', err.message);
+    res.status(502).json({
+      error: 'Failed to retrieve placement insight companies',
+      detail: err.message,
+    });
+  }
+});
+
+// ── GET /api/sp/placement/company/:id ─────────────────────────────────
+// Fetches detailed Stagewise Question Matrix (SQM) and Feedback links
+router.get('/sp/placement/company/:id', async (req, res) => {
+  const companyId = req.params.id;
+  const regNumber = req.query.regNumber || '';
+  const cacheKey = `company_${companyId}`;
+  const supabase = getSupabaseAdmin();
+
+  if (supabase) {
+    try {
+      const { data: cached } = await supabase
+        .from('placement_insights_cache')
+        .select('data, updated_at')
+        .eq('key', cacheKey)
+        .maybeSingle();
+
+      if (cached?.data) {
+        return res.json({
+          success: true,
+          companyId,
+          ...cached.data,
+          cached: true,
+        });
+      }
+    } catch (cErr) {
+      console.warn('[SP Placement] Company cache notice:', cErr.message);
+    }
+  }
+
+  try {
+    const session = await getAnyActiveSession(supabase, regNumber);
+    if (!session?.jsessionid) {
+      return res.status(401).json({
+        error: 'Active Student Portal session required to fetch company details.',
+        needsLogin: true,
+      });
+    }
+
+    const details = await fetchPlacementDetailsWithSession(
+      session.jsessionid,
+      session.worker_cookie || '',
+      companyId
+    );
+
+    if (supabase && (details.sqmLink || details.feedbackLink || details.links?.length > 0)) {
+      try {
+        await supabase.from('placement_insights_cache').upsert({
+          key: cacheKey,
+          data: details,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'key' });
+      } catch (saveErr) {
+        console.warn('[SP Placement] Company cache save failed:', saveErr.message);
+      }
+    }
+
+    res.json({
+      success: true,
+      companyId,
+      ...details,
+      cached: false,
+    });
+  } catch (err) {
+    console.error(`[SP Placement] Detail fetch error for company ${companyId}:`, err.message);
+    res.status(502).json({
+      error: 'Failed to fetch company placement details',
+      detail: err.message,
+    });
+  }
+});
+
+// ── GET /api/sp/placement/resources ───────────────────────────────────
+// Fetches learning prep resources, resumes of placed students, aptitude sheets
+router.get('/sp/placement/resources', async (req, res) => {
+  const regNumber = req.query.regNumber || '';
+  const force = req.query.force === 'true' || req.query.refresh === '1';
+  const cacheKey = 'resources';
+  const supabase = getSupabaseAdmin();
+
+  if (supabase && !force) {
+    try {
+      const { data: cached } = await supabase
+        .from('placement_insights_cache')
+        .select('data, updated_at')
+        .eq('key', cacheKey)
+        .maybeSingle();
+
+      if (cached?.data && Array.isArray(cached.data) && cached.data.length > 0) {
+        return res.json({
+          success: true,
+          resources: cached.data,
+          cached: true,
+          updatedAt: cached.updated_at,
+        });
+      }
+    } catch (cErr) {
+      console.warn('[SP Placement] Resources cache notice:', cErr.message);
+    }
+  }
+
+  try {
+    const session = await getAnyActiveSession(supabase, regNumber);
+    if (!session?.jsessionid) {
+      // Check fallback cache
+      if (supabase) {
+        const { data: fallback } = await supabase
+          .from('placement_insights_cache')
+          .select('data, updated_at')
+          .eq('key', cacheKey)
+          .maybeSingle();
+        if (fallback?.data) {
+          return res.json({
+            success: true,
+            resources: fallback.data,
+            cached: true,
+            updatedAt: fallback.updated_at,
+          });
+        }
+      }
+      return res.status(401).json({
+        error: 'Active Student Portal session required to fetch placement resources.',
+        needsLogin: true,
+      });
+    }
+
+    const resources = await fetchPlacementResourcesWithSession(
+      session.jsessionid,
+      session.worker_cookie || ''
+    );
+
+    if (supabase && resources.length > 0) {
+      try {
+        await supabase.from('placement_insights_cache').upsert({
+          key: cacheKey,
+          data: resources,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'key' });
+      } catch (saveErr) {
+        console.warn('[SP Placement] Resources cache save failed:', saveErr.message);
+      }
+    }
+
+    res.json({
+      success: true,
+      resources,
+      cached: false,
+      updatedAt: new Date().toISOString(),
+    });
+  } catch (err) {
+    console.error('[SP Placement] Resources fetch failed:', err.message);
+    res.status(502).json({
+      error: 'Failed to retrieve placement resources',
+      detail: err.message,
+    });
+  }
+});
+
 export default router;
+

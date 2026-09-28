@@ -293,6 +293,61 @@ export async function refreshSpAttendance(regNumber) {
   return data;
 }
 
+// ── Placement Insights ────────────────────────────────────────────────
+
+export async function fetchPlacementBatches() {
+  const res = await fetch(apiUrl('/sp/placement/batches'));
+  if (!res.ok) throw new Error('Failed to load placement batches');
+  return res.json();
+}
+
+export async function fetchPlacementCompanies(year = '25', force = false, regNumber = '') {
+  const params = new URLSearchParams({ year: String(year) });
+  if (force) params.set('force', 'true');
+  if (regNumber) params.set('regNumber', String(regNumber));
+
+  const res = await fetch(apiUrl(`/sp/placement/companies?${params}`));
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.error || 'Failed to load placement companies');
+    err.needsLogin = !!data.needsLogin;
+    throw err;
+  }
+  return data;
+}
+
+export async function fetchPlacementCompanyDetails(companyId, regNumber = '') {
+  const params = new URLSearchParams();
+  if (regNumber) params.set('regNumber', String(regNumber));
+  const q = params.toString() ? `?${params}` : '';
+
+  const res = await fetch(apiUrl(`/sp/placement/company/${companyId}${q}`));
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.error || 'Failed to load company details');
+    err.needsLogin = !!data.needsLogin;
+    throw err;
+  }
+  return data;
+}
+
+export async function fetchPlacementResources(force = false, regNumber = '') {
+  const params = new URLSearchParams();
+  if (force) params.set('force', 'true');
+  if (regNumber) params.set('regNumber', String(regNumber));
+  const q = params.toString() ? `?${params}` : '';
+
+  const res = await fetch(apiUrl(`/sp/placement/resources${q}`));
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const err = new Error(data.error || 'Failed to load placement resources');
+    err.needsLogin = !!data.needsLogin;
+    throw err;
+  }
+  return data;
+}
+
 export { API_BASE };
+
 
 
