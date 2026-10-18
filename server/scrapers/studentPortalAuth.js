@@ -17,11 +17,6 @@ const BROWSER_HEADERS = {
   'Sec-Ch-Ua': '"Google Chrome";v="131", "Chromium";v="131", "Not_A Brand";v="24"',
   'Sec-Ch-Ua-Mobile': '?0',
   'Sec-Ch-Ua-Platform': '"macOS"',
-  'Sec-Fetch-Dest': 'document',
-  'Sec-Fetch-Mode': 'navigate',
-  'Sec-Fetch-Site': 'same-origin',
-  'Sec-Fetch-User': '?1',
-  'Upgrade-Insecure-Requests': '1',
   'Connection': 'keep-alive',
 };
 
@@ -72,26 +67,26 @@ export async function fetchSpLoginPage() {
 
   const imgRes = await axios.get(captchaUrl, {
     headers: {
-      ...BROWSER_HEADERS,
+      'User-Agent': BROWSER_HEADERS['User-Agent'],
       'Cookie': cookies,
       'X-Domain-Proof': proof,
       'Referer': LOGIN_URL,
-      'Accept': 'image/png, image/jpeg, image/svg+xml, image/*;q=0.8',
+      'Accept': 'image/png, image/jpeg, image/svg+xml, image/*',
     },
     responseType: 'arraybuffer',
     timeout: 15000,
     validateStatus: () => true,
   });
 
-  if (imgRes.status !== 200 || !imgRes.data || imgRes.data.length === 0) {
-    throw new Error(`Failed to load captcha image: HTTP ${imgRes.status}`);
+  const mimeType = imgRes.headers['content-type'] || 'image/png';
+  if (imgRes.status !== 200 || !imgRes.data || imgRes.data.length === 0 || mimeType.includes('text/html')) {
+    throw new Error(`Failed to load captcha image: HTTP ${imgRes.status} (${mimeType})`);
   }
 
   // Check for any additional cookies set by SCaptchaServlet
   const imgCookies = (imgRes.headers['set-cookie'] || []).map(c => c.split(';')[0]).filter(Boolean);
   const allCookies = mergeCookies(cookies, imgCookies);
 
-  const mimeType = imgRes.headers['content-type'] || 'image/png';
   const captchaImg = `data:${mimeType};base64,${Buffer.from(imgRes.data).toString('base64')}`;
 
   const sessionPayload = {
@@ -198,6 +193,11 @@ export async function submitSpLogin(sessionId, username, password, userCaptcha) 
       'Cookie': cookies,
       'Referer': LOGIN_URL,
       'Origin': 'https://sp.srmist.edu.in',
+      'Sec-Fetch-Dest': 'document',
+      'Sec-Fetch-Mode': 'navigate',
+      'Sec-Fetch-Site': 'same-origin',
+      'Sec-Fetch-User': '?1',
+      'Upgrade-Insecure-Requests': '1',
     },
     maxRedirects: 0,
     validateStatus: () => true,
