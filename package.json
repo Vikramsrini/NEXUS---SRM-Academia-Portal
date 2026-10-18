@@ -9,6 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "server": "node server/index.js",
+    "placement": "npm --prefix placement-portal run dev",
+    "build:placement": "npm --prefix placement-portal run build",
     "fetch:gradex-faculty": "node scripts/fetch-gradex-faculty.js"
   },
   "dependencies": {

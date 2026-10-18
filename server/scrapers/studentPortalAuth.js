@@ -54,8 +54,8 @@ export async function fetchSpLoginPage() {
   const captchaSrcMatch = html.match(/id=['"]secure_captcha['"][^>]*data-src=['"]([^'"]+)['"]/);
   const captchaSrc = captchaSrcMatch ? captchaSrcMatch[1] : '';
 
-  if (!captchaSrc || !nonce) {
-    throw new Error('Could not find captcha parameters on Student Portal login page');
+  if (!captchaSrc || !nonce || !domainFieldName || !captchaFieldName) {
+    throw new Error('Could not find captcha or security tokens on Student Portal login page');
   }
 
   // Fetch the genuine PNG/JPEG captcha from SCaptchaServlet
@@ -86,15 +86,18 @@ export async function fetchSpLoginPage() {
   const mimeType = imgRes.headers['content-type'] || 'image/png';
   const captchaImg = `data:${mimeType};base64,${Buffer.from(imgRes.data).toString('base64')}`;
 
-  const sessionId = crypto.randomUUID();
-  pendingSessions.set(sessionId, {
+  const sessionPayload = {
     cookies: allCookies,
     domainFieldName,
     captchaFieldName,
     randomDelimiter,
     honeypotName,
     startedAt: Date.now(),
-  });
+  };
+
+  // Base64url encoded token so serverless instances never lose session state
+  const sessionId = Buffer.from(JSON.stringify(sessionPayload)).toString('base64url');
+  pendingSessions.set(sessionId, sessionPayload);
 
   return { sessionId, captchaImg };
 }
@@ -103,8 +106,13 @@ export async function fetchSpLoginPage() {
  * Step 2: Submits login to LoginServlet with authentic telemetry and tokens.
  */
 export async function submitSpLogin(sessionId, username, password, userCaptcha) {
-  const session = pendingSessions.get(sessionId);
-  if (!session) {
+  let session = pendingSessions.get(sessionId);
+  if (!session && sessionId) {
+    try {
+      session = JSON.parse(Buffer.from(sessionId, 'base64url').toString('utf8'));
+    } catch { /* fallback */ }
+  }
+  if (!session || !session.cookies) {
     throw new Error('Login session expired. Please refresh the captcha.');
   }
 
@@ -152,7 +160,7 @@ export async function submitSpLogin(sessionId, username, password, userCaptcha) 
   const telemetryPayload = Buffer.from(JSON.stringify(telemetry)).toString('base64');
 
   // Build form payload
-  const cleanUsername = username.trim().replace(/@srmist\.edu\.in$/i, '').split('@')[0];
+  const cleanUsername = username.trim().toLowerCase().replace(/@srmist\.edu\.in$/i, '').split('@')[0].trim();
   const params = new URLSearchParams();
   params.append('username', cleanUsername);
   params.append('password', password);
@@ -164,6 +172,8 @@ export async function submitSpLogin(sessionId, username, password, userCaptcha) 
   params.append('fpToken', '');
   params.append('telemetryPayload', telemetryPayload);
   if (domainFieldName) {
+    params.append(domainFieldName, dtokenValue);
+    // guardloginbottom.js also appends domainFieldName on form submission
     params.append(domainFieldName, dtokenValue);
   }
   if (captchaFieldName) {
@@ -205,7 +215,10 @@ export async function submitSpLogin(sessionId, username, password, userCaptcha) 
       throw new Error('Invalid captcha entered. Please try again.');
     }
     if (/invalid login credentials|user ID or password entered is invalid/i.test(alertText)) {
-      throw new Error(alertText || 'Invalid username or password. Please verify your Student Portal credentials.');
+      throw new Error(alertText || 'Invalid NetID or password. Note: Student Portal requires your official SRM E-mail (Microsoft 365) password, not your Academia portal password.');
+    }
+    if (/invalid credentials/i.test(alertText)) {
+      throw new Error('Student Portal security check failed. Please refresh the captcha and try again.');
     }
     if (alertText) {
       throw new Error(alertText);
@@ -213,8 +226,8 @@ export async function submitSpLogin(sessionId, username, password, userCaptcha) 
     if (/invalid captcha\./i.test(body)) {
       throw new Error('Invalid captcha entered. Please try again.');
     }
-    if (body.includes('youLogin')) {
-      throw new Error('Invalid username or password. Please verify your Student Portal credentials.');
+    if (body.includes('youLogin') || location.includes('youLogin')) {
+      throw new Error('Invalid NetID or password. Note: Student Portal requires your official SRM E-mail (Microsoft 365) password, not your Academia portal password.');
     }
     throw new Error('Student Portal login failed. Please verify your credentials and captcha.');
   }

@@ -50,7 +50,12 @@ router.post('/sp/login', requireAuth, async (req, res) => {
 
   try {
     // 1. Complete the login
-    const cleanUsername = username.trim().replace(/@srmist\.edu\.in$/i, '').split('@')[0];
+    const cleanUsername = username.trim().toLowerCase().replace(/@srmist\.edu\.in$/i, '').split('@')[0].trim();
+    if (/^ra\d{10,}/i.test(cleanUsername)) {
+      return res.status(400).json({
+        error: 'Student Portal requires your 6-character NetID (e.g. vs0436), not your Register Number (RA...).',
+      });
+    }
     const { jsessionid, workerCookie, allCookies } = await submitSpLogin(
       sessionId, cleanUsername, password, captcha
     );

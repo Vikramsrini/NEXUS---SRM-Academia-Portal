@@ -35,12 +35,32 @@ function getStudentData() {
 }
 
 function getStudentNetid(student) {
-  const fromNetid = localStorage.getItem('academia_netid') || '';
-  const cleanNetidStorage = fromNetid ? fromNetid.replace(/@srmist\.edu\.in$/i, '').split('@')[0].trim() : '';
-  const cleanStudentNetid = student?.netid ? String(student.netid).replace(/@srmist\.edu\.in$/i, '').split('@')[0].trim() : '';
-  const cleanEmail = student?.email ? String(student.email).replace(/@srmist\.edu\.in$/i, '').split('@')[0].trim() : '';
-  const cleanOfficialEmail = student?.officialEmail ? String(student.officialEmail).replace(/@srmist\.edu\.in$/i, '').split('@')[0].trim() : '';
-  return cleanStudentNetid || cleanNetidStorage || cleanEmail || cleanOfficialEmail || '';
+  const candidates = [
+    localStorage.getItem('academia_netid'),
+    student?.netid,
+    student?.email,
+    student?.officialEmail,
+  ];
+
+  for (const raw of candidates) {
+    if (!raw) continue;
+    const clean = String(raw).trim().replace(/@srmist\.edu\.in$/i, '').split('@')[0].trim().toLowerCase();
+    // Genuine 6-character NetID (e.g. vs0436, ab1234)
+    if (/^[a-z]{1,3}\d{3,5}$/i.test(clean)) {
+      return clean;
+    }
+  }
+
+  // Fallback: exclude Register Numbers (RA...) and full name emails with dots
+  for (const raw of candidates) {
+    if (!raw) continue;
+    const clean = String(raw).trim().replace(/@srmist\.edu\.in$/i, '').split('@')[0].trim().toLowerCase();
+    if (!/^ra\d+/i.test(clean) && !clean.includes('.')) {
+      return clean;
+    }
+  }
+
+  return '';
 }
 
 function getProgressColor(statusType) {
@@ -306,9 +326,17 @@ export default function AttendancePage() {
     }
     const student = getStudentData();
     const fallbackUname = getStudentNetid(student);
-    const uname = (spUsername.trim() || fallbackUname).replace(/@srmist\.edu\.in$/i, '').split('@')[0].trim();
+    const uname = (spUsername.trim() || fallbackUname).toLowerCase().replace(/@srmist\.edu\.in$/i, '').split('@')[0].trim();
     if (!uname) {
-      setSpError('Please enter your Student Portal username (email prefix without @srmist.edu.in)');
+      setSpError('Please enter your 6-character SRM NetID (e.g. vs0436)');
+      return;
+    }
+    if (/^ra\d{8,}/i.test(uname)) {
+      setSpError('Student Portal requires your 6-character NetID (e.g. vs0436), not your Register Number (RA...).');
+      return;
+    }
+    if (uname.includes('.')) {
+      setSpError('Student Portal requires your 6-character NetID (e.g. vs0436), not your full name email address.');
       return;
     }
     setSpLoading(true);
@@ -953,31 +981,61 @@ export default function AttendancePage() {
 
               {spStep === 'form' && (
                 <>
-                  <p style={{ fontSize: 13, opacity: 0.65, marginBottom: 16, lineHeight: 1.5 }}>
-                    Sign in with your SRM Student Portal credentials to sync attendance directly.
-                  </p>
+                  <div style={{
+                    background: 'rgba(59, 130, 246, 0.1)',
+                    border: '1px solid rgba(59, 130, 246, 0.25)',
+                    borderRadius: 8,
+                    padding: '10px 12px',
+                    marginBottom: 14,
+                    fontSize: 12,
+                    lineHeight: 1.5,
+                  }}>
+                    <strong style={{ color: '#93c5fd' }}>Important Password Notice:</strong>
+                    <div style={{ opacity: 0.85, marginTop: 2 }}>
+                      Student Portal requires your <strong>official SRM E-mail (Microsoft 365) password</strong>. This is often <em>different</em> from your Academia Zoho portal password.
+                    </div>
+                  </div>
 
                   <div style={{ marginBottom: 12 }}>
-                    <label style={{ fontSize: 12, opacity: 0.7, display: 'block', marginBottom: 5 }}>USERNAME / NETID (EMAIL WITHOUT @SRMIST.EDU.IN)</label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+                      <label style={{ fontSize: 12, opacity: 0.7 }}>SRM NETID (6 CHARACTERS)</label>
+                      <span style={{ fontSize: 11, opacity: 0.5 }}>Without @srmist.edu.in</span>
+                    </div>
                     <input
                       type="text"
-                      placeholder="e.g. vs0436 (without @srmist.edu.in)"
+                      placeholder="e.g. vs0436 (do not use Register Number)"
                       value={spUsername}
-                      onChange={e => setSpUsername(e.target.value)}
+                      onChange={e => setSpUsername(e.target.value.toLowerCase().trim())}
                       autoComplete="username"
+                      maxLength={10}
                       style={{
                         width: '100%', background: 'rgba(255,255,255,0.07)',
-                        border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8,
-                        padding: '9px 12px', color: 'inherit', fontSize: 14, outline: 'none',
+                        border: spUsername.startsWith('ra') ? '1px solid #f87171' : '1px solid rgba(255,255,255,0.15)',
+                        borderRadius: 8, padding: '9px 12px', color: 'inherit', fontSize: 14, outline: 'none',
                       }}
                     />
+                    {spUsername.startsWith('ra') && (
+                      <div style={{ fontSize: 11, color: '#f87171', marginTop: 4 }}>
+                        ⚠️ Enter your 6-character NetID (e.g. vs0436), not your Register Number (RA...).
+                      </div>
+                    )}
                   </div>
 
                   <div style={{ marginBottom: 14 }}>
-                    <label style={{ fontSize: 12, opacity: 0.7, display: 'block', marginBottom: 5 }}>SRM PASSWORD</label>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+                      <label style={{ fontSize: 12, opacity: 0.7 }}>SRM E-MAIL / NETID PASSWORD</label>
+                      <a
+                        href="https://ssp.srmist.edu.in/resetpassword/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ fontSize: 11, color: '#60a5fa', textDecoration: 'none' }}
+                      >
+                        Forgot password?
+                      </a>
+                    </div>
                     <input
                       type="password"
-                      placeholder="Your Student Portal password"
+                      placeholder="Your official @srmist.edu.in email password"
                       value={spPassword}
                       onChange={e => setSpPassword(e.target.value)}
                       onKeyDown={e => e.key === 'Enter' && handleSpLogin()}
@@ -987,12 +1045,15 @@ export default function AttendancePage() {
                         padding: '9px 12px', color: 'inherit', fontSize: 14, outline: 'none',
                       }}
                     />
+                    <div style={{ fontSize: 11, opacity: 0.5, marginTop: 4 }}>
+                      Your Microsoft 365 email password, NOT your Academia Zoho password.
+                    </div>
                   </div>
 
                   {/* Captcha display */}
                   <div style={{ marginBottom: 14 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-                      <label style={{ fontSize: 12, opacity: 0.7 }}>CAPTCHA</label>
+                      <label style={{ fontSize: 12, opacity: 0.7 }}>CAPTCHA (CASE-SENSITIVE)</label>
                       <button
                         type="button"
                         onClick={openSpModal}
@@ -1040,7 +1101,7 @@ export default function AttendancePage() {
                     <input
                       ref={captchaInputRef}
                       type="text"
-                      placeholder="Type the characters above"
+                      placeholder="Type characters exactly as shown above"
                       value={spCaptchaInput}
                       onChange={e => setSpCaptchaInput(e.target.value)}
                       onKeyDown={e => e.key === 'Enter' && handleSpLogin()}
@@ -1058,9 +1119,15 @@ export default function AttendancePage() {
                   {spError && (
                     <div style={{
                       background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)',
-                      borderRadius: 8, padding: '8px 12px', fontSize: 13, color: '#f87171', marginBottom: 12,
+                      borderRadius: 8, padding: '10px 12px', fontSize: 13, color: '#f87171', marginBottom: 14,
+                      lineHeight: 1.4,
                     }}>
-                      {spError}
+                      <div style={{ fontWeight: 600, marginBottom: 2 }}>{spError}</div>
+                      {/invalid|credentials|password/i.test(spError) && !/captcha/i.test(spError) && (
+                        <div style={{ fontSize: 11, opacity: 0.9, marginTop: 6, color: '#fca5a5' }}>
+                          💡 <strong>Check:</strong> Make sure you are using your official <strong>SRM E-mail (Microsoft 365) password</strong> (reset at <a href="https://ssp.srmist.edu.in/resetpassword/" target="_blank" rel="noopener noreferrer" style={{ color: '#93c5fd', textDecoration: 'underline' }}>ssp.srmist.edu.in</a>), NOT your Academia portal password.
+                        </div>
+                      )}
                     </div>
                   )}
 
