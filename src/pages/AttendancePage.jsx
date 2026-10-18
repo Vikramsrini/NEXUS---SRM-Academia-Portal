@@ -1144,37 +1144,6 @@ export default function AttendancePage() {
                     {spLoading ? 'Signing in…' : 'Sync Attendance'}
                   </button>
 
-                  <div style={{ margin: '14px 0 10px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
-                    <span style={{ fontSize: 11, opacity: 0.5, textTransform: 'uppercase', letterSpacing: 0.5 }}>Already logged in?</span>
-                    <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.1)' }} />
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowSpModal(false);
-                      setShowPasteModal(true);
-                    }}
-                    style={{
-                      width: '100%',
-                      background: 'rgba(255,255,255,0.06)',
-                      border: '1px solid rgba(255,255,255,0.15)',
-                      borderRadius: 10,
-                      padding: '11px',
-                      color: '#fff',
-                      fontSize: 13,
-                      fontWeight: 600,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: 8,
-                    }}
-                  >
-                    📋 Instant Import (Paste from Open Tab)
-                  </button>
-
                   <p style={{ fontSize: 11, opacity: 0.4, textAlign: 'center', marginTop: 12 }}>
                     Your password is sent directly to SRM's servers — it is never stored by NEXUS.
                   </p>
@@ -1348,35 +1317,20 @@ export default function AttendancePage() {
             SRM has moved attendance to sp.srmist.edu.in.<br />
             Sign in once to sync your data directly — no extension needed.
           </p>
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <button
-              onClick={openSpModal}
-              style={{
-                background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
-                border: 'none', borderRadius: 12, padding: '13px 28px',
-                color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer',
-                boxShadow: '0 4px 20px rgba(59,130,246,0.35)',
-                transition: 'transform 0.15s, box-shadow 0.15s',
-              }}
-              onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 24px rgba(59,130,246,0.45)'; }}
-              onMouseOut={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 4px 20px rgba(59,130,246,0.35)'; }}
-            >
-              Connect Student Portal
-            </button>
-            <button
-              onClick={() => setShowPasteModal(true)}
-              style={{
-                background: 'rgba(255,255,255,0.07)',
-                border: '1px solid rgba(255,255,255,0.18)', borderRadius: 12, padding: '13px 24px',
-                color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer',
-                transition: 'background 0.15s',
-              }}
-              onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.12)'; }}
-              onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; }}
-            >
-              📋 Instant Import (Paste Table)
-            </button>
-          </div>
+          <button
+            onClick={openSpModal}
+            style={{
+              background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+              border: 'none', borderRadius: 12, padding: '13px 32px',
+              color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer',
+              boxShadow: '0 4px 20px rgba(59,130,246,0.35)',
+              transition: 'transform 0.15s, box-shadow 0.15s',
+            }}
+            onMouseOver={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 24px rgba(59,130,246,0.45)'; }}
+            onMouseOut={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 4px 20px rgba(59,130,246,0.35)'; }}
+          >
+            Connect Student Portal
+          </button>
           <p style={{ fontSize: 11, opacity: 0.35, marginTop: 16 }}>
             Your password goes directly to SRM — NEXUS never stores it.
           </p>
