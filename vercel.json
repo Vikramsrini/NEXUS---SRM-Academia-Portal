@@ -1,6 +1,10 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "regions": ["bom1"],
+  "functions": {
+    "api/index.js": {
+      "regions": ["bom1"]
+    }
+  },
   "crons": [
     {
       "path": "/api/cron/quote",
