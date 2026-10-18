@@ -181,8 +181,8 @@ export async function submitSpLogin(sessionId, username, password, userCaptcha) 
   // F5 BIG-IP ASM binds TS9dec... cookies to the specific outbound IP address of the container.
   // In serverless environments (Vercel), /sp/captcha and /sp/login often route through different
   // container IPs. Passing only JSESSIONID avoids F5 ASM IP-mismatch rejection on LoginServlet.
-  const jsessionMatch = cookies.match(/JSESSIONID=[^;]+/);
-  const outboundCookies = jsessionMatch ? jsessionMatch[0] : cookies;
+  const initialJsessionMatch = cookies.match(/JSESSIONID=[^;]+/);
+  const outboundCookies = initialJsessionMatch ? initialJsessionMatch[0] : cookies;
 
   // POST to LoginServlet
   const loginRes = await axios.post(LOGIN_SERVLET_URL, params.toString(), {
