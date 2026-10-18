@@ -177,19 +177,17 @@ export async function submitSpLogin(sessionId, username, password, userCaptcha) 
   if (captchaFieldName) {
     params.append(captchaFieldName, cptokenValue);
   }
-
-  // F5 BIG-IP ASM binds TS9dec... cookies to the specific outbound IP address of the container.
-  // In serverless environments (Vercel), /sp/captcha and /sp/login often route through different
-  // container IPs. Passing only JSESSIONID avoids F5 ASM IP-mismatch rejection on LoginServlet.
-  const initialJsessionMatch = cookies.match(/JSESSIONID=[^;]+/);
-  const outboundCookies = initialJsessionMatch ? initialJsessionMatch[0] : cookies;
+  if (domainFieldName) {
+    // Replicates guardloginbottom.js behavior which appends domain token a second time
+    params.append(domainFieldName, dtokenValue);
+  }
 
   // POST to LoginServlet
   const loginRes = await axios.post(LOGIN_SERVLET_URL, params.toString(), {
     headers: {
       ...BROWSER_HEADERS,
       'Content-Type': 'application/x-www-form-urlencoded',
-      'Cookie': outboundCookies,
+      'Cookie': cookies,
       'Referer': LOGIN_URL,
       'Origin': 'https://sp.srmist.edu.in',
     },
@@ -218,11 +216,8 @@ export async function submitSpLogin(sessionId, username, password, userCaptcha) 
     if (/invalid captcha/i.test(alertText)) {
       throw new Error('Invalid captcha entered. Please try again.');
     }
-    if (/invalid login credentials|user ID or password entered is invalid/i.test(alertText)) {
-      throw new Error(alertText || 'Invalid NetID or password. Note: Student Portal requires your official SRM E-mail (Microsoft 365) password, not your Academia portal password.');
-    }
-    if (/invalid credentials/i.test(alertText)) {
-      throw new Error('Student Portal security check failed. Please refresh the captcha and try again.');
+    if (/invalid credentials|invalid login credentials|user ID or password entered is invalid/i.test(alertText)) {
+      throw new Error('Invalid NetID or password. Note: Student Portal requires your official SRM Microsoft 365 student email password (which may differ from your Academia Zoho password). If you forgot it, reset it at ssp.srmist.edu.in.');
     }
     if (alertText) {
       throw new Error(alertText);
