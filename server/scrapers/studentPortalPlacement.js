@@ -1,6 +1,7 @@
 import axios from 'axios';
 import https from 'https';
 import * as cheerio from 'cheerio';
+import { spProxyConfig } from './spProxy.js';
 
 const SP_BASE = 'https://sp.srmist.edu.in/srmiststudentportal';
 const DASHBOARD_URL = `${SP_BASE}/students/report/studentPlacementInsightDashboard.jsp`;
@@ -18,9 +19,10 @@ const BROWSER_HEADERS = {
 async function postWithRetry(url, data, config, retries = 2) {
   for (let i = 0; i <= retries; i++) {
     try {
+      const proxy = spProxyConfig();
       return await axios.post(url, data, {
         ...config,
-        httpsAgent,
+        ...(proxy.httpsAgent ? proxy : { httpsAgent }),
         timeout: 15000,
         validateStatus: () => true,
       });

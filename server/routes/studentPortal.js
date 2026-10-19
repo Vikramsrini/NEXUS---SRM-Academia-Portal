@@ -19,8 +19,16 @@ import {
   fetchPlacementResourcesWithSession,
 } from '../scrapers/studentPortalPlacement.js';
 import { getSupabaseAdmin } from '../lib/supabase.js';
+import { isSpProxyEnabled } from '../scrapers/spProxy.js';
 
 const router = Router();
+
+// ── GET /api/sp/proxy-status ──────────────────────────────────────────
+// Lets the deployment verify that SP_PROXY_URL is configured. Never exposes
+// the proxy URL itself (it usually contains credentials).
+router.get('/sp/proxy-status', (req, res) => {
+  res.json({ configured: isSpProxyEnabled() });
+});
 
 // ── GET /api/sp/captcha ───────────────────────────────────────────────
 // Fetches the SP login page and returns a captcha image + session token.

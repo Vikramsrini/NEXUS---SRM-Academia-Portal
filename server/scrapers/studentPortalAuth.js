@@ -1,5 +1,6 @@
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+import { spProxyConfig } from './spProxy.js';
 
 const SP_BASE = 'https://sp.srmist.edu.in/srmiststudentportal';
 const LOGIN_URL = `${SP_BASE}/students/loginManager/youLogin.jsp`;
@@ -19,6 +20,19 @@ const BROWSER_HEADERS = {
   'Connection': 'keep-alive',
 };
 
+// Every SRM request goes through this instance so a configured residential
+// proxy is applied consistently (login page, captcha, LoginServlet, reports).
+const spHttp = axios.create();
+spHttp.interceptors.request.use((config) => {
+  const proxy = spProxyConfig();
+  if (proxy.httpsAgent) {
+    config.httpAgent = proxy.httpAgent;
+    config.httpsAgent = proxy.httpsAgent;
+    config.proxy = false;
+  }
+  return config;
+});
+
 // In-memory store for pending login sessions
 const pendingSessions = new Map();
 
@@ -36,7 +50,7 @@ if (cleanupTimer.unref) cleanupTimer.unref();
  * Returns { sessionId, captchaImg } where captchaImg is a base64 Data URL.
  */
 export async function fetchSpLoginPage() {
-  const loginRes = await axios.get(LOGIN_URL, {
+  const loginRes = await spHttp.get(LOGIN_URL, {
     headers: BROWSER_HEADERS,
     timeout: 15000,
     validateStatus: () => true,
@@ -64,7 +78,7 @@ export async function fetchSpLoginPage() {
   const captchaUrl = captchaSrc.startsWith('http') ? captchaSrc : `https://sp.srmist.edu.in${captchaSrc}`;
   const proof = Buffer.from(`${nonce}:sp.srmist.edu.in`).toString('base64');
 
-  const imgRes = await axios.get(captchaUrl, {
+  const imgRes = await spHttp.get(captchaUrl, {
     headers: {
       'User-Agent': BROWSER_HEADERS['User-Agent'],
       'Cookie': cookies,
@@ -190,7 +204,7 @@ export async function submitSpLogin(sessionId, username, password, userCaptcha) 
   const loginCookies = onlyJSessionCookie(cookies) || stripF5Cookies(cookies) || cookies;
 
   // POST to LoginServlet
-  const loginRes = await axios.post(LOGIN_SERVLET_URL, params.toString(), {
+  const loginRes = await spHttp.post(LOGIN_SERVLET_URL, params.toString(), {
     headers: {
       ...BROWSER_HEADERS,
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -252,7 +266,7 @@ export async function submitSpLogin(sessionId, username, password, userCaptcha) 
   // Follow redirect to HRDSystem.jsp to initialize student session
   const targetUrl = location.startsWith('http') ? location : `https://sp.srmist.edu.in${location}`;
   try {
-    const hrdRes = await axios.get(targetUrl, {
+    const hrdRes = await spHttp.get(targetUrl, {
       headers: {
         ...BROWSER_HEADERS,
         'Cookie': activeCookies,
@@ -289,7 +303,7 @@ export async function fetchAttendanceWithSession(jsessionid, workerCookieOrAllCo
   });
 
   // Attempt 1: GET studentAttendanceDetails.jsp
-  let response = await axios.get(ATTENDANCE_URL, {
+  let response = await spHttp.get(ATTENDANCE_URL, {
     headers: {
       ...BROWSER_HEADERS,
       'Cookie': cookieHeader,
@@ -303,7 +317,7 @@ export async function fetchAttendanceWithSession(jsessionid, workerCookieOrAllCo
 
   // Attempt 2: If GET returned session loader or no table, try POST with studentid
   if (!html.includes('<table') && !html.includes('.theGR8LoginLoader')) {
-    const postRes = await axios.post(
+    const postRes = await spHttp.post(
       ATTENDANCE_URL,
       new URLSearchParams({ studentid: regNumber }).toString(),
       {
@@ -345,7 +359,7 @@ export async function fetchMarksWithSession(jsessionid, workerCookieOrAllCookies
 
   try {
     // Attempt 1: GET studentInternalMarkDetails.jsp
-    let response = await axios.get(MARKS_URL, {
+    let response = await spHttp.get(MARKS_URL, {
       headers: {
         ...BROWSER_HEADERS,
         'Cookie': cookieHeader,
@@ -359,7 +373,7 @@ export async function fetchMarksWithSession(jsessionid, workerCookieOrAllCookies
 
     // Attempt 2: If GET returned session loader or no table, try POST with studentid
     if (!html.includes('<table') && !html.includes('.theGR8LoginLoader')) {
-      const postRes = await axios.post(
+      const postRes = await spHttp.post(
         MARKS_URL,
         new URLSearchParams({ studentid: regNumber }).toString(),
         {
@@ -408,7 +422,7 @@ export async function fetchMarksWithSession(jsessionid, workerCookieOrAllCookies
         await Promise.allSettled(
           subjects.map(async (s) => {
             try {
-              const res = await axios.post(
+              const res = await spHttp.post(
                 MARKS_INNER_URL,
                 `iden=1&hdnSubjectId=${encodeURIComponent(s.subjectId)}&status=${encodeURIComponent(s.status || 2)}`,
                 {
