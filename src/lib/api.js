@@ -265,7 +265,10 @@ export async function submitSpLogin({ sessionId, username, password, captcha, re
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || 'Student Portal login failed');
+    const error = new Error(err.error || 'Student Portal login failed');
+    error.code = err.code;
+    error.status = res.status;
+    throw error;
   }
   return res.json();
 }
@@ -287,6 +290,7 @@ export async function refreshSpAttendance(regNumber) {
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     const err = new Error(data.error || 'Failed to refresh attendance');
+    err.code = data.code;
     err.needsLogin = !!data.needsLogin;
     throw err;
   }

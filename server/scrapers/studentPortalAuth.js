@@ -1,5 +1,4 @@
 import axios from 'axios';
-import crypto from 'crypto';
 import * as cheerio from 'cheerio';
 
 const SP_BASE = 'https://sp.srmist.edu.in/srmiststudentportal';
@@ -180,17 +179,22 @@ export async function submitSpLogin(sessionId, username, password, userCaptcha) 
   if (captchaFieldName) {
     params.append(captchaFieldName, cptokenValue);
   }
-  if (domainFieldName) {
-    // Replicates guardloginbottom.js behavior which appends domain token a second time
-    params.append(domainFieldName, dtokenValue);
-  }
+
+  // guardloginbottom.js appends the domain token exactly once on the real
+  // domain (the second append in guardlogin.js only runs on a phishing host).
+  // Sending it twice is not what the browser does.
+
+  // Drop the IP-bound F5 ASM cookies for the login POST. JSESSIONID carries the
+  // server-side login session; the TS* cookie is what makes a login submitted
+  // from a different serverless egress IP look like a security violation.
+  const loginCookies = onlyJSessionCookie(cookies) || stripF5Cookies(cookies) || cookies;
 
   // POST to LoginServlet
   const loginRes = await axios.post(LOGIN_SERVLET_URL, params.toString(), {
     headers: {
       ...BROWSER_HEADERS,
       'Content-Type': 'application/x-www-form-urlencoded',
-      'Cookie': cookies,
+      'Cookie': loginCookies,
       'Referer': LOGIN_URL,
       'Origin': 'https://sp.srmist.edu.in',
       'Sec-Fetch-Dest': 'document',
@@ -204,12 +208,13 @@ export async function submitSpLogin(sessionId, username, password, userCaptcha) 
     timeout: 20000,
   });
 
-  // Capture response cookies
+  // Capture response cookies. Start from the non-IP-bound cookies and layer on
+  // whatever the login response issued for *this* invocation's IP.
   const postCookies = (loginRes.headers['set-cookie'] || [])
     .map(c => c.split(';')[0])
     .filter(c => !c.includes('Max-Age=0'));
 
-  let activeCookies = mergeCookies(cookies, postCookies);
+  let activeCookies = mergeCookies(stripF5Cookies(cookies), postCookies);
 
   // Success is indicated by HTTP 302 redirect to HRDSystem.jsp
   const location = loginRes.headers['location'] || '';
@@ -220,24 +225,28 @@ export async function submitSpLogin(sessionId, username, password, userCaptcha) 
     const $ = cheerio.load(body);
     $('.alert-heading').remove();
     const alertText = $('.alert-danger, .alert').text().trim().replace(/\s+/g, ' ');
-    console.log('[SP Login Debug]', { status: loginRes.status, location, alertText: alertText || '(no alert found)' });
+    const classified = classifySpLoginAlert(alertText);
+    console.log('[SP Login Debug]', {
+      status: loginRes.status,
+      location,
+      alertText: alertText || '(no alert found)',
+      code: classified?.code || null,
+    });
 
-    if (/invalid captcha/i.test(alertText)) {
-      throw new Error('Invalid captcha entered. Please try again.');
-    }
-    if (/invalid credentials|invalid login credentials|user ID or password entered is invalid/i.test(alertText)) {
-      throw new Error('Invalid NetID or password. Note: Student Portal requires your official SRM Microsoft 365 student email password (which may differ from your Academia Zoho password). If you forgot it, reset it at ssp.srmist.edu.in.');
-    }
-    if (alertText) {
-      throw new Error(alertText);
+    if (classified) {
+      throw spLoginError(classified.message, classified.status, classified.code);
     }
     if (/invalid captcha\./i.test(body)) {
-      throw new Error('Invalid captcha entered. Please try again.');
+      throw spLoginError('Invalid captcha entered. Please try again.', 401, 'INVALID_CAPTCHA');
     }
     if (body.includes('youLogin') || location.includes('youLogin')) {
-      throw new Error('Invalid NetID or password. Note: Student Portal requires your official SRM E-mail (Microsoft 365) password, not your Academia portal password.');
+      throw spLoginError(
+        'Invalid NetID or password. Student Portal requires your official SRM E-mail (Microsoft 365) password, not your Academia portal password.',
+        401,
+        'INVALID_CREDENTIALS'
+      );
     }
-    throw new Error('Student Portal login failed. Please verify your credentials and captcha.');
+    throw spLoginError('Student Portal login failed. Please verify your credentials and captcha.', 401, 'LOGIN_REJECTED');
   }
 
   // Follow redirect to HRDSystem.jsp to initialize student session
@@ -262,19 +271,22 @@ export async function submitSpLogin(sessionId, username, password, userCaptcha) 
   // Extract JSESSIONID
   const jsessionMatch = activeCookies.match(/JSESSIONID=([^;]+)/);
   const jsessionid = jsessionMatch ? jsessionMatch[1] : '';
-  const workerCookie = activeCookies.split('; ').find(c => c.startsWith('worker')) || '';
 
-  return { jsessionid, workerCookie, allCookies: activeCookies };
+  // Persist only IP-independent cookies. The TS* cookie from this invocation
+  // must not be replayed later from a different serverless egress IP.
+  const persistedCookies = stripF5Cookies(activeCookies);
+  const workerCookie = persistedCookies.split('; ').find(c => c.startsWith('worker')) || '';
+
+  return { jsessionid, workerCookie, allCookies: activeCookies, persistedCookies };
 }
 
 /**
  * Step 3: Fetches attendance HTML using the authenticated cookies.
  */
-export async function fetchAttendanceWithSession(jsessionid, workerCookieOrAllCookies, regNumber) {
-  let cookieHeader = workerCookieOrAllCookies;
-  if (!cookieHeader || !cookieHeader.includes('JSESSIONID')) {
-    cookieHeader = [`JSESSIONID=${jsessionid}`, workerCookieOrAllCookies].filter(Boolean).join('; ');
-  }
+export async function fetchAttendanceWithSession(jsessionid, workerCookieOrAllCookies, regNumber, options = {}) {
+  const cookieHeader = buildSessionCookieHeader(jsessionid, workerCookieOrAllCookies, {
+    stripF5: options.stripF5 !== false,
+  });
 
   // Attempt 1: GET studentAttendanceDetails.jsp
   let response = await axios.get(ATTENDANCE_URL, {
@@ -326,11 +338,10 @@ export async function fetchAttendanceWithSession(jsessionid, workerCookieOrAllCo
 /**
  * Step 4: Fetches internal marks HTML using the authenticated cookies.
  */
-export async function fetchMarksWithSession(jsessionid, workerCookieOrAllCookies, regNumber) {
-  let cookieHeader = workerCookieOrAllCookies;
-  if (!cookieHeader || !cookieHeader.includes('JSESSIONID')) {
-    cookieHeader = [`JSESSIONID=${jsessionid}`, workerCookieOrAllCookies].filter(Boolean).join('; ');
-  }
+export async function fetchMarksWithSession(jsessionid, workerCookieOrAllCookies, regNumber, options = {}) {
+  const cookieHeader = buildSessionCookieHeader(jsessionid, workerCookieOrAllCookies, {
+    stripF5: options.stripF5 !== false,
+  });
 
   try {
     // Attempt 1: GET studentInternalMarkDetails.jsp
@@ -455,17 +466,125 @@ export async function fetchMarksWithSession(jsessionid, workerCookieOrAllCookies
 
 // ── Helpers ───────────────────────────────────────────────────────────
 
-function mergeCookies(existing, newCookies = []) {
+function parseCookieHeader(header = '') {
   const map = new Map();
-  if (existing) {
-    existing.split('; ').forEach(c => {
-      const idx = c.indexOf('=');
-      if (idx > 0) map.set(c.slice(0, idx).trim(), c.slice(idx + 1).trim());
-    });
+  if (!header) return map;
+  header.split(';').forEach(part => {
+    const trimmed = part.trim();
+    if (!trimmed) return;
+    const idx = trimmed.indexOf('=');
+    if (idx > 0) {
+      map.set(trimmed.slice(0, idx).trim(), trimmed.slice(idx + 1).trim());
+    }
+  });
+  return map;
+}
+
+/**
+ * F5 BIG-IP ASM issues TS* / BIGipServer* cookies that are bound to the source
+ * IP address. On Vercel (and any load-balanced/serverless host) the captcha is
+ * fetched by one invocation and the login is submitted by another, often with a
+ * different outbound IP. Replaying the IP-bound cookie makes F5 reject an
+ * otherwise perfectly valid login with the generic "Invalid credentials" page.
+ */
+function isF5Cookie(name = '') {
+  return /^TS[0-9a-f]+(?:[_-][0-9a-f]+)?$/i.test(name) || /^BIGipServer/i.test(name);
+}
+
+function stripF5Cookies(header = '') {
+  const map = parseCookieHeader(header);
+  for (const name of map.keys()) {
+    if (isF5Cookie(name)) map.delete(name);
   }
+  return Array.from(map.entries()).map(([k, v]) => `${k}=${v}`).join('; ');
+}
+
+function onlyJSessionCookie(header = '') {
+  const map = parseCookieHeader(header);
+  const value = map.get('JSESSIONID');
+  return value ? `JSESSIONID=${value}` : '';
+}
+
+function mergeCookies(existing, newCookies = []) {
+  const map = parseCookieHeader(existing);
   newCookies.forEach(c => {
-    const idx = c.indexOf('=');
-    if (idx > 0) map.set(c.slice(0, idx).trim(), c.slice(idx + 1).trim());
+    // Set-Cookie values may carry attributes (Path, Secure, HttpOnly, ...).
+    // Only the leading name=value pair belongs in a Cookie request header.
+    const parsed = parseCookieHeader(String(c).split(';')[0]);
+    for (const [name, value] of parsed) map.set(name, value);
   });
   return Array.from(map.entries()).map(([k, v]) => `${k}=${v}`).join('; ');
+}
+
+/**
+ * SRM returns two very different messages that look almost identical:
+ *
+ *   "Invalid login credentials. The user ID or password entered is invalid."
+ *     -> the credentials really are wrong
+ *
+ *   "Invalid credentials"
+ *     -> F5 ASM / telemetry / anti-bot check rejected the request. The password
+ *        may be entirely correct.
+ *
+ * Conflating them is what told users with valid passwords that their password
+ * was invalid. Keep the classification separate and let the UI explain it.
+ */
+export function classifySpLoginAlert(alertText = '') {
+  const text = String(alertText || '').trim();
+  if (!text) return null;
+
+  if (/invalid captcha/i.test(text)) {
+    return {
+      code: 'INVALID_CAPTCHA',
+      status: 401,
+      message: 'Invalid captcha entered. Please try again.',
+    };
+  }
+
+  if (/temporarily locked|locked due to multiple|too many (?:login )?attempts/i.test(text)) {
+    return {
+      code: 'ACCOUNT_LOCKED',
+      status: 429,
+      message: text,
+    };
+  }
+
+  if (/invalid login credentials|user ID or password entered is invalid/i.test(text)) {
+    return {
+      code: 'INVALID_CREDENTIALS',
+      status: 401,
+      message: 'Invalid NetID or password. Student Portal requires your official SRM Microsoft 365 student email password (which may differ from your Academia Zoho password). If you forgot it, reset it at ssp.srmist.edu.in.',
+    };
+  }
+
+  // Generic "Invalid credentials" is SRM's anti-bot/security rejection, not a
+  // password mismatch. Do not tell the user their password is wrong.
+  if (/invalid credentials/i.test(text)) {
+    return {
+      code: 'SECURITY_CHECK',
+      status: 401,
+      message: 'SRM rejected the login at its security check (this is not necessarily your password). Refresh the captcha and try again. If you are on a VPN, proxy, or mobile hotspot, turn it off and retry.',
+    };
+  }
+
+  return {
+    code: 'LOGIN_REJECTED',
+    status: 401,
+    message: text,
+  };
+}
+
+function spLoginError(message, status = 401, code = 'LOGIN_FAILED') {
+  const err = new Error(message);
+  err.status = status;
+  err.code = code;
+  return err;
+}
+
+function buildSessionCookieHeader(jsessionid, cookieString, { stripF5 = true } = {}) {
+  let header = cookieString || '';
+  if (!header.includes('JSESSIONID') && jsessionid) {
+    header = [`JSESSIONID=${jsessionid}`, header].filter(Boolean).join('; ');
+  }
+  return stripF5 ? stripF5Cookies(header) : header;
 }

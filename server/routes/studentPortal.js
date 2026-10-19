@@ -51,24 +51,44 @@ router.post('/sp/login', requireAuth, async (req, res) => {
   try {
     // 1. Complete the login
     const cleanUsername = username.trim().toLowerCase().replace(/@srmist\.edu\.in$/i, '').split('@')[0].trim();
-    if (/^ra\d{10,}/i.test(cleanUsername)) {
+    if (/^ra\d+/i.test(cleanUsername)) {
       return res.status(400).json({
         error: 'Student Portal requires your 6-character NetID (e.g. vs0436), not your Register Number (RA...).',
+        code: 'INVALID_NETID',
       });
     }
-    const { jsessionid, workerCookie, allCookies } = await submitSpLogin(
+    if (!cleanUsername) {
+      return res.status(400).json({
+        error: 'Please enter your SRM NetID (e.g. vs0436).',
+        code: 'INVALID_NETID',
+      });
+    }
+    const { jsessionid, workerCookie, allCookies, persistedCookies } = await submitSpLogin(
       sessionId, cleanUsername, password, captcha
     );
 
-    // 2. Fetch attendance using the new session
+    // 2. Fetch attendance using the new session. The immediate fetch runs in the
+    // same invocation as the login, so it can safely use the full cookie jar
+    // (including the F5 cookie that was just issued for this IP).
     let attendanceHtml;
     try {
-      attendanceHtml = await fetchAttendanceWithSession(jsessionid, allCookies, regNumber || cleanUsername);
+      attendanceHtml = await fetchAttendanceWithSession(
+        jsessionid,
+        allCookies,
+        regNumber || cleanUsername,
+        { stripF5: false }
+      );
     } catch (attErr) {
       if (attErr.message === 'SESSION_EXPIRED') {
-        return res.status(401).json({ error: 'Session established but attendance fetch failed. Try again.' });
+        return res.status(401).json({
+          error: 'Login succeeded but the Student Portal session was not accepted. Please refresh the captcha and try again.',
+          code: 'SESSION_EXPIRED',
+        });
       }
-      throw attErr;
+      return res.status(502).json({
+        error: `Login succeeded, but attendance could not be fetched: ${attErr.message}`,
+        code: 'ATTENDANCE_FETCH_FAILED',
+      });
     }
 
     // 3. Parse attendance
@@ -83,7 +103,12 @@ router.post('/sp/login', requireAuth, async (req, res) => {
     // 4. Fetch and parse internal marks
     let marks = [];
     try {
-      const marksResult = await fetchMarksWithSession(jsessionid, allCookies, regNumber || username.split('@')[0]);
+      const marksResult = await fetchMarksWithSession(
+        jsessionid,
+        allCookies,
+        regNumber || username.split('@')[0],
+        { stripF5: false }
+      );
       const marksHtml = typeof marksResult === 'string' ? marksResult : marksResult?.html || '';
       const componentsMap = typeof marksResult === 'object' ? marksResult?.componentsMap || {} : {};
       if (marksHtml) {
@@ -104,7 +129,7 @@ router.post('/sp/login', requireAuth, async (req, res) => {
         await supabase.from('student_portal_sessions').upsert({
           reg_number: reg,
           jsessionid,
-          worker_cookie: allCookies || workerCookie || '',
+          worker_cookie: persistedCookies || workerCookie || allCookies || '',
           stored_at: new Date().toISOString(),
         }, { onConflict: 'reg_number' });
       } catch (e) { console.warn('[SP Auth] Session store failed:', e.message); }
@@ -142,16 +167,16 @@ router.post('/sp/login', requireAuth, async (req, res) => {
     });
 
   } catch (err) {
-    console.error('[SP Auth] Login error:', err.message);
+    console.error('[SP Auth] Login error:', err.message, err.code ? `(${err.code})` : '');
 
-    // Distinguish between wrong credentials and server errors
     const isCredentialError = err.message.includes('credentials') ||
       err.message.includes('captcha') ||
       err.message.includes('Invalid') ||
       err.message.includes('expired');
 
-    res.status(isCredentialError ? 401 : 502).json({
+    res.status(err.status || (isCredentialError ? 401 : 502)).json({
       error: err.message,
+      code: err.code || (isCredentialError ? 'LOGIN_REJECTED' : 'LOGIN_ERROR'),
     });
   }
 });
@@ -176,6 +201,7 @@ router.post('/sp/refresh', requireAuth, async (req, res) => {
   if (error || !sessionData?.jsessionid) {
     return res.status(401).json({
       error: 'No stored session found. Please log in to the Student Portal.',
+      code: 'NO_SESSION',
       needsLogin: true,
     });
   }
@@ -190,7 +216,11 @@ router.post('/sp/refresh', requireAuth, async (req, res) => {
     const { attendance } = parseStudentPortalAttendance(html);
 
     if (!attendance || attendance.length === 0) {
-      return res.status(422).json({ error: 'No attendance data returned', needsLogin: false });
+      return res.status(422).json({
+        error: 'No attendance data returned by the Student Portal.',
+        code: 'NO_ATTENDANCE',
+        needsLogin: false,
+      });
     }
 
     // Fetch marks on refresh too
@@ -246,10 +276,11 @@ router.post('/sp/refresh', requireAuth, async (req, res) => {
       await supabase.from('student_portal_sessions').delete().eq('reg_number', regNumber);
       return res.status(401).json({
         error: 'Student Portal session expired. Please connect again.',
+        code: 'SESSION_EXPIRED',
         needsLogin: true,
       });
     }
-    res.status(502).json({ error: err.message });
+    res.status(err.status || 502).json({ error: err.message, code: err.code || 'REFRESH_FAILED' });
   }
 });
 

@@ -42,20 +42,15 @@ function getStudentNetid(student) {
     student?.officialEmail,
   ];
 
+  // Only prefill a value that actually looks like an SRM NetID (e.g. vs0436).
+  // Guessing from an arbitrary old username/email is dangerous: the field looks
+  // filled in, the user leaves it alone, and the portal rejects the login with
+  // "invalid credentials" even though the password was correct.
+  const NETID_RE = /^[a-z]{1,4}\d{3,5}$/i;
   for (const raw of candidates) {
     if (!raw) continue;
     const clean = String(raw).trim().replace(/@srmist\.edu\.in$/i, '').split('@')[0].trim().toLowerCase();
-    // Genuine 6-character NetID (e.g. vs0436, ab1234)
-    if (/^[a-z]{1,3}\d{3,5}$/i.test(clean)) {
-      return clean;
-    }
-  }
-
-  // Fallback: exclude Register Numbers (RA...) and full name emails with dots
-  for (const raw of candidates) {
-    if (!raw) continue;
-    const clean = String(raw).trim().replace(/@srmist\.edu\.in$/i, '').split('@')[0].trim().toLowerCase();
-    if (!/^ra\d+/i.test(clean) && !clean.includes('.')) {
+    if (NETID_RE.test(clean)) {
       return clean;
     }
   }
@@ -287,6 +282,7 @@ export default function AttendancePage() {
   const [spUsername, setSpUsername] = useState('');
   const [spPassword, setSpPassword] = useState('');
   const [spError, setSpError] = useState('');
+  const [spErrorCode, setSpErrorCode] = useState('');
   const [spLoading, setSpLoading] = useState(false);
   const captchaInputRef = useRef(null);
 
@@ -296,32 +292,48 @@ export default function AttendancePage() {
     }
   }, [showSpModal, spStep, spCaptchaSvg]);
 
-  const openSpModal = async () => {
-    setShowSpModal(true);
-    setSpStep('captcha');
-    setSpError('');
-    setSpCaptchaInput('');
-    setSpPassword('');
-    const student = getStudentData();
-    const defaultUname = getStudentNetid(student);
-    setSpUsername(defaultUname);
+  const loadSpCaptcha = async () => {
     setSpLoading(true);
     try {
       const data = await fetchSpCaptcha();
       setSpSessionId(data.sessionId);
       setSpCaptchaSvg(data.captchaImg || data.captchaSvg || '');
       setSpStep('form');
+      return true;
     } catch (err) {
       setSpError(err.message || 'Could not load captcha');
+      setSpErrorCode(err.code || 'CAPTCHA_ERROR');
       setSpStep('captcha');
+      return false;
     } finally {
       setSpLoading(false);
     }
   };
 
+  const refreshSpCaptcha = async ({ clearError = true } = {}) => {
+    if (clearError) {
+      setSpError('');
+      setSpErrorCode('');
+    }
+    setSpCaptchaInput('');
+    await loadSpCaptcha();
+  };
+
+  const openSpModal = async () => {
+    setShowSpModal(true);
+    setSpStep('captcha');
+    setSpError('');
+    setSpErrorCode('');
+    setSpCaptchaInput('');
+    setSpPassword('');
+    setSpUsername(getStudentNetid(getStudentData()));
+    await loadSpCaptcha();
+  };
+
   const handleSpLogin = async () => {
     if (!spCaptchaInput.trim() || !spPassword.trim()) {
       setSpError('Please fill in all fields');
+      setSpErrorCode('MISSING_FIELDS');
       return;
     }
     const student = getStudentData();
@@ -329,18 +341,22 @@ export default function AttendancePage() {
     const uname = (spUsername.trim() || fallbackUname).toLowerCase().replace(/@srmist\.edu\.in$/i, '').split('@')[0].trim();
     if (!uname) {
       setSpError('Please enter your 6-character SRM NetID (e.g. vs0436)');
+      setSpErrorCode('MISSING_NETID');
       return;
     }
-    if (/^ra\d{8,}/i.test(uname)) {
+    if (/^ra\d+/i.test(uname)) {
       setSpError('Student Portal requires your 6-character NetID (e.g. vs0436), not your Register Number (RA...).');
+      setSpErrorCode('INVALID_NETID');
       return;
     }
     if (uname.includes('.')) {
       setSpError('Student Portal requires your 6-character NetID (e.g. vs0436), not your full name email address.');
+      setSpErrorCode('INVALID_NETID');
       return;
     }
     setSpLoading(true);
     setSpError('');
+    setSpErrorCode('');
     try {
       const result = await submitSpLogin({
         sessionId: spSessionId,
@@ -370,15 +386,9 @@ export default function AttendancePage() {
       }
     } catch (err) {
       setSpError(err.message || 'Login failed');
-      // Refresh captcha on wrong captcha/credentials
-      setSpLoading(true);
-      try {
-        const data = await fetchSpCaptcha();
-        setSpSessionId(data.sessionId);
-        setSpCaptchaSvg(data.captchaImg || data.captchaSvg || '');
-        setSpCaptchaInput('');
-      } catch { /* ignore */ }
-      setSpLoading(false);
+      setSpErrorCode(err.code || '');
+      // Always hand the user a fresh captcha; do not wipe the error message.
+      await refreshSpCaptcha({ clearError: false });
     } finally {
       setSpLoading(false);
     }
@@ -387,6 +397,7 @@ export default function AttendancePage() {
   const handleSpRefresh = async () => {
     setSpLoading(true);
     setSpError('');
+    setSpErrorCode('');
     try {
       const result = await refreshSpAttendance(regNumber);
       if (result.attendance?.length > 0) {
@@ -409,6 +420,7 @@ export default function AttendancePage() {
         openSpModal();
       } else {
         setSpError(err.message);
+        setSpErrorCode(err.code || '');
       }
     } finally {
       setSpLoading(false);
@@ -1003,10 +1015,13 @@ export default function AttendancePage() {
                     </div>
                     <input
                       type="text"
+                      name="spNetid"
                       placeholder="e.g. vs0436 (do not use Register Number)"
                       value={spUsername}
                       onChange={e => setSpUsername(e.target.value.toLowerCase().trim())}
-                      autoComplete="username"
+                      autoComplete="off"
+                      autoCapitalize="none"
+                      spellCheck={false}
                       maxLength={10}
                       style={{
                         width: '100%', background: 'rgba(255,255,255,0.07)',
@@ -1035,10 +1050,13 @@ export default function AttendancePage() {
                     </div>
                     <input
                       type="password"
+                      name="spPassword"
                       placeholder="Your official @srmist.edu.in email password"
                       value={spPassword}
                       onChange={e => setSpPassword(e.target.value)}
                       onKeyDown={e => e.key === 'Enter' && handleSpLogin()}
+                      autoComplete="new-password"
+                      spellCheck={false}
                       style={{
                         width: '100%', background: 'rgba(255,255,255,0.07)',
                         border: '1px solid rgba(255,255,255,0.15)', borderRadius: 8,
@@ -1056,7 +1074,7 @@ export default function AttendancePage() {
                       <label style={{ fontSize: 12, opacity: 0.7 }}>CAPTCHA (CASE-SENSITIVE)</label>
                       <button
                         type="button"
-                        onClick={openSpModal}
+                        onClick={() => refreshSpCaptcha()}
                         disabled={spLoading}
                         style={{
                           background: 'none', border: 'none', color: '#60a5fa',
@@ -1077,7 +1095,7 @@ export default function AttendancePage() {
                         cursor: 'pointer'
                       }}
                       title="Click to reload captcha"
-                      onClick={openSpModal}
+                      onClick={() => refreshSpCaptcha()}
                     >
                       {spCaptchaSvg.startsWith('data:') || spCaptchaSvg.startsWith('http') ? (
                         <img
@@ -1123,9 +1141,28 @@ export default function AttendancePage() {
                       lineHeight: 1.4,
                     }}>
                       <div style={{ fontWeight: 600, marginBottom: 2 }}>{spError}</div>
-                      {/invalid|credentials|password/i.test(spError) && !/captcha/i.test(spError) && (
+
+                      {(spErrorCode === 'INVALID_CREDENTIALS' || (!spErrorCode && /invalid|credentials|password/i.test(spError) && !/captcha/i.test(spError))) && (
                         <div style={{ fontSize: 11, opacity: 0.9, marginTop: 6, color: '#fca5a5' }}>
-                          💡 <strong>Check:</strong> Make sure you are using your official <strong>SRM E-mail (Microsoft 365) password</strong> (reset at <a href="https://ssp.srmist.edu.in/resetpassword/" target="_blank" rel="noopener noreferrer" style={{ color: '#93c5fd', textDecoration: 'underline' }}>ssp.srmist.edu.in</a>), NOT your Academia portal password.
+                          💡 <strong>Check:</strong> Make sure the NetID is your 6-character SRM NetID (e.g. vs0436) and the password is your official <strong>SRM E-mail (Microsoft 365) password</strong> (reset at <a href="https://ssp.srmist.edu.in/resetpassword/" target="_blank" rel="noopener noreferrer" style={{ color: '#93c5fd', textDecoration: 'underline' }}>ssp.srmist.edu.in</a>), NOT your Academia portal password.
+                        </div>
+                      )}
+
+                      {spErrorCode === 'SECURITY_CHECK' && (
+                        <div style={{ fontSize: 11, opacity: 0.9, marginTop: 6, color: '#fca5a5' }}>
+                          💡 <strong>This is not a password error.</strong> SRM's anti-bot check rejected the request. A fresh captcha has been loaded — try again. If you are on a VPN, proxy, or mobile hotspot, turn it off first. Wait a minute if it keeps happening.
+                        </div>
+                      )}
+
+                      {spErrorCode === 'ACCOUNT_LOCKED' && (
+                        <div style={{ fontSize: 11, opacity: 0.9, marginTop: 6, color: '#fca5a5' }}>
+                          💡 SRM temporarily locks a NetID after repeated attempts. Wait about 5 minutes, then try again with the correct password.
+                        </div>
+                      )}
+
+                      {spErrorCode === 'CAPTCHA_ERROR' && (
+                        <div style={{ fontSize: 11, opacity: 0.9, marginTop: 6, color: '#fca5a5' }}>
+                          💡 The captcha could not be loaded from SRM. Check your connection/server and try refreshing the captcha.
                         </div>
                       )}
                     </div>
