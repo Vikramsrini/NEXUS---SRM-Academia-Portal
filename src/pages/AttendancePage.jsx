@@ -1151,6 +1151,27 @@ export default function AttendancePage() {
                       {spErrorCode === 'SECURITY_CHECK' && (
                         <div style={{ fontSize: 11, opacity: 0.9, marginTop: 6, color: '#fca5a5' }}>
                           💡 <strong>This is not a password error.</strong> SRM's anti-bot check rejected the request. A fresh captcha has been loaded — try again. If you are on a VPN, proxy, or mobile hotspot, turn it off first. Wait a minute if it keeps happening.
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowSpModal(false);
+                              setShowPasteModal(true);
+                            }}
+                            style={{
+                              display: 'block',
+                              marginTop: 8,
+                              background: 'rgba(255,255,255,0.08)',
+                              border: '1px solid rgba(255,255,255,0.22)',
+                              borderRadius: 6,
+                              padding: '6px 10px',
+                              color: '#fca5a5',
+                              fontSize: 11,
+                              fontWeight: 600,
+                              cursor: 'pointer',
+                            }}
+                          >
+                            Use manual paste import instead
+                          </button>
                         </div>
                       )}
 
@@ -1367,6 +1388,22 @@ export default function AttendancePage() {
             onMouseOut={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 4px 20px rgba(59,130,246,0.35)'; }}
           >
             Connect Student Portal
+          </button>
+          <button
+            onClick={() => setShowPasteModal(true)}
+            style={{
+              marginTop: 10,
+              background: 'transparent',
+              border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: 10,
+              padding: '10px 22px',
+              color: 'inherit',
+              fontSize: 13,
+              cursor: 'pointer',
+              opacity: 0.8,
+            }}
+          >
+            Paste attendance table
           </button>
           <p style={{ fontSize: 11, opacity: 0.35, marginTop: 16 }}>
             Your password goes directly to SRM — NEXUS never stores it.
